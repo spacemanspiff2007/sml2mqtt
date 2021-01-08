@@ -1,0 +1,5 @@
+asyncio-mqtt==0.8.0
+pyserial-asyncio==0.5
+EasyCo
+voluptuous
+smllib==0.4
