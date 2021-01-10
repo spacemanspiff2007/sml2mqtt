@@ -227,6 +227,7 @@ mqtt:
 # Configuration of the sml devices
 devices:
 - device: COM24
+  timeout: 3        # Timeout in seconds between messages from the device
   skip:
   - value ids that will
   - not be reported

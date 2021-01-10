@@ -57,8 +57,9 @@ class Logging(ConfigContainer):
 
 
 class DeviceConfig:
-    def __init__(self, device: str, skip: List[str]):
+    def __init__(self, device: str, timeout: float, skip: List[str]):
         self.device: str = device
+        self.timeout: float = timeout
         self.skip: List[str] = skip
 
     @classmethod
@@ -70,12 +71,16 @@ class DeviceConfig:
         if not isinstance(device, str) or not device:
             raise Invalid(msg or 'device must be a valid string')
 
+        timeout = _in['timeout']
+        if not isinstance(timeout, (float, int)) or timeout < 1:
+            raise Invalid(msg or f'timeout must be a valid int/float and >= 1 ({type(timeout)}, {timeout})')
+
         skip = _in.get('skip', [])
         for i, v in enumerate(skip):
             if not isinstance(v, str) or not v:
                 raise Invalid(msg or f'Skipped value at {i} must be a valid string')
 
-        return cls(device, skip)
+        return cls(device, timeout, skip)
 
 
 def device_validator(_in, msg=None):
@@ -96,8 +101,8 @@ class SmlMqttConfig(ConfigFile):
     log = Logging()
     general = General()
     devices: List[DeviceConfig] = ConfigEntry(
-        default_factory=lambda: [{'device': 'COM1', 'skip': ['value ids that will', 'not be reported']},
-                                 {'device': '/dev/ttyS0'}],
+        default_factory=lambda: [{'device': 'COM1', 'timeout': 3, 'skip': ['value ids that will', 'not be reported']},
+                                 {'device': '/dev/ttyS0', 'timeout': 3}],
         description='Configuration of the sml devices', validator=device_validator)
 
 

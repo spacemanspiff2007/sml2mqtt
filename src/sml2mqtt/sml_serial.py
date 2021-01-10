@@ -14,12 +14,13 @@ log = logging.getLogger('sml.serial')
 
 class SmlSerial(asyncio.Protocol):
     @classmethod
-    async def create(cls, url: str, device: 'Device') -> 'SmlSerial':
+    async def create(cls, url: str, device: 'Device', timeout: float) -> 'SmlSerial':
         transport, protocol = await create_serial_connection(
             asyncio.get_event_loop(), cls, url, baudrate=9600)  # type: SerialTransport, SmlSerial
 
         protocol.url = url
         protocol.device = device
+        protocol.timeout_secs = timeout
         return protocol
 
     def __init__(self) -> None:
@@ -30,8 +31,13 @@ class SmlSerial(asyncio.Protocol):
 
         self.transport: typing.Optional[SerialTransport] = None
 
-        self.timeout = asyncio.Event()
+        self.timeout_secs: typing.Union[int, float] = 3
+        self.timeout_event = asyncio.Event()
         self.timeout_task: typing.Optional[asyncio.Task] = None
+
+        self.pause_task: typing.Optional[asyncio.Task] = None
+
+        self.loop = asyncio.get_event_loop()
 
     def connection_made(self, transport):
         self.transport = transport
@@ -41,9 +47,22 @@ class SmlSerial(asyncio.Protocol):
 
         self.device.set_status(DeviceStatus.PORT_OPENED)
 
-    def data_received(self, data):
+    def data_received(self, data: bytes):
         self.device.stream.add(data)
-        self.timeout.set()
+        self.timeout_event.set()
+
+        self.pause_serial()
+        asyncio.ensure_future(self.device.read(), loop=self.loop)
+
+    async def resume_serial(self):
+        await asyncio.sleep(0.4, loop=self.loop)
+
+        self.pause_task = None
+        self.transport.resume_reading()
+
+    def pause_serial(self):
+        self.transport.pause_reading()
+        self.pause_task = asyncio.ensure_future(self.resume_serial(), loop=self.loop)
 
     def connection_lost(self, exc):
         self.close()
@@ -52,11 +71,13 @@ class SmlSerial(asyncio.Protocol):
         self.device.set_status(DeviceStatus.PORT_CLOSED)
 
     def close(self):
-        if self.timeout_task is None:
-            return None
+        if self.timeout_task is not None:
+            self.timeout_task.cancel()
+            self.timeout_task = None
 
-        self.timeout_task.cancel()
-        self.timeout_task = None
+        if self.pause_task is not None:
+            self.pause_task.cancel()
+            self.pause_task = None
 
         if not self.transport.is_closing():
             self.transport.close()
@@ -64,12 +85,13 @@ class SmlSerial(asyncio.Protocol):
         self.device.stream.clear()
 
     async def watchdog(self):
+        await asyncio.sleep(0.1)
+
         while True:
-            await asyncio.sleep(0.1)
-            self.timeout.clear()
+            self.timeout_event.clear()
 
             try:
-                await asyncio.wait_for(self.timeout.wait(), 3)
+                await asyncio.wait_for(self.timeout_event.wait(), self.timeout_secs)
                 timeout = False
             except asyncio.TimeoutError:
                 timeout = True
