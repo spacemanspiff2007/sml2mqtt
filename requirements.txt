@@ -1,5 +1,5 @@
-asyncio-mqtt==0.8.0
+asyncio-mqtt==0.9.1
 pyserial-asyncio==0.5
 EasyCo
 voluptuous
-smllib==0.4
+smllib==0.5
