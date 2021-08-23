@@ -78,7 +78,7 @@ def get_command_line_args(args=None) -> CommandArgs:
         '--analyze',
         help='Processes exactly one sml message and explicitly shows the structure',
         action='store_true',
-        default=None
+        default=False
     )
     args = parser.parse_args(args)
     ARGS = CommandArgs(config=find_config_folder(args.config), analyze=args.analyze)

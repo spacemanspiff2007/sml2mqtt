@@ -1,6 +1,7 @@
 import logging
 import traceback
 from asyncio import create_task
+from binascii import b2a_hex
 from time import monotonic
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -77,6 +78,7 @@ class Device:
             if sml2mqtt._args.ARGS.analyze:
                 self.log.info('')
                 self.log.info('Received Frame')
+                self.log.info(f' -> {b2a_hex(frame.buffer)}')
                 self.log.info('')
                 for obj in frame.parse_frame():
                     for line in obj.format_msg().splitlines():
