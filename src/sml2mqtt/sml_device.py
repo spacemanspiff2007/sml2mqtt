@@ -65,6 +65,7 @@ class Device:
         )
 
     async def read(self):
+        frame = None
         try:
             try:
                 frame = self.stream.get_frame()
@@ -128,6 +129,10 @@ class Device:
                 self.set_status(DeviceStatus.OK)
 
         except Exception:
+            if frame is not None:
+                self.log.error('Received Frame')
+                self.log.error(f' -> {b2a_hex(frame.buffer)}')
+
             for line in traceback.format_exc().splitlines():
                 self.log.error(line)
 

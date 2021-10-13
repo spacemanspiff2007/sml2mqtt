@@ -68,6 +68,8 @@ After=network-online.target
 Type=simple
 User=openhab
 Group=openhab
+Restart=on-failure
+RestartSec=2min
 ExecStart=/opt/sml2mqtt/venv/bin/sml2mqtt -c PATH_TO_CONFIGURATION_FILE
 
 [Install]
