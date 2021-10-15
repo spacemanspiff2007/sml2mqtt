@@ -15,7 +15,7 @@ def load_version() -> str:
 
 def load_req() -> typing.List[str]:
     # When we run tox tests we don't have this file available so we skip them
-    req_file = Path(__file__).with_name('requirements.txt')
+    req_file = Path(__file__).with_name('requirements_setup.txt')
     if not req_file.is_file():
         return ['']
 
@@ -55,6 +55,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(where='src', exclude=['tests*']),
     package_dir={'': 'src'},
+    python_requires='>=3.8',
     install_requires=load_req(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -68,7 +69,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'sml2mqtt = sml2mqtt.main:main'
+            'sml2mqtt = sml2mqtt.__main__:main'
         ]
     }
 )

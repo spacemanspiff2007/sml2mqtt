@@ -4,7 +4,14 @@ from datetime import date, datetime
 from logging.handlers import RotatingFileHandler
 
 import sml2mqtt
-import sml2mqtt._args
+
+log = logging.getLogger('sml')
+
+
+def get_logger(suffix: str) -> logging.Logger:
+    if not suffix:
+        return log
+    return log.getChild(suffix)
 
 
 class MidnightRotatingFileHandler(RotatingFileHandler):
@@ -22,27 +29,35 @@ class MidnightRotatingFileHandler(RotatingFileHandler):
 
 
 def setup_log():
-    lvl = sml2mqtt.CONFIG.log.level
+    level = sml2mqtt.CONFIG.logging.set_log_level()
 
     # This is the longest logger name str
     chars = 0
-    for device in sml2mqtt.CONFIG.devices:
-        chars = max(len(f'sml.device.{device.device}'), chars)
+    for device in sml2mqtt.CONFIG.ports:
+        chars = max(len(f'sml.device.{device.url}'), chars)
     log_format = logging.Formatter("[{asctime:s}] [{name:" + str(chars) + "s}] {levelname:8s} | {message:s}", style='{')
 
+    # File Handler
+    log_file = sml2mqtt.CONFIG.logging.file
+    if not log_file.is_absolute():
+        log_file = sml2mqtt.CMD_ARGS.config.parent / log_file
+        log_file.resolve()
+
     handler = MidnightRotatingFileHandler(
-        str(sml2mqtt.CONFIG.log.file), maxBytes=1024 * 1024, backupCount=3, encoding='utf-8'
+        str(log_file), maxBytes=1024 * 1024, backupCount=3, encoding='utf-8'
     )
     handler.setFormatter(log_format)
     handler.setLevel(logging.DEBUG)
 
     # Bind handler to logger
-    root = logging.getLogger()
-    root.setLevel(lvl)
-    root.addHandler(handler)
+    root_log = logging.getLogger()
+    root_log.addHandler(handler)
 
-    if sml2mqtt._args.ARGS.analyze:
+    # If we analyze we print, too
+    if sml2mqtt.CMD_ARGS.analyze:
         ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(lvl)
+        ch.setLevel(level)
         ch.setFormatter(log_format)
-        root.addHandler(ch)
+        root_log.addHandler(ch)
+
+    log.info(f'Starting V{sml2mqtt.__version__}')
