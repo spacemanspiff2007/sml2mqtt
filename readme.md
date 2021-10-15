@@ -8,7 +8,7 @@
 _A simple sml to mqtt bridge_
 
 
-sml2mqtt is a asyncio application that can read multiple sml (Smart Message Language) streams 
+sml2mqtt is a asyncio application that can read multiple sml (Smart Message Language) streams
 from energy meters and report the values through mqtt.
 
 ## Installation
@@ -203,37 +203,62 @@ Configuration is done in the ``config.yml`` file.
 
 ```yml
 logging:
-  level: INFO
-  file: /opt/sml2mqtt/sml2mqtt.log
+  level: INFO                    # Log level
+  file: sml2mqtt.log             # Log file path (absolute or relative to config file)
 
 mqtt:
   connection:
-    client_id: sml2mqtt
+    client id: sml2mqtt
     host: localhost
-    port: 1883
+    port: 1833
     user: ''
     password: ''
     tls: false
-    tls_insecure: false
-  publish:
-    qos: 0        # Default QoS when publishing values
-    retain: false # Default retain flag when publishing values
-  topics:
-    base topic: sml2mqtt  # Topic that will prefix all topics
-    last will: status     # Last will topic
+    tls insecure: false
 
-    # These aliases are replaced in the mqtt topics
-    alias:
-      0100010800ff: total_energy
-
-# Configuration of the sml devices
-devices:
-- device: COM24
-  timeout: 3        # Timeout in seconds between messages from the device
-  skip:
-  - value ids that will
-  - not be reported
+  # base topic configuration
+  # All other topics use these values if no other values for qos/retain are set
+  # It's possible to override topic, full_topic, qos and retain for each mqtt-topic entry
+  base:
+    topic: sml2mqtt
+    qos: 0
+    retain: false
+  last will:
+    topic: status
 
 general:
-  max wait: 120  # Time in seconds sml2mqtt waits for a value change until the value gets republished
+  Wh in kWh: true                  # Automatically convert Wh to kWh
+  republish after: 120             # Republish automatically after this time (if no other filter is configured)
+
+# Port configurations
+ports:
+- url: COM1
+  timeout: 3
+- url: /dev/ttyS0
+  timeout: 3
+
+# Device configuration by OBIS 0100000009ff or by url if the device does not report OBIS 0100000009ff
+devices:
+  DEVICE_ID_HEX:
+    mqtt:
+      topic: DEVICE_TOPIC
+    skip:
+    - OBIS
+    - values
+    - to skip
+    values:
+      OBIS:
+        # each entry (mqtt, workarounds, transformations, filters) is optional and can be omitted
+        mqtt:
+          topic: OBIS
+        workarounds:
+        - negative on energy meter status: true   # activate this workaround
+        transformations:
+        - factor: 3     # multiply with factor
+        - offset: 100   # add offset
+        - round: 2      # round on two digits
+        filters:
+        - diff: 10      # report if value difference is >= 10
+        - perc: 10      # report if percentage change is >= 10%
+        - every: 120    # report at least every 120 secs (overrides the value from general)
 ```
