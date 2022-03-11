@@ -55,6 +55,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(where='src', exclude=['tests*']),
     package_dir={'': 'src'},
+    python_requires='>=3.8',
     install_requires=load_req(),
     classifiers=[
         "Development Status :: 4 - Beta",

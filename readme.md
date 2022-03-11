@@ -93,7 +93,8 @@ sudo systemctl status sml2mqtt.service
 ## Analyze
 
 Starting sml2mqtt with the ``-a`` or ``--analyze`` arg will analyze a single sml frame and report the output.
-It's convenient way to check what values will be reported.
+It's a convenient way to check what values will be reported.
+It will also show how the configuration changes the sml values.
 
 ```
 sml2mqtt --config PATH_TO_CONFIGURATION_FOLDER -a
@@ -216,9 +217,14 @@ mqtt:
     tls: false
     tls insecure: false
 
-  # base topic configuration
+  # MQTT base topic configuration
   # All other topics use these values if no other values for qos/retain are set
-  # It's possible to override topic, full_topic, qos and retain for each mqtt-topic entry
+  # It's possible to override 
+  #  - topic        (fragment that is used to build the full mqtt topic)
+  #  - full_topic   (will not build the topic from the fragments but rather use the configured value)
+  #  - qos
+  #  - retain 
+  # for each (!) mqtt-topic entry
   base:
     topic: sml2mqtt
     qos: 0
@@ -228,37 +234,97 @@ mqtt:
 
 general:
   Wh in kWh: true                  # Automatically convert Wh to kWh
-  republish after: 120             # Republish automatically after this time (if no other filter is configured)
+  republish after: 120             # Republish automatically after this time (if no other every filter is configured)
 
-# Port configurations
+# Serial port configurations for the sml readers 
 ports:
 - url: COM1
   timeout: 3
 - url: /dev/ttyS0
   timeout: 3
 
-# Device configuration by OBIS 0100000009ff or by url if the device does not report OBIS 0100000009ff
+
 devices:
-  DEVICE_ID_HEX:
+  # Device configuration by OBIS value 0100000009ff or by url if the device does not report OBIS 0100000009ff
+  11111111111111111111:
     mqtt:
       topic: DEVICE_TOPIC
+    
+    # OBIS IDs that will not be processed (optional)
     skip:
     - OBIS
     - values
     - to skip
+
+    # Configuration how each OBIS value is reported. Create as many OBIS IDs (e.g. 0100010800ff as you like).
+    # Each sub entry (mqtt, workarounds, transformations, filters) is optional and can be omitted
     values:
+      
       OBIS:
-        # each entry (mqtt, workarounds, transformations, filters) is optional and can be omitted
+        # Sub topic how this value is reported.
         mqtt:
           topic: OBIS
+
+        # Workarounds allow the enabling workarounds (e.g. if the device has strange behaviour)
+        # These are the available workarounds
         workarounds:
         - negative on energy meter status: true   # activate this workaround
+
+        # Transformations allow mathematical calculations on the obis value
+        # They are applied in order how they are defined
         transformations:
         - factor: 3     # multiply with factor
         - offset: 100   # add offset
         - round: 2      # round on two digits
+
+        # Filters control how often a value is published over mqtt.
+        # If one filter is true the value will be published
         filters:
         - diff: 10      # report if value difference is >= 10
         - perc: 10      # report if percentage change is >= 10%
         - every: 120    # report at least every 120 secs (overrides the value from general)
+```
+
+
+### Example devices configuration
+One energy meter is connected to the serial port. The serial meter reports OSIB ``0100000009ff`` 
+as ``11111111111111111111``.
+
+For this device
+- the mqtt topic fragment is set to ``light``
+- the value ``0100010801ff`` will not be published
+- The following values of the device are specially configured: 
+
+  - Energy value (OBIS ``0100010800ff``)
+    - Will be rounded to one digit
+    - Will be published on change **or** at least every hour
+    - The mqtt topic used is ``sml2mqtt/light/energy``
+
+  - Power value (OBIS ``0100100700ff``)
+    - Will be rounded to one digit
+    - Will be published if at least a 5% power change occurred **or** at least every 2 mins
+      (default from ``general`` -> ``republish after``)
+    - The mqtt topic used is ``sml2mqtt/light/power``
+
+
+```yaml
+devices:
+  11111111111111111111:
+    mqtt:
+      topic: light
+    skip:
+    - 0100010801ff
+    values:
+      0100010800ff:
+        mqtt:
+          topic: energy
+        transformations:
+        - round: 1
+        filters:
+        - every: 3600
+      0100100700ff:
+        mqtt:
+          topic: power
+        filters:
+        - perc: 5
 ```

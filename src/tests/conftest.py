@@ -1,5 +1,3 @@
-import asyncio
-
 import pytest
 
 
@@ -14,15 +12,3 @@ def test_data_1():
            b'005F2501010163810200760501188E636200620072650000020171016325FC000000001B1B1B1B1A0356F5'
 
     yield data
-
-
-@pytest.fixture(autouse=True, scope='function')
-def graceful_shutdown():
-    pending = asyncio.Task.all_tasks()
-    if not pending:
-        return None
-
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(
-        asyncio.wait(*pending, timeout=1)
-    )
