@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Dict, List, Optional, Set, Union
 
-from easyconfig import ConfigModel
-from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, validator
+from easyconfig import ConfigMixin
+from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, validator, BaseModel
 
 from .mqtt import OptionalMqttPublishConfig
 
@@ -31,7 +31,7 @@ TYPE_SML_VALUE_TRANSFORM_CFG = Optional[List[Dict[TransformOptionEnum, Union[Str
 TYPE_SML_VALUE_FILTER_CFG = Optional[List[Dict[FilterOptionEnum, Union[StrictInt, StrictFloat]]]]
 
 
-class SmlValueConfig(ConfigModel):
+class SmlValueConfig(BaseModel, ConfigMixin):
     mqtt: OptionalMqttPublishConfig = Field(None, description='Mqtt config for this entry (optional)')
 
     workarounds: TYPE_SML_VALUE_WORKAROUND_CFG = Field(
@@ -52,7 +52,7 @@ class SmlValueConfig(ConfigModel):
         return v
 
 
-class SmlDeviceConfig(ConfigModel):
+class SmlDeviceConfig(BaseModel, ConfigMixin):
     mqtt: Optional[OptionalMqttPublishConfig] = OptionalMqttPublishConfig()
     status: Optional[OptionalMqttPublishConfig] = OptionalMqttPublishConfig(topic='status')
 

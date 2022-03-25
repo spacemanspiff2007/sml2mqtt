@@ -1,18 +1,19 @@
-from easyconfig import ConfigModel
-from pydantic import conint, constr, Field, StrictBool, validator
+from easyconfig import ConfigMixin
+from pydantic import conint, constr, Field, StrictBool, validator, BaseModel
 
 QOS = conint(ge=0, le=2)
 TOPIC_STR = constr(strip_whitespace=True, min_length=1)
 STRIPPED_STR = constr(strip_whitespace=True)
 
 
-class MqttPublishConfig(ConfigModel):
-    topic: TOPIC_STR = 'sml2mqtt'
-    qos: QOS = 0
-    retain: StrictBool = False
+class MqttDefaultPublishConfig(BaseModel, ConfigMixin):
+    qos: QOS = Field(
+        0, description='Default value for QOS if no other QOS value in the config entry is set')
+    retain: StrictBool = Field(
+        False, description='Default value for retain if no other retain value in the config entry is set')
 
 
-class OptionalMqttPublishConfig(ConfigModel):
+class OptionalMqttPublishConfig(BaseModel, ConfigMixin):
     topic: TOPIC_STR = None
     full_topic: TOPIC_STR = Field(None, alias='full topic')
     qos: QOS = None
@@ -39,7 +40,7 @@ class OptionalMqttPublishConfig(ConfigModel):
         return v
 
 
-class MqttConnection(ConfigModel):
+class MqttConnection(BaseModel, ConfigMixin):
     client_id: STRIPPED_STR = Field('sml2mqtt', alias='client id')
     host: STRIPPED_STR = 'localhost'
     port: conint(gt=0) = 1833
@@ -49,8 +50,9 @@ class MqttConnection(ConfigModel):
     tls_insecure: StrictBool = Field(False, alias='tls insecure')
 
 
-class MqttConfig(ConfigModel):
+class MqttConfig(BaseModel, ConfigMixin):
     connection: MqttConnection = MqttConnection()
-    base: MqttPublishConfig = MqttPublishConfig()
+    topic: TOPIC_STR = Field('sml2mqtt', alias='topic prefix')
+    defaults: MqttDefaultPublishConfig = MqttDefaultPublishConfig()
     last_will: OptionalMqttPublishConfig = Field(
         default_factory=lambda: OptionalMqttPublishConfig(topic='status'), alias='last will')

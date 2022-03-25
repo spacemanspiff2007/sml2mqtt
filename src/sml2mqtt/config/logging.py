@@ -1,11 +1,11 @@
 import logging
 from pathlib import Path
 
-from easyconfig import ConfigModel
-from pydantic import Field, validator
+from easyconfig import ConfigMixin
+from pydantic import Field, validator, BaseModel
 
 
-class LoggingSettings(ConfigModel):
+class LoggingSettings(BaseModel, ConfigMixin):
     level: str = Field('INFO', description='Log level')
     file: Path = Field('sml2mqtt.log', description='Log file path (absolute or relative to config file)')
 

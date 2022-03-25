@@ -28,7 +28,7 @@ async def a_main():
 
 def main() -> typing.Union[int, str]:
     try:
-        CONFIG.load_file(get_command_line_args().config)
+        CONFIG.load_config_file(get_command_line_args().config)
     except Exception as e:
         print(e)
         return 7
@@ -45,9 +45,9 @@ def main() -> typing.Union[int, str]:
         setup_log()
 
         # setup mqtt base topic
-        BASE_TOPIC.cfg.topic_fragment = CONFIG.mqtt.base.topic
-        BASE_TOPIC.cfg.qos = CONFIG.mqtt.base.qos
-        BASE_TOPIC.cfg.retain = CONFIG.mqtt.base.retain
+        BASE_TOPIC.cfg.topic_fragment = CONFIG.mqtt.topic
+        BASE_TOPIC.cfg.qos = CONFIG.mqtt.defaults.qos
+        BASE_TOPIC.cfg.retain = CONFIG.mqtt.defaults.retain
         BASE_TOPIC.update()
 
         # setup loop
