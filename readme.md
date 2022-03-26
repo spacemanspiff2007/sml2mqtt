@@ -217,19 +217,14 @@ mqtt:
     tls: false
     tls insecure: false
 
-  # MQTT base topic
+  # MQTT topic prefix
   # This value will be used as prefix for the 'topic' value of all mqtt-topic entries.
   # To disable this prefix for an entry, omit 'topic' in the entry and set 'full_topic' instead.
-  topic: sml2mqtt
+  topic prefix: sml2mqtt
 
-  # Default values or all topic entries.
-  # It's possible to override 
-  #  - qos
-  #  - retain
-  # for each mqtt-topic entry
   defaults:
-    qos: 0
-    retain: false
+    qos: 0         # Default value for QOS if no other QOS value in the config entry is set
+    retain: false  # Default value for retain if no other retain value in the config entry is set
 
   last will:
     topic: status
