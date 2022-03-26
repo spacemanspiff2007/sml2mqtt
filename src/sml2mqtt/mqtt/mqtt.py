@@ -71,7 +71,7 @@ async def _connect_to_broker():
 
                 # since we just pass this into the mqtt wrapper we do not link it to the base topic
                 will_topic = sml2mqtt.mqtt.MqttObj(
-                    config.mqtt.base.topic, config.mqtt.base.qos, config.mqtt.base.retain
+                    config.mqtt.topic, config.mqtt.defaults.qos, config.mqtt.defaults.retain
                 ).update().create_child(config.mqtt.last_will)
                 will_topic.set_config(config.mqtt.last_will)
 
