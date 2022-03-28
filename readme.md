@@ -213,7 +213,7 @@ mqtt:
   connection:
     client id: sml2mqtt
     host: localhost
-    port: 1833
+    port: 1883
     user: ''
     password: ''
     tls: false

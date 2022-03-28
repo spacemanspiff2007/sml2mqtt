@@ -49,7 +49,7 @@ class OptionalMqttPublishConfig(BaseModel, ConfigMixin):
 class MqttConnection(BaseModel, ConfigMixin):
     client_id: STRIPPED_STR = Field('sml2mqtt', alias='client id')
     host: STRIPPED_STR = 'localhost'
-    port: conint(gt=0) = 1833
+    port: conint(gt=0) = 1883
     user: STRIPPED_STR = ''
     password: STRIPPED_STR = ''
     tls: StrictBool = False
