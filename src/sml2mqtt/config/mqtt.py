@@ -1,29 +1,23 @@
-from easyconfig import ConfigMixin
-from pydantic import BaseModel, conint, constr, Extra, Field, StrictBool, validator
+from easyconfig import BaseModel
+from pydantic import conint, constr, Field, StrictBool, validator
 
 QOS = conint(ge=0, le=2)
 TOPIC_STR = constr(strip_whitespace=True, min_length=1)
 STRIPPED_STR = constr(strip_whitespace=True)
 
 
-class MqttDefaultPublishConfig(BaseModel, ConfigMixin):
+class MqttDefaultPublishConfig(BaseModel):
     qos: QOS = Field(
         0, description='Default value for QOS if no other QOS value in the config entry is set')
     retain: StrictBool = Field(
         False, description='Default value for retain if no other retain value in the config entry is set')
 
-    class Config:
-        extra = Extra.forbid
 
-
-class OptionalMqttPublishConfig(BaseModel, ConfigMixin):
+class OptionalMqttPublishConfig(BaseModel):
     topic: TOPIC_STR = None
     full_topic: TOPIC_STR = Field(None, alias='full topic')
     qos: QOS = None
     retain: StrictBool = None
-
-    class Config:
-        extra = Extra.forbid
 
     @validator('topic', 'full_topic')
     def validate_topic(cls, value):
@@ -46,7 +40,7 @@ class OptionalMqttPublishConfig(BaseModel, ConfigMixin):
         return v
 
 
-class MqttConnection(BaseModel, ConfigMixin):
+class MqttConnection(BaseModel):
     client_id: STRIPPED_STR = Field('sml2mqtt', alias='client id')
     host: STRIPPED_STR = 'localhost'
     port: conint(gt=0) = 1883
@@ -55,16 +49,10 @@ class MqttConnection(BaseModel, ConfigMixin):
     tls: StrictBool = False
     tls_insecure: StrictBool = Field(False, alias='tls insecure')
 
-    class Config:
-        extra = Extra.forbid
 
-
-class MqttConfig(BaseModel, ConfigMixin):
+class MqttConfig(BaseModel):
     connection: MqttConnection = MqttConnection()
     topic: TOPIC_STR = Field('sml2mqtt', alias='topic prefix')
     defaults: MqttDefaultPublishConfig = MqttDefaultPublishConfig()
     last_will: OptionalMqttPublishConfig = Field(
         default_factory=lambda: OptionalMqttPublishConfig(topic='status'), alias='last will')
-
-    class Config:
-        extra = Extra.forbid

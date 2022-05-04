@@ -30,7 +30,7 @@ async def test_watchdog_no_expire():
     w.start()
     for _ in range(3):
         w.feed()
-        await asyncio.sleep(0.075)
+        await asyncio.sleep(0.07)
 
     m.assert_not_called()
 

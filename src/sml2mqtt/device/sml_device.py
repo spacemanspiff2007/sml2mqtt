@@ -65,7 +65,7 @@ class Device:
         if new_status != DeviceStatus.PORT_OPENED:
             self.mqtt_status.publish(new_status.value)
 
-        # If all ports are closed or we have errors we shut down
+        # If all ports are closed, or we have errors we shut down
         if all(map(lambda x: x.status.is_shutdown_status(), ALL_DEVICES.values())):
             # Stop reading from the serial port because we are shutting down
             self.serial.close()
@@ -135,6 +135,7 @@ class Device:
 
         do_analyze = sml2mqtt.CMD_ARGS.analyze
         do_wh_in_kwh = CONFIG.general.wh_in_kwh
+        report_blank_meters = CONFIG.general.report_blank_energy_meters
 
         if do_analyze:
             self.log.info('')
@@ -155,7 +156,7 @@ class Device:
             # Unit is Wh -> Value is from an Energy Meter
             if sml_obj.unit == 30:
                 # We Don't publish disabled energy meters (always 0)
-                if sml_obj.get_value() < 0.1:
+                if sml_obj.get_value() < 0.1 and not report_blank_meters:
                     continue
                 # Global option to automatically convert from Wh to kWh
                 if do_wh_in_kwh:
@@ -169,14 +170,15 @@ class Device:
         if not self.device_id_set:
             entry = frame_values.pop('0100000009ff', None)
             if entry is not None:
-                self.skip_values.add('0100000009ff')
+                if not CONFIG.general.report_device_id:
+                    self.skip_values.add('0100000009ff')
                 self.process_device_id(entry.get_value())
             else:
                 self.process_device_id(self.device_url)
 
             # remove additionally skipped frames
-            for skip in self.skip_values:
-                frame_values.pop(skip, None)
+            for name in self.skip_values:
+                frame_values.pop(name, None)
 
         # Process all values
         for obis_value in frame_values.values():

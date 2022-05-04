@@ -46,7 +46,7 @@ def create_sml_value(device: 'sml2mqtt.device.Device', obj: SmlListEntry) -> Sml
             filters=sml2mqtt.value.filter_from_config(None)
         )
 
-    if cfg is None:
+    if cfg is None or cfg.values is None:
         return create_default_value()
 
     value_cfg = cfg.values.get(obis)

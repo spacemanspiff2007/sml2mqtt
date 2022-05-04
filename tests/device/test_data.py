@@ -7,12 +7,12 @@ from sml2mqtt import CMD_ARGS
 from sml2mqtt.device import Device
 
 
-async def test_serial_data(device: Device, no_serial, caplog, test_data_1: bytes):
+async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes):
     caplog.set_level(logging.DEBUG)
 
     CMD_ARGS.analyze = True
 
-    await device.serial_data_read(a2b_hex(test_data_1))
+    await device.serial_data_read(a2b_hex(sml_data_1))
 
     msg = "\n".join(map(lambda x: x.msg, filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records)))
 
@@ -29,8 +29,6 @@ async def test_serial_data(device: Device, no_serial, caplog, test_data_1: bytes
         'testing/00000000000000000000/status: SHUTDOWN (QOS: 0, retain: False)'
 
     msg = "\n".join(map(lambda x: x.msg, filter(lambda x: x.name == 'sml.device_url', caplog.records)))
-
-    print(msg)
 
     assert msg == '''
 Received Frame

@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Dict, List, Optional, Set, Union
 
-from easyconfig import ConfigMixin
-from pydantic import BaseModel, Extra, Field, StrictBool, StrictFloat, StrictInt, StrictStr, validator
+from easyconfig import BaseModel
+from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, validator
 
 from .mqtt import OptionalMqttPublishConfig
 
@@ -31,7 +31,7 @@ TYPE_SML_VALUE_TRANSFORM_CFG = Optional[List[Dict[TransformOptionEnum, Union[Str
 TYPE_SML_VALUE_FILTER_CFG = Optional[List[Dict[FilterOptionEnum, Union[StrictInt, StrictFloat]]]]
 
 
-class SmlValueConfig(BaseModel, ConfigMixin):
+class SmlValueConfig(BaseModel):
     mqtt: OptionalMqttPublishConfig = Field(None, description='Mqtt config for this entry (optional)')
 
     workarounds: TYPE_SML_VALUE_WORKAROUND_CFG = Field(
@@ -40,9 +40,6 @@ class SmlValueConfig(BaseModel, ConfigMixin):
         None, description='Mathematical transformations for the value (optional)')
     filters: TYPE_SML_VALUE_FILTER_CFG = Field(
         None, description='Refresh options for the value (optional)')
-
-    class Config:
-        extra = Extra.forbid
 
     @validator('workarounds', 'transformations', 'filters')
     def len_1(cls, v):
@@ -55,16 +52,12 @@ class SmlValueConfig(BaseModel, ConfigMixin):
         return v
 
 
-class SmlDeviceConfig(BaseModel, ConfigMixin):
+class SmlDeviceConfig(BaseModel):
     mqtt: Optional[OptionalMqttPublishConfig] = OptionalMqttPublishConfig()
     status: Optional[OptionalMqttPublishConfig] = OptionalMqttPublishConfig(topic='status')
 
-    skip: Optional[Set[str]] = Field(
+    skip: Optional[Set[StrictStr]] = Field(
         default=None, description='OBIS codes (HEX) of values that will not be published (optional)')
 
     values: Optional[Dict[str, SmlValueConfig]] = Field(
         default=None, description='Special configurations for each of the values (optional)')
-
-
-    class Config:
-        extra = Extra.forbid

@@ -1,43 +1,41 @@
 from typing import Dict, List, Union
 
-import pydantic
-from easyconfig import AppConfigMixin, ConfigMixin, create_app_config
-from pydantic import BaseModel, constr, Field
+from easyconfig import AppBaseModel, BaseModel, create_app_config
+from pydantic import constr, Field
 
 from .device import REPUBLISH_ALIAS, SmlDeviceConfig, SmlValueConfig
 from .logging import LoggingSettings
 from .mqtt import MqttConfig, OptionalMqttPublishConfig
 
 
-class PortSettings(BaseModel, ConfigMixin):
+class PortSettings(BaseModel):
     url: constr(strip_whitespace=True, min_length=1, strict=True) = Field(..., description='Device path')
     timeout: Union[int, float] = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')
 
-    class Config:
-        extra = pydantic.Extra.forbid
 
-
-class GeneralSettings(BaseModel, ConfigMixin):
+class GeneralSettings(BaseModel):
     wh_in_kwh: bool = Field(True, description='Automatically convert Wh to kWh', alias='Wh in kWh')
     republish_after: int = Field(
         120, description='Republish automatically after this time (if no other filter configured)',
         alias=REPUBLISH_ALIAS,
     )
+    report_blank_energy_meters: bool = Field(
+        False, description='Report blank energy meters (where the value is 0kwh)',
+        alias='report blank energy meters', in_file=False
+    )
+    report_device_id: bool = Field(
+        False, description='Report the device id even though it does never change',
+        alias='report device id', in_file=False
+    )
 
-    class Config:
-        extra = pydantic.Extra.forbid
 
-
-class Settings(BaseModel, AppConfigMixin):
+class Settings(AppBaseModel):
     logging: LoggingSettings = LoggingSettings()
     mqtt: MqttConfig = MqttConfig()
     general: GeneralSettings = GeneralSettings()
     ports: List[PortSettings] = []
     devices: Dict[str, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
-
-    class Config:
-        extra = pydantic.Extra.forbid
 
 
 def default_config() -> Settings:
