@@ -3,7 +3,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sml2mqtt)](https://pypi.org/project/sml2mqtt/)
 [![Updates](https://pyup.io/repos/github/spacemanspiff2007/sml2mqtt/shield.svg)](https://pyup.io/repos/github/spacemanspiff2007/sml2mqtt/)
 [![PyPI](https://img.shields.io/pypi/v/sml2mqtt)](https://pypi.org/project/sml2mqtt/)
-[![Downloads](https://pepy.tech/badge/sml2mqtt/month)](https://pepy.tech/project/sml2mqtt/month)
+[![Downloads](https://pepy.tech/badge/sml2mqtt/month)](https://pepy.tech/project/sml2mqtt)
 
 _A simple sml to mqtt bridge_
 

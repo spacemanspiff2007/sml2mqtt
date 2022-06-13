@@ -16,7 +16,7 @@ async def test_frame_no_id(device: Device, no_serial, caplog, sml_frame_1: SmlFr
     ))
 
     caplog.set_level(logging.DEBUG)
-    CMD_ARGS.analyze = True
+    monkeypatch.setattr(CMD_ARGS, 'analyze', True)
 
     await device.process_frame(sml_frame_1)
 

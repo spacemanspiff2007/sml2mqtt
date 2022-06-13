@@ -7,10 +7,10 @@ from sml2mqtt import CMD_ARGS
 from sml2mqtt.device import Device
 
 
-async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes):
+async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes, monkeypatch):
     caplog.set_level(logging.DEBUG)
 
-    CMD_ARGS.analyze = True
+    monkeypatch.setattr(CMD_ARGS, 'analyze', True)
 
     await device.serial_data_read(a2b_hex(sml_data_1))
 

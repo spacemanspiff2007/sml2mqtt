@@ -1,7 +1,27 @@
 from binascii import a2b_hex
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from smllib.reader import SmlFrame
+
+import sml2mqtt.device.sml_device
+import sml2mqtt.device.sml_serial
+import sml2mqtt.mqtt.mqtt_obj
+from sml2mqtt.device import Device, DeviceStatus
+from sml2mqtt.mqtt import MqttObj
+
+
+@pytest.fixture
+def no_mqtt(monkeypatch):
+
+    pub_list = []
+
+    async def pub_func(topic: str, value, qos: int, retain: bool):
+        pub_list.append((topic, value, qos, retain))
+
+    monkeypatch.setattr(sml2mqtt.mqtt.mqtt_obj, 'publish', pub_func)
+
+    yield pub_list
 
 
 @pytest.fixture
@@ -24,5 +44,17 @@ def sml_frame_1():
            b'534b0177070100600100ff010101010b0a0149534b0005020de20177070100010800ff65001c010401621e52ff650026bea90177' \
            b'070100020800ff0101621e52ff62000177070100100700ff0101621b52005301100101016350ba00760500531efc620062007263' \
            b'0201710163ba1900'
+
+    yield SmlFrame(a2b_hex(data))
+
+
+@pytest.fixture
+def sml_frame_2():
+    data = b'7605065850a66200620072630101760107ffffffffffff05021d70370b0a014c475a0003403b4972620165021d7707016326de' \
+           b'007605065850a762006200726307017707ffffffffffff0b0a014c475a0003403b49070100620affff72620165021d77077577' \
+           b'0701006032010101010101044c475a0177070100600100ff010101010b0a014c475a0003403b490177070100010800ff65001c' \
+           b'010472620165021d7707621e52ff690000000003152c450177070100020800ff0172620165021d7707621e52ff690000000000' \
+           b'0000000177070100100700ff0101621b52005900000000000000fb010101637264007605065850a86200620072630201710163' \
+           b'1c8c00'
 
     yield SmlFrame(a2b_hex(data))

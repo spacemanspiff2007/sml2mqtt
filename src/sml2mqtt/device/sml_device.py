@@ -1,6 +1,6 @@
 import traceback
 from binascii import b2a_hex
-from typing import Dict, Final, Optional, Set
+from typing import Dict, Final, List, Optional, Set
 
 from smllib import SmlFrame, SmlStreamReader
 from smllib.errors import CrcError
@@ -147,8 +147,21 @@ class Device:
                     self.log.info(line)
             self.log.info('')
 
+        # try shortcut, if that fails try parsing the whole frame
+        try:
+            sml_objs: List[SmlListEntry] = frame.get_obis()
+        except Exception:
+            self.log.info('get_obis failed - try parsing frame')
+            for line in traceback.format_exc().splitlines():
+                self.log.debug(line)
+
+            sml_objs: List[SmlListEntry] = []
+            for msg in frame.parse_frame():
+                for val in getattr(msg.message_body, 'val_list', []):
+                    sml_objs.append(val)
+
         frame_values: Dict[str, SmlListEntry] = {}
-        for sml_obj in frame.get_obis():
+        for sml_obj in sml_objs:
             name = sml_obj.obis
             if name in self.skip_values:
                 continue

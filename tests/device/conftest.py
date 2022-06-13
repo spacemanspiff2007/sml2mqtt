@@ -24,7 +24,7 @@ def clean_devices(monkeypatch):
 
 
 @pytest.fixture
-async def device(monkeypatch, no_serial):
+async def device(no_serial):
     device_url = 'device_url'
 
     mqtt_base = MqttObj('testing', 0, False).update()
@@ -40,6 +40,7 @@ async def device(monkeypatch, no_serial):
             func(status)
         return raise_exception_on_error
 
+    assert hasattr(obj, 'set_status')
     obj.set_status = wrapper(obj.set_status)
 
     yield obj
