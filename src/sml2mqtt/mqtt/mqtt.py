@@ -37,7 +37,7 @@ async def disconnect():
 async def connect():
     global TASK_CONNECT
     if TASK_CONNECT is None:
-        TASK_CONNECT = create_task(_connect_to_broker())
+        TASK_CONNECT = create_task(_connect_task())
 
 
 async def _connect_task():
