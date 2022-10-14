@@ -290,7 +290,7 @@ devices:
 
 
 ### Example devices configuration
-One energy meter is connected to the serial port. The serial meter reports OSIB ``0100000009ff``
+One energy meter is connected to the serial port. The serial meter reports OBIS ``0100000009ff``
 as ``11111111111111111111``.
 
 For this device

@@ -28,6 +28,10 @@ class GeneralSettings(BaseModel):
         False, description='Report the device id even though it does never change',
         alias='report device id', in_file=False
     )
+    device_id_obis: str = Field(
+        '', description='Additional OBIS field for the serial number, default is 0100000009ff',
+        alias='device id obis', in_file=False
+    )
 
 
 class Settings(AppBaseModel):

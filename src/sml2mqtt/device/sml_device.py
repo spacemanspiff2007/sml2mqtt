@@ -72,8 +72,9 @@ class Device:
             shutdown(AllDevicesFailed)
         return True
 
-    def process_device_id(self, serial: str):
+    def set_device_id(self, serial: str):
         assert isinstance(serial, str)
+        assert not self.device_id_set
         self.device_id = serial
         self.device_id_set = True
 
@@ -93,6 +94,26 @@ class Device:
 
         if cfg.skip is not None:
             self.skip_values.update(cfg.skip)
+
+    def select_device_id(self, frame_values: Dict[str, SmlListEntry]):
+        obis_ids = ['0100000009ff']
+        if CONFIG.general.device_id_obis:
+            obis_ids.append(CONFIG.general.device_id_obis)
+
+        for obis_id in obis_ids:
+            entry = frame_values.pop(obis_id, None)
+            if entry is not None:
+                if not CONFIG.general.report_device_id:
+                    self.skip_values.add(obis_id)
+                self.set_device_id(entry.get_value())
+                break
+        else:
+            self.set_device_id(self.device_url)
+
+        # remove additionally skipped frames
+        # this gets filled in set_device_id, so we have to do it afterwards!
+        for name in self.skip_values:
+            frame_values.pop(name, None)
 
     def serial_data_timeout(self):
         if self.set_status(DeviceStatus.MSG_TIMEOUT):
@@ -181,17 +202,7 @@ class Device:
         # We overwrite the device_id url (default) with the serial number if the device reports it
         # Otherwise we still do the config lookup so the user can configure the mqtt topics
         if not self.device_id_set:
-            entry = frame_values.pop('0100000009ff', None)
-            if entry is not None:
-                if not CONFIG.general.report_device_id:
-                    self.skip_values.add('0100000009ff')
-                self.process_device_id(entry.get_value())
-            else:
-                self.process_device_id(self.device_url)
-
-            # remove additionally skipped frames
-            for name in self.skip_values:
-                frame_values.pop(name, None)
+            self.select_device_id(frame_values)
 
         # Process all values
         for obis_value in frame_values.values():

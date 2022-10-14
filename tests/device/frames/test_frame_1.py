@@ -44,7 +44,7 @@ Received Frame
   abort_on_error: 0
   message_body <SmlGetListResponse>
     client_id       : None
-    sever_id        : 0a0149534b0005020de2
+    server_id       : 0a0149534b0005020de2
     list_name       : 0100620affff
     act_sensor_time : 1815342
     val_list:
@@ -81,7 +81,7 @@ Received Frame
         scaler         : -1
         value          : 0
         value_signature: None
-        -> 0.0Wh
+        -> 0.0Wh (Wirkenergie Total)
       <SmlListEntry>
         obis           : 0100100700ff (1-0:16.7.0*255)
         status         : None
