@@ -4,6 +4,7 @@ import pytest
 
 import sml2mqtt.device.sml_device
 import sml2mqtt.device.sml_serial
+from sml2mqtt.config.config import PortSettings
 from sml2mqtt.device import Device, DeviceStatus
 from sml2mqtt.mqtt import MqttObj
 
@@ -30,7 +31,7 @@ async def device(no_serial):
     mqtt_base = MqttObj('testing', 0, False).update()
     mqtt_device = mqtt_base.create_child(device_url)
 
-    obj = await Device.create(device_url, 1, set(), mqtt_device)
+    obj = await Device.create(PortSettings(url=device_url), 1, set(), mqtt_device)
 
     # Wrapper so we see the traceback in the tests
     def wrapper(func):

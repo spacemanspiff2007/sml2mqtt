@@ -1,5 +1,5 @@
-asyncio-mqtt     == 0.12.1
+asyncio-mqtt     == 0.16.1
 pyserial-asyncio == 0.6
-easyconfig       == 0.2.4
+easyconfig       == 0.2.6
 pydantic         >= 1.10, <2.0
 smllib           == 1.2

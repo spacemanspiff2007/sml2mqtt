@@ -27,29 +27,29 @@ general:
   Wh in kWh: true       # Automatically convert Wh to kWh
   republish after: 120  # Republish automatically after this time (if no other filter configured)
 ports:
-- url: COM1
-  timeout: 3
-- url: /dev/ttyS0
-  timeout: 3
+- url: COM1   # Device path
+  timeout: 3  # Seconds after which a timeout will be detected (default=3)
+- url: /dev/ttyS0   # Device path
+  timeout: 3        # Seconds after which a timeout will be detected (default=3)
 devices:   # Device configuration by ID or url
   DEVICE_ID_HEX:
     mqtt:
       topic: DEVICE_BASE_TOPIC
     status:
       topic: status
-    skip:
+    skip:    # OBIS codes (HEX) of values that will not be published (optional)
     - OBIS
-    values:
+    values:  # Special configurations for each of the values (optional)
       OBIS:
-        mqtt:
+        mqtt:             # Mqtt config for this entry (optional)
           topic: OBIS
-        workarounds:
+        workarounds:      # Workarounds for the value (optional)
         - negative on energy meter status: true
-        transformations:
+        transformations:  # Mathematical transformations for the value (optional)
         - factor: 3
         - offset: 100
         - round: 2
-        filters:
+        filters:          # Refresh options for the value (optional)
         - diff: 10
         - perc: 10
         - every: 120

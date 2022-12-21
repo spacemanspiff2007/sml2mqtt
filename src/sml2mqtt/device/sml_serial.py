@@ -5,6 +5,7 @@ from typing import Awaitable, Callable, Final, Optional, TYPE_CHECKING
 from serial_asyncio import create_serial_connection, SerialTransport
 
 from sml2mqtt.__log__ import get_logger
+from sml2mqtt.config.config import PortSettings
 from sml2mqtt.device import DeviceStatus
 
 if TYPE_CHECKING:
@@ -16,11 +17,14 @@ log = get_logger('serial')
 
 class SmlSerial(asyncio.Protocol):
     @classmethod
-    async def create(cls, url: str, device: 'sml2mqtt.device_id.Device') -> 'SmlSerial':
+    async def create(cls, settings: PortSettings, device: 'sml2mqtt.device_id.Device') -> 'SmlSerial':
         transport, protocol = await create_serial_connection(
-            asyncio.get_event_loop(), cls, url, baudrate=9600)  # type: SerialTransport, SmlSerial
+            asyncio.get_event_loop(), cls,
+            url=settings.url,
+            baudrate=settings.baudrate, parity=settings.parity,
+            stopbits=settings.stopbits, bytesize=settings.bytesize)  # type: SerialTransport, SmlSerial
 
-        protocol.url = url
+        protocol.url = settings.url
         protocol.device = device
         return protocol
 

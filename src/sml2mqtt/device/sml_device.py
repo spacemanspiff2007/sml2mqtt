@@ -11,6 +11,7 @@ from sml2mqtt import process_value
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.__shutdown__ import shutdown
 from sml2mqtt.config import CONFIG
+from sml2mqtt.config.config import PortSettings
 from sml2mqtt.config.device import SmlDeviceConfig
 from sml2mqtt.device import DeviceStatus
 from sml2mqtt.device.watchdog import Watchdog
@@ -23,11 +24,11 @@ ALL_DEVICES: Dict[str, 'Device'] = {}
 
 class Device:
     @classmethod
-    async def create(cls, url: str, timeout: float, skip_values: Set[str], mqtt_device: MqttObj):
+    async def create(cls, settings: PortSettings, timeout: float, skip_values: Set[str], mqtt_device: MqttObj):
         try:
-            device = cls(url, timeout, set(skip_values), mqtt_device)
-            device.serial = await sml2mqtt.device.SmlSerial.create(url, device)
-            ALL_DEVICES[url] = device
+            device = cls(settings.url, timeout, set(skip_values), mqtt_device)
+            device.serial = await sml2mqtt.device.SmlSerial.create(settings, device)
+            ALL_DEVICES[settings.url] = device
             return device
         except Exception as e:
             raise DeviceSetupFailed(e) from None

@@ -20,7 +20,7 @@ async def a_main():
     try:
         for port_cfg in CONFIG.ports:
             dev_mqtt = BASE_TOPIC.create_child(port_cfg.url)
-            await Device.create(port_cfg.url, port_cfg.timeout, set(), dev_mqtt)
+            await Device.create(port_cfg, port_cfg.timeout, set(), dev_mqtt)
 
     except Exception as e:
         shutdown(e)
