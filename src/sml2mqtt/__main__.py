@@ -51,8 +51,9 @@ def main() -> typing.Union[int, str]:
         BASE_TOPIC.update()
 
         # setup loop
-        loop = asyncio.get_event_loop_policy().get_event_loop()
-        loop.create_task(a_main())
+        loop = asyncio.get_event_loop()
+        asyncio.set_event_loop(loop)
+        task = loop.create_task(a_main())
         loop.run_forever()
     except Exception as e:
         for line in traceback.format_exc().splitlines():
