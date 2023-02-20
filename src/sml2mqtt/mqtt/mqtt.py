@@ -80,7 +80,8 @@ async def _connect_to_broker():
                     port=config.mqtt.connection.port,
                     username=config.mqtt.connection.user if config.mqtt.connection.user else None,
                     password=config.mqtt.connection.password if config.mqtt.connection.password else None,
-                    will=Will(will_topic.topic, payload='OFFLINE', qos=will_topic.qos, retain=will_topic.retain)
+                    will=Will(will_topic.topic, payload='OFFLINE', qos=will_topic.qos, retain=will_topic.retain),
+                    client_id=config.mqtt.connection.client_id
                 )
 
                 log.debug(f'Connecting to {config.mqtt.connection.host}:{config.mqtt.connection.port}')

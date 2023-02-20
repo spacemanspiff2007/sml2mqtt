@@ -9,7 +9,7 @@ from sml2mqtt.device import Device, DeviceStatus
 from sml2mqtt.mqtt import MqttObj
 
 
-@pytest.fixture
+@pytest.fixture()
 def no_serial(monkeypatch):
 
     m = Mock()
@@ -17,6 +17,7 @@ def no_serial(monkeypatch):
 
     monkeypatch.setattr(sml2mqtt.device, 'SmlSerial', m)
     monkeypatch.setattr(sml2mqtt.device.sml_serial, 'SmlSerial', m)
+    return m
 
 
 @pytest.fixture(autouse=True)
@@ -24,7 +25,7 @@ def clean_devices(monkeypatch):
     monkeypatch.setattr(sml2mqtt.device.sml_device, 'ALL_DEVICES', {})
 
 
-@pytest.fixture
+@pytest.fixture()
 async def device(no_serial):
     device_url = 'device_url'
 
@@ -44,4 +45,4 @@ async def device(no_serial):
     assert hasattr(obj, 'set_status')
     obj.set_status = wrapper(obj.set_status)
 
-    yield obj
+    return obj

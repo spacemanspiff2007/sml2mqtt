@@ -20,7 +20,7 @@ class MidnightRotatingFileHandler(RotatingFileHandler):
         super().__init__(*args, **kwargs)
         self.last_check: date = datetime.now().date()
 
-    def shouldRollover(self, record):
+    def shouldRollover(self, record):   # noqa: N802
         date = datetime.now().date()
         if date == self.last_check:
             return 0

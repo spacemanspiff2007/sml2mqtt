@@ -14,5 +14,5 @@ def test_readme(pytestconfig):
 
     # First entry is the complete config
     for cfg_sample in yaml_parts:
-        obj = yaml_rt.load(yaml_parts[0])    # type: dict
+        obj = yaml_rt.load(cfg_sample)    # type: dict
         Settings(**obj)

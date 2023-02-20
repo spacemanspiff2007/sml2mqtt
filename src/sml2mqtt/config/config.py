@@ -50,7 +50,6 @@ class PortSettings(BaseModel):
         return v
 
 
-
 class GeneralSettings(BaseModel):
     wh_in_kwh: bool = Field(True, description='Automatically convert Wh to kWh', alias='Wh in kWh')
     republish_after: int = Field(

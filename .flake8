@@ -16,6 +16,10 @@ ignore =
     # E303 too many blank lines
     E303,
 
+
+per-file-ignores =
+    src/sml2mqtt/config/*:N805
+
 max-line-length = 120
 exclude =
     .git,

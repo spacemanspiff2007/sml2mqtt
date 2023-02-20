@@ -1,4 +1,3 @@
-
 class MqttError(Exception):
     pass
 

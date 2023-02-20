@@ -67,7 +67,7 @@ class Device:
             self.mqtt_status.publish(new_status.value)
 
         # If all ports are closed, or we have errors we shut down
-        if all(map(lambda x: x.status.is_shutdown_status(), ALL_DEVICES.values())):
+        if all(x.status.is_shutdown_status() for x in ALL_DEVICES.values()):
             # Stop reading from the serial port because we are shutting down
             self.serial.close()
             shutdown(AllDevicesFailed)

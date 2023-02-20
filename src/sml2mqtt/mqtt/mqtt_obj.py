@@ -1,12 +1,13 @@
 import dataclasses
 from asyncio import create_task
-from typing import List, Optional, Union, Final
+from typing import Final, List, Optional, Union
 
 from sml2mqtt import CMD_ARGS
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.config import OptionalMqttPublishConfig
 from sml2mqtt.mqtt import publish
-from .errors import TopicFragmentExpectedError, MqttConfigValuesMissingError
+
+from .errors import MqttConfigValuesMissingError, TopicFragmentExpectedError
 
 
 @dataclasses.dataclass
