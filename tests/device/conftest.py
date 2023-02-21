@@ -23,6 +23,7 @@ def no_serial(monkeypatch):
 @pytest.fixture(autouse=True)
 def clean_devices(monkeypatch):
     monkeypatch.setattr(sml2mqtt.device.sml_device, 'ALL_DEVICES', {})
+    return None
 
 
 @pytest.fixture()
