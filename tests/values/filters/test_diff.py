@@ -1,4 +1,4 @@
-from sml2mqtt.value.filter import DiffAbsFilter, DiffPercFilter
+from sml2mqtt.sml_value.filter import DiffAbsFilter, DiffPercFilter
 
 
 def test_abs():

@@ -2,9 +2,9 @@ from unittest.mock import Mock
 
 from smllib.sml import SmlListEntry
 
-from sml2mqtt.value import SmlValue
-from sml2mqtt.value.filter import RefreshEvery
-from sml2mqtt.value.transformations import RoundTransformation
+from sml2mqtt.sml_value import SmlValue
+from sml2mqtt.sml_value.filter import RefreshEvery
+from sml2mqtt.sml_value.transformations import RoundTransformation
 
 
 def test_round():

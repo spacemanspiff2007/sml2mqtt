@@ -25,3 +25,5 @@ class NegativeOnEnergyMeterStatus(WorkaroundBase):
         negative = status & 0x20
         if negative:
             value.value *= -1
+
+        return value

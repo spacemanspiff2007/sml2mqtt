@@ -36,7 +36,7 @@ class SmlSerial(asyncio.Protocol):
 
         self.transport: Optional[SerialTransport] = None
 
-        self.pause_task: Optional[Task] = None
+        self._task: Optional[Task] = None
 
         self.on_data_cb: Final = Callable[[bytes], Awaitable]
 
@@ -46,31 +46,34 @@ class SmlSerial(asyncio.Protocol):
 
         self.device.set_status(DeviceStatus.PORT_OPENED)
 
-    def data_received(self, data: bytes):
-        self.pause_serial()
-        create_task(self.device.serial_data_read(data))
-
-    async def resume_serial(self):
-        try:
-            await asyncio.sleep(0.4)
-            self.transport.resume_reading()
-        finally:
-            self.pause_task = None
-
-    def pause_serial(self):
-        self.transport.pause_reading()
-        self.pause_task = create_task(self.resume_serial())
-
     def connection_lost(self, exc):
         self.close()
 
         log.info(f'Port {self.url} was closed')
         self.device.set_status(DeviceStatus.PORT_CLOSED)
 
-    def close(self):
-        if self.pause_task is not None:
-            self.pause_task.cancel()
-            self.pause_task = None
+    def data_received(self, data: bytes):
+        self.transport.pause_reading()
+        create_task(self.device.serial_data_read(data))
 
+    async def _chunk_task(self):
+        while True:
+            await asyncio.sleep(0.1)
+            self.transport.resume_reading()
+
+    def start(self):
+        assert self._task is None
+        self._task = create_task(self._chunk_task(), name=f'Chunk task {self.url:s}')
+
+    def close(self):
         if not self.transport.is_closing():
             self.transport.close()
+
+        task = self._task
+        self._task = None
+
+        task.cancel()
+        return task
+
+    async def shutdown(self):
+        await self.close()
