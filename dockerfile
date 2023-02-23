@@ -1,4 +1,4 @@
-FROM python:3.10-apline
+FROM python:3.10-alpine
 
 VOLUME /sml2mqtt
 
