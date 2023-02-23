@@ -67,7 +67,7 @@ def find_config_folder(config_file_str: Optional[str]) -> Path:
         if config_file.is_file():
             return config_file
 
-        # folder exists but not the file -> create
+        # folder exists but not the file -> create file
         if config_file.parent.is_dir():
             return config_file
 
