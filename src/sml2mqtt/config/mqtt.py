@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from easyconfig import BaseModel
 from pydantic import conint, constr, Field, StrictBool, validator
 
