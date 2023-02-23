@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 import sml2mqtt
 from sml2mqtt.config.device import FilterOptionEnum, TransformOptionEnum, TYPE_SML_VALUE_FILTER_CFG, \
     TYPE_SML_VALUE_TRANSFORM_CFG, TYPE_SML_VALUE_WORKAROUND_CFG, WorkaroundOptionEnum
-from sml2mqtt.sml_value.filter import ChangeFilter, DiffAbsFilter, DiffFilterBase, DiffPercFilter, FilterBase, RefreshEvery
+from sml2mqtt.sml_value.filter import ChangeFilter, DiffAbsFilter, \
+    DiffFilterBase, DiffPercFilter, FilterBase, RefreshEvery
 from sml2mqtt.sml_value.transformations import FactorTransformation, \
     OffsetTransformation, RoundTransformation, TransformationBase
 from sml2mqtt.sml_value.workarounds import NegativeOnEnergyMeterStatus, WorkaroundBase

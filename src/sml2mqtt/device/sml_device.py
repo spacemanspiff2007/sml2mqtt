@@ -1,23 +1,25 @@
+import logging
 import traceback
 from binascii import b2a_hex
-from typing import Dict, Final, List, Optional, Set
+from typing import Dict, Final, List, Set
 
 from smllib import SmlFrame, SmlStreamReader
 from smllib.errors import CrcError
 from smllib.sml import SmlListEntry
 
 import sml2mqtt
-from sml2mqtt import process_value
+from sml2mqtt import CMD_ARGS
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.__shutdown__ import shutdown
 from sml2mqtt.config import CONFIG
 from sml2mqtt.config.config import PortSettings
-from sml2mqtt.config.device import SmlDeviceConfig
+from sml2mqtt.config.device import SmlDeviceConfig, SmlValueConfig
 from sml2mqtt.device import DeviceStatus
 from sml2mqtt.device.watchdog import Watchdog
-from sml2mqtt.errors import AllDevicesFailed, DeviceSetupFailed
+from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, \
+    ObisIdForConfigurationMappingNotFoundError, Sml2MqttConfigMappingError
 from sml2mqtt.mqtt import MqttObj
-from sml2mqtt.process_value import VALUES as ALL_VALUES
+from sml2mqtt.sml_value import SmlValue
 
 ALL_DEVICES: Dict[str, 'Device'] = {}
 
@@ -31,7 +33,7 @@ class Device:
             ALL_DEVICES[settings.url] = device
             return device
         except Exception as e:
-            raise DeviceSetupFailed(e) from None
+            raise DeviceSetupFailedError(e) from None
 
     def __init__(self, url: str, timeout: float, skip_values: Set[str], mqtt_device: MqttObj):
         self.stream = SmlStreamReader()
@@ -47,7 +49,8 @@ class Device:
 
         self.device_url = url
         self.device_id: str = url.split("/")[-1]
-        self.device_id_set = False
+
+        self.sml_values: dict[str, SmlValue] = {}
 
         self.skip_values = skip_values
 
@@ -70,51 +73,80 @@ class Device:
         if all(x.status.is_shutdown_status() for x in ALL_DEVICES.values()):
             # Stop reading from the serial port because we are shutting down
             self.serial.close()
-            shutdown(AllDevicesFailed)
+            shutdown(AllDevicesFailedError)
         return True
 
-    def set_device_id(self, serial: str):
-        assert isinstance(serial, str)
-        assert not self.device_id_set
-        self.device_id = serial
-        self.device_id_set = True
+    def _select_device_id(self, frame_values: dict[str, SmlListEntry]) -> str:
+        # search frame and see if we get a match
+        for search_obis in CONFIG.general.device_id_obis:
+            if (obis_value := frame_values.get(search_obis)) is not None:
+                self.log.debug(f'Found obis id {search_obis:s} in the sml frame')
+                value = obis_value.get_value()
+                self.device_id = str(value)
+                return str(search_obis)
 
-        # config is optional
-        cfg: Optional[SmlDeviceConfig] = None
-        if CONFIG.devices is not None:
-            cfg = CONFIG.devices.get(serial)
+        searched = ', '.join(CONFIG.general.device_id_obis)
+        self.log.error(f'Found none of the following obis ids in the sml frame: {searched:s}')
+        raise ObisIdForConfigurationMappingNotFoundError()
 
-        # Build the defaults but with the serial number instead of the url
-        if cfg is None:
-            self.mqtt_device.set_topic(serial)
+    def _select_device_config(self) -> SmlDeviceConfig | None:
+        device_cfg = CONFIG.devices.get(self.device_id)
+        if device_cfg is None:
+            self.log.warning(f'No configuration found for {self.device_id:s}')
             return None
 
-        # config found -> load all configured values
-        self.mqtt_device.set_config(cfg.mqtt)
-        self.mqtt_status.set_config(cfg.status)
+        self.log.debug(f'Configuration found for {self.device_id:s}')
+        return device_cfg
 
-        if cfg.skip is not None:
-            self.skip_values.update(cfg.skip)
+    def _setup_device(self, frame_values: dict[str, SmlListEntry]):
+        found_obis = self._select_device_id(frame_values)
+        cfg = self._select_device_config()
 
-    def select_device_id(self, frame_values: Dict[str, SmlListEntry]):
-        obis_ids = ['0100000009ff']
-        if CONFIG.general.device_id_obis:
-            obis_ids.append(CONFIG.general.device_id_obis)
+        # Global configuration option to ignore mapping value
+        if not CONFIG.general.report_device_id:
+            self.skip_values.add(found_obis)
 
-        for obis_id in obis_ids:
-            entry = frame_values.pop(obis_id, None)
-            if entry is not None:
-                if not CONFIG.general.report_device_id:
-                    self.skip_values.add(obis_id)
-                self.set_device_id(entry.get_value())
-                break
-        else:
-            self.set_device_id(self.device_url)
+        # Change the mqtt topic default from device url to the matched device id
+        self.mqtt_device.set_topic(self.device_id)
 
-        # remove additionally skipped frames
-        # this gets filled in set_device_id, so we have to do it afterwards!
-        for name in self.skip_values:
-            frame_values.pop(name, None)
+        # override from config
+        if cfg is not None:
+            # setup topics
+            self.mqtt_device.set_config(cfg.mqtt)
+            self.mqtt_status.set_config(cfg.status)
+
+            # additional obis values that are ignored from the config
+            if cfg.skip is not None:
+                self.skip_values.update(cfg.skip)
+
+        self._setup_sml_values(cfg, frame_values)
+
+    def _setup_sml_values(self, device_config: SmlDeviceConfig | None, frame_values: dict[str, SmlListEntry]):
+        log_level = logging.DEBUG if not CMD_ARGS.analyze else logging.INFO
+        values_config: dict[str, SmlValueConfig] = device_config.values if device_config is not None else {}
+
+        for obis_id in frame_values:
+            if obis_id in self.skip_values:
+                continue
+
+            value_config = values_config.get(obis_id)
+
+            if device_config is None or value_config is None:
+                self.log.log(log_level, f'Creating default value handler for {obis_id}')
+                value = SmlValue(
+                    self.device_id, obis_id, self.mqtt_device.create_child(obis_id),
+                    workarounds=[], transformations=[], filters=sml2mqtt.sml_value.filter_from_config(None)
+                )
+            else:
+                self.log.log(log_level, f'Creating value handler from config for {obis_id}')
+                value = SmlValue(
+                    self.device_id, obis_id, self.mqtt_device.create_child(obis_id).set_config(value_config.mqtt),
+                    workarounds=sml2mqtt.sml_value.workaround_from_config(value_config.workarounds),
+                    transformations=sml2mqtt.sml_value.transform_from_config(value_config.transformations),
+                    filters=sml2mqtt.sml_value.filter_from_config(value_config.filters),
+                )
+
+            self.sml_values[obis_id] = value
 
     def serial_data_timeout(self):
         if self.set_status(DeviceStatus.MSG_TIMEOUT):
@@ -139,15 +171,18 @@ class Device:
 
             # Process Frame
             await self.process_frame(frame)
-        except Exception:
+        except Exception as e:
             # dump frame if possible
             if frame is not None:
                 self.log.error('Received Frame')
                 self.log.error(f' -> {b2a_hex(frame.buffer)}')
 
             # Log exception
-            for line in traceback.format_exc().splitlines():
-                self.log.error(line)
+            if isinstance(e, Sml2MqttConfigMappingError):
+                self.log.error(str(e))
+            else:
+                for line in traceback.format_exc().splitlines():
+                    self.log.error(line)
 
             # Signal that an error occurred
             self.set_status(DeviceStatus.ERROR)
@@ -200,20 +235,20 @@ class Device:
             # Mark for publishing
             frame_values[name] = sml_obj
 
-        # We overwrite the device_id url (default) with the serial number if the device reports it
-        # Otherwise we still do the config lookup so the user can configure the mqtt topics
-        if not self.device_id_set:
-            self.select_device_id(frame_values)
+        # If we don't have the values we have to set up the device first
+        if not self.sml_values:
+            self._setup_device(frame_values)
+            for drop_obis in self.skip_values:
+                frame_values.pop(drop_obis, None)
 
-        # Process all values
-        for obis_value in frame_values.values():
-            process_value(self, obis_value, frame_values)
+        for obis_id, frame_value in frame_values.items():
+            self.sml_values[obis_id].set_value(frame_value, frame_values)
 
         # There was no Error -> OK
         self.set_status(DeviceStatus.OK)
 
         if do_analyze:
-            for obis, value in ALL_VALUES.get(self.device_id, {}).items():
+            for value in self.sml_values.values():
                 self.log.info('')
                 for line in value.describe().splitlines():
                     self.log.info(line)

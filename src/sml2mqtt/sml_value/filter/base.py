@@ -1,5 +1,3 @@
-from typing import TypeVar
-
 from sml2mqtt.sml_value.__types__ import VALUE_TYPE
 
 
@@ -9,4 +7,3 @@ class FilterBase:
 
     def done(self, value):
         raise NotImplementedError()
-

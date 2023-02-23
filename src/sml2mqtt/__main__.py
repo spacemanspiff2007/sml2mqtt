@@ -53,7 +53,7 @@ def main() -> typing.Union[int, str]:
         # setup loop
         loop = asyncio.get_event_loop()
         asyncio.set_event_loop(loop)
-        task = loop.create_task(a_main())
+        task = loop.create_task(a_main())   # noqa: F841
         loop.run_forever()
     except Exception as e:
         for line in traceback.format_exc().splitlines():

@@ -1,4 +1,3 @@
-# flake8: noqa: E501
 import asyncio
 import logging
 from binascii import a2b_hex
@@ -14,7 +13,7 @@ async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes,
 
     await device.serial_data_read(a2b_hex(sml_data_1))
 
-    msg = "\n".join(map(lambda x: x.msg, filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records)))
+    msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records))
 
     assert msg == \
         'testing/00000000000000000000/0100010800ff: 450.09189911 (QOS: 0, retain: False)\n' \
@@ -28,7 +27,7 @@ async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes,
         'testing/00000000000000000000/status: OK (QOS: 0, retain: False)\n' \
         'testing/00000000000000000000/status: SHUTDOWN (QOS: 0, retain: False)'
 
-    msg = "\n".join(map(lambda x: x.msg, filter(lambda x: x.name == 'sml.device_url', caplog.records)))
+    msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.device_url', caplog.records))
 
     assert msg == '''
 Received Frame
@@ -157,6 +156,16 @@ Received Frame
     global_signature: None
   crc16         : 9724
 
+Found obis id 0100000009ff in the sml frame
+No configuration found for 00000000000000000000
+Creating default value handler for 0100010800ff
+Creating default value handler for 0100010801ff
+Creating default value handler for 0100010802ff
+Creating default value handler for 0100020800ff
+Creating default value handler for 0100100700ff
+Creating default value handler for 0100240700ff
+Creating default value handler for 0100380700ff
+Creating default value handler for 01004c0700ff
 
 testing/00000000000000000000/0100010800ff (0100010800ff):
   raw value: 450.09189911

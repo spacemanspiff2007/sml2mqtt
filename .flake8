@@ -19,6 +19,7 @@ ignore =
 
 per-file-ignores =
     src/sml2mqtt/config/*:N805
+    tests/*:E501
 
 max-line-length = 120
 exclude =

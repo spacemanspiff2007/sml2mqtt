@@ -56,7 +56,7 @@ def test_config_documentation_complete(pytestconfig):
 
     # documented config
     current_module = ''
-    for line in map(lambda x: x.strip().replace('  ', ''), cfg_docs.read_text().splitlines()):  # type: str
+    for line in (x.strip().replace('  ', '') for x in cfg_docs.read_text().splitlines()):  # type: str
         if line.startswith('.. py:currentmodule::'):
             current_module = line[21:].strip()
             continue

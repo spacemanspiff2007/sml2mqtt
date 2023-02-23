@@ -5,7 +5,7 @@ from typing import Dict, Optional, Type, Union
 
 import sml2mqtt.mqtt
 from sml2mqtt.__log__ import log
-from sml2mqtt.errors import AllDevicesFailed, DeviceSetupFailed
+from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Return code logic
@@ -72,12 +72,12 @@ async def do_shutdown():
 def shutdown(e: Union[Exception, Type[Exception]]):
     global SHUTDOWN_TASK
 
-    ret_map: Dict[int, Type[Exception]] = {10: DeviceSetupFailed, 20: AllDevicesFailed}
+    ret_map: Dict[int, Type[Exception]] = {10: DeviceSetupFailedError, 20: AllDevicesFailedError}
 
     log_traceback = True
 
     # get return code based on the error
-    for ret_code, cls in ret_map.items():
+    for ret_code, cls in ret_map.items():   # noqa: B007
         if isinstance(e, cls):
             break
 
