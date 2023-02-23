@@ -1,7 +1,7 @@
 import logging
 import traceback
 from binascii import b2a_hex
-from typing import Dict, Final, List, Set
+from typing import Dict, Final, List, Optional, Set
 
 from smllib import SmlFrame, SmlStreamReader
 from smllib.errors import CrcError
@@ -50,7 +50,7 @@ class Device:
         self.device_url = url
         self.device_id: str = url.split("/")[-1]
 
-        self.sml_values: dict[str, SmlValue] = {}
+        self.sml_values: Dict[str, SmlValue] = {}
 
         self.skip_values = skip_values
 
@@ -76,7 +76,7 @@ class Device:
             shutdown(AllDevicesFailedError)
         return True
 
-    def _select_device_id(self, frame_values: dict[str, SmlListEntry]) -> str:
+    def _select_device_id(self, frame_values: Dict[str, SmlListEntry]) -> str:
         # search frame and see if we get a match
         for search_obis in CONFIG.general.device_id_obis:
             if (obis_value := frame_values.get(search_obis)) is not None:
@@ -89,7 +89,7 @@ class Device:
         self.log.error(f'Found none of the following obis ids in the sml frame: {searched:s}')
         raise ObisIdForConfigurationMappingNotFoundError()
 
-    def _select_device_config(self) -> SmlDeviceConfig | None:
+    def _select_device_config(self) -> Optional[SmlDeviceConfig]:
         device_cfg = CONFIG.devices.get(self.device_id)
         if device_cfg is None:
             self.log.warning(f'No configuration found for {self.device_id:s}')
@@ -98,7 +98,7 @@ class Device:
         self.log.debug(f'Configuration found for {self.device_id:s}')
         return device_cfg
 
-    def _setup_device(self, frame_values: dict[str, SmlListEntry]):
+    def _setup_device(self, frame_values: Dict[str, SmlListEntry]):
         found_obis = self._select_device_id(frame_values)
         cfg = self._select_device_config()
 
@@ -121,9 +121,9 @@ class Device:
 
         self._setup_sml_values(cfg, frame_values)
 
-    def _setup_sml_values(self, device_config: SmlDeviceConfig | None, frame_values: dict[str, SmlListEntry]):
+    def _setup_sml_values(self, device_config: Optional[SmlDeviceConfig], frame_values: Dict[str, SmlListEntry]):
         log_level = logging.DEBUG if not CMD_ARGS.analyze else logging.INFO
-        values_config: dict[str, SmlValueConfig] = device_config.values if device_config is not None else {}
+        values_config: Dict[str, SmlValueConfig] = device_config.values if device_config is not None else {}
 
         for obis_id in frame_values:
             if obis_id in self.skip_values:

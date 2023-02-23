@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 from easyconfig import BaseModel
 from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, validator
@@ -55,11 +53,11 @@ class SmlValueConfig(BaseModel):
 
 
 class SmlDeviceConfig(BaseModel):
-    mqtt: OptionalMqttPublishConfig | None
-    status: OptionalMqttPublishConfig | None = OptionalMqttPublishConfig(topic='status')
+    mqtt: Optional[OptionalMqttPublishConfig]
+    status: Optional[OptionalMqttPublishConfig] = OptionalMqttPublishConfig(topic='status')
 
-    skip: set[StrictStr] | None = Field(
+    skip: Optional[Set[StrictStr]] = Field(
         default=None, description='OBIS codes (HEX) of values that will not be published (optional)')
 
-    values: dict[str, SmlValueConfig] = Field(
+    values: Dict[str, SmlValueConfig] = Field(
         default={}, description='Special configurations for each of the values (optional)')

@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Dict, List, Union
 
 import serial
 from easyconfig import AppBaseModel, BaseModel, create_app_config
@@ -11,12 +11,12 @@ from .mqtt import MqttConfig, OptionalMqttPublishConfig
 
 class PortSettings(BaseModel):
     url: constr(strip_whitespace=True, min_length=1, strict=True) = Field(..., description='Device path')
-    timeout: int | float = Field(
+    timeout: Union[int, float] = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')
 
     baudrate: int = Field(9600, in_file=False)
     parity: str = Field('None', in_file=False)
-    stopbits: StrictInt | StrictFloat = Field(serial.STOPBITS_ONE, in_file=False, alias='stop bits')
+    stopbits: Union[StrictInt, StrictFloat] = Field(serial.STOPBITS_ONE, in_file=False, alias='stop bits')
     bytesize: int = Field(serial.EIGHTBITS, in_file=False, alias='byte size')
 
     @validator('baudrate')
@@ -64,7 +64,7 @@ class GeneralSettings(BaseModel):
         False, description='Report the device id even though it does never change',
         alias='report device id', in_file=False
     )
-    device_id_obis: list[StrictStr] = Field(
+    device_id_obis: List[StrictStr] = Field(
         ['0100000009ff'], description='Additional OBIS field for the serial number, default is 0100000009ff',
         alias='device id obis', in_file=False
     )
@@ -74,8 +74,8 @@ class Settings(AppBaseModel):
     logging: LoggingSettings = LoggingSettings()
     mqtt: MqttConfig = MqttConfig()
     general: GeneralSettings = GeneralSettings()
-    ports: list[PortSettings] = []
-    devices: dict[str, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
+    ports: List[PortSettings] = []
+    devices: Dict[str, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
 
 
 def default_config() -> Settings:
