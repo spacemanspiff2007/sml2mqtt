@@ -40,5 +40,9 @@ jobs:
             spacemanspiff2007/sml2mqtt:latest
             spacemanspiff2007/sml2mqtt:${{ github.ref_name }}
 
+      - name: Test
+        run: |
+          docker run --rm ${{ github.ref_name }} sml2mqtt -h
+
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

@@ -1,5 +1,9 @@
 import os
+import re
 import sys
+
+RTD_BUILD = os.environ.get('READTHEDOCS') == 'True'
+
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -73,7 +77,16 @@ autodoc_pydantic_field_swap_name_and_alias = True
 
 # -- Options for intersphinx -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
-if os.environ.get('READTHEDOCS') == 'True':
+if RTD_BUILD:
     intersphinx_mapping = {
         'python': ('https://docs.python.org/3', None)
     }
+
+# -- Options for nitpick -------------------------------------------------
+# Don't show warnings for missing python references since these are created via intersphinx during the RTD build
+if not RTD_BUILD:
+    nitpick_ignore_regex = [
+        (re.compile(r'^py:class'), re.compile(r'pathlib\..+')),
+        (re.compile(r'^py:data'), re.compile(r'typing\..+')),
+        (re.compile(r'^py:class'), re.compile(r'pydantic\..+|.+Constrained(?:Str|Int)Value')),
+    ]

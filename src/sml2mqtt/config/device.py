@@ -14,9 +14,9 @@ class WorkaroundOptionEnum(str, Enum):
 
 
 class TransformOptionEnum(str, Enum):
-    factor = 'factor'
-    offset = 'offset'
-    round = 'round'
+    factor = 'factor'   #: Factor
+    offset = 'offset'   #: Offset
+    round = 'round'     #: Round
 
 
 class FilterOptionEnum(str, Enum):

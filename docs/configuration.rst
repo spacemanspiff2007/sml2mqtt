@@ -205,3 +205,12 @@ devices
 .. autopydantic_model:: SmlDeviceConfig
 
 .. autopydantic_model:: SmlValueConfig
+
+.. autoclass:: WorkaroundOptionEnum
+   :members:
+
+.. autoclass:: TransformOptionEnum
+   :members:
+
+.. autoclass:: FilterOptionEnum
+   :members:
