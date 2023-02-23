@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set, Union
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -33,7 +33,7 @@ class TestingStreamReader:
         self.reader = reader
         self.data = None
 
-    def add(self, data: SmlFrame | bytes):
+    def add(self, data: Union[SmlFrame, bytes]):
         if isinstance(data, SmlFrame):
             self.data = data
             self.reader.clear()
