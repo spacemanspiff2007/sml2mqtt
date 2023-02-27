@@ -6,9 +6,10 @@ from smllib import SmlFrame, SmlStreamReader
 
 import sml2mqtt.device.sml_device
 import sml2mqtt.device.sml_serial
+from sml2mqtt import CMD_ARGS
 from sml2mqtt.config.config import PortSettings
 from sml2mqtt.device import Device, DeviceStatus
-from sml2mqtt.mqtt import MqttObj
+from sml2mqtt.mqtt import MqttObj, patch_analyze
 
 
 @pytest.fixture()
@@ -71,3 +72,15 @@ async def device(no_serial):
     obj = await TestingDevice.create(PortSettings(url=device_url), 1, set(), mqtt_device)
 
     return obj
+
+
+@pytest.fixture()
+def arg_analyze(monkeypatch):
+    monkeypatch.setattr(CMD_ARGS, 'analyze', True)
+    patch_analyze()
+
+    yield None
+
+    module = sml2mqtt.mqtt.mqtt_obj
+    assert hasattr(module, 'pub_func')
+    module.pub_func = module.publish

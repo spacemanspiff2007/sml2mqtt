@@ -5,14 +5,11 @@ from unittest.mock import Mock
 
 from serial_asyncio import SerialTransport
 
-from sml2mqtt import CMD_ARGS
 from sml2mqtt.device import Device, SmlSerial
 
 
-async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes, monkeypatch):
+async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes, arg_analyze):
     caplog.set_level(logging.DEBUG)
-
-    monkeypatch.setattr(CMD_ARGS, 'analyze', True)
 
     # we want to test incoming data from the serial port
     device.serial = SmlSerial()

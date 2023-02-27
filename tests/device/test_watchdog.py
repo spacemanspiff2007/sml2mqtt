@@ -2,7 +2,6 @@ import asyncio
 from binascii import a2b_hex
 from unittest.mock import Mock
 
-import sml2mqtt.__shutdown__
 from sml2mqtt.config.config import PortSettings
 from sml2mqtt.device import Device, DeviceStatus
 from sml2mqtt.device.watchdog import Watchdog
@@ -37,9 +36,9 @@ async def test_watchdog_no_expire():
 
     w = Watchdog(0.1, m)
     w.start()
-    for _ in range(3):
+    for _ in range(4):
         w.feed()
-        await asyncio.sleep(0.07)
+        await asyncio.sleep(0.06)
 
     m.assert_not_called()
 
@@ -57,6 +56,7 @@ async def test_watchdog_setup_and_feed(no_serial, sml_data_1):
     mqtt_device = mqtt_base.create_child(device_url)
 
     obj = await Device.create(PortSettings(url=device_url), 0.2, set(), mqtt_device)
+    obj.start()
     assert obj.status == DeviceStatus.STARTUP
 
     await asyncio.sleep(0.3)
@@ -70,5 +70,7 @@ async def test_watchdog_setup_and_feed(no_serial, sml_data_1):
     await asyncio.sleep(0.3)
     assert obj.status == DeviceStatus.MSG_TIMEOUT
 
-    obj.shutdown()
-    await sml2mqtt.__shutdown__.SHUTDOWN_TASK
+    async def cancel():
+        obj.stop()
+
+    await asyncio.gather(obj, cancel())

@@ -1,13 +1,17 @@
 import dataclasses
-from asyncio import create_task
-from typing import Final, List, Optional, Union
+from typing import Any, Callable, Final, List, Optional, Union
 
-from sml2mqtt import CMD_ARGS
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.config import OptionalMqttPublishConfig
 from sml2mqtt.mqtt import publish
 
 from .errors import MqttConfigValuesMissingError, TopicFragmentExpectedError
+
+pub_func: Callable[[str, Union[int, float, str], int, bool], Any] = publish
+
+
+def publish_analyze(topic: str, value: Union[int, float, str], qos: int, retain: bool):
+    get_logger('mqtt.pub').info(f'{topic}: {value} (QOS: {qos}, retain: {retain})')
 
 
 @dataclasses.dataclass
@@ -39,11 +43,7 @@ class MqttObj:
         self.children: List[MqttObj] = []
 
     def publish(self, value: Union[str, int, float, bytes]):
-        # do not publish when the analyze flag is set
-        if CMD_ARGS.analyze:
-            get_logger('mqtt.pub').info(f'{self.topic}: {value} (QOS: {self.qos}, retain: {self.retain})')
-        else:
-            create_task(publish(self.topic, value, self.qos, self.retain))
+        pub_func(self.topic, value, self.qos, self.retain)
 
     def update(self) -> 'MqttObj':
         self._merge_values()
@@ -105,3 +105,16 @@ class MqttObj:
 
 
 BASE_TOPIC: Final = MqttObj()
+
+
+def setup_base_topic(topic: str, qos: int, retain: bool):
+    BASE_TOPIC.cfg.topic_fragment = topic
+    BASE_TOPIC.cfg.qos = qos
+    BASE_TOPIC.cfg.retain = retain
+    BASE_TOPIC.update()
+
+
+def patch_analyze():
+    global pub_func
+
+    pub_func = publish_analyze

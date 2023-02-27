@@ -2,11 +2,22 @@ class Sml2MqttException(Exception):     # noqa: N818
     pass
 
 
-class DeviceSetupFailedError(Sml2MqttException):
+class AllDevicesFailedError(Sml2MqttException):
     pass
 
 
-class AllDevicesFailedError(Sml2MqttException):
+# ------------------------------------------------------------------------------------
+# Initial setup failed
+# ------------------------------------------------------------------------------------
+class InitialSetupFailedError(Sml2MqttException):
+    pass
+
+
+class DeviceSetupFailedError(InitialSetupFailedError):
+    pass
+
+
+class InitialMqttConnectionFailedError(InitialSetupFailedError):
     pass
 
 

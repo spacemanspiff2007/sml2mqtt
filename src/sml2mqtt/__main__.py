@@ -4,24 +4,28 @@ import sys
 import traceback
 import typing
 
-from sml2mqtt.__args__ import get_command_line_args
+from sml2mqtt import mqtt
+from sml2mqtt.__args__ import CMD_ARGS, get_command_line_args
 from sml2mqtt.__log__ import log, setup_log
 from sml2mqtt.__shutdown__ import get_return_code, shutdown, signal_handler_setup
 from sml2mqtt.config import CONFIG
 from sml2mqtt.device import Device
-from sml2mqtt.mqtt import BASE_TOPIC, connect
 
 
 async def a_main():
-    await connect()
-    await asyncio.sleep(0.1)  # Wait till mqtt is connected
+    devices = []
 
-    # Create devices for port
     try:
-        devices = []
+        if CMD_ARGS.analyze:
+            mqtt.patch_analyze()
+        else:
+            # initial mqtt connect
+            mqtt.start()
+            await mqtt.wait_for_connect(5)
 
+        # Create devices for port
         for port_cfg in CONFIG.ports:
-            dev_mqtt = BASE_TOPIC.create_child(port_cfg.url)
+            dev_mqtt = mqtt.BASE_TOPIC.create_child(port_cfg.url)
             device = await Device.create(port_cfg, port_cfg.timeout, set(), dev_mqtt)
             devices.append(device)
 
@@ -31,7 +35,7 @@ async def a_main():
     except Exception as e:
         shutdown(e)
 
-    return await asyncio.gather(*devices)
+    return await asyncio.gather(*devices, mqtt.wait_for_disconnect())
 
 
 def main() -> typing.Union[int, str]:
@@ -53,10 +57,7 @@ def main() -> typing.Union[int, str]:
         setup_log()
 
         # setup mqtt base topic
-        BASE_TOPIC.cfg.topic_fragment = CONFIG.mqtt.topic
-        BASE_TOPIC.cfg.qos = CONFIG.mqtt.defaults.qos
-        BASE_TOPIC.cfg.retain = CONFIG.mqtt.defaults.retain
-        BASE_TOPIC.update()
+        mqtt.setup_base_topic(CONFIG.mqtt.topic, CONFIG.mqtt.defaults.qos, CONFIG.mqtt.defaults.retain)
 
         asyncio.run(a_main())
     except Exception as e:

@@ -16,10 +16,10 @@ def no_mqtt(monkeypatch):
 
     pub_list = []
 
-    async def pub_func(topic: str, value, qos: int, retain: bool):
+    def pub_func(topic: str, value, qos: int, retain: bool):
         pub_list.append((topic, value, qos, retain))
 
-    monkeypatch.setattr(sml2mqtt.mqtt.mqtt_obj, 'publish', pub_func)
+    monkeypatch.setattr(sml2mqtt.mqtt.mqtt_obj, 'pub_func', pub_func)
 
     yield pub_list
 

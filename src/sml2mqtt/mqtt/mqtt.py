@@ -1,125 +1,119 @@
-import time
 import traceback
-from asyncio import create_task, Future
+from asyncio import CancelledError, create_task, Event, Queue, Task, TimeoutError, wait_for
 from typing import Optional, Union
 
 from asyncio_mqtt import Client, MqttError, Will
 
 import sml2mqtt
 from sml2mqtt.__log__ import log as _parent_logger
-
-# from sml2mqtt.config import CONFIG
+from sml2mqtt.errors import InitialMqttConnectionFailedError
 from sml2mqtt.mqtt import DynDelay
 
 log = _parent_logger.getChild('mqtt')
 
-TIME_BEFORE_RECONNECT = 15
-DELAY_CONNECT = DynDelay(0, 180)
 
-MQTT: Optional[Client] = None
-TASK_CONNECT: Optional[Future] = None
+TASK: Optional[Task] = None
+IS_CONNECTED: Optional[Event] = None
 
 
-async def disconnect():
-    global TASK_CONNECT, MQTT
+def start():
+    global TASK, IS_CONNECTED
 
-    if TASK_CONNECT is not None:
-        TASK_CONNECT.cancel()
-        TASK_CONNECT = None
+    IS_CONNECTED = Event()
 
-    if MQTT is not None:
-        mqtt = MQTT
-        MQTT = None
-        if mqtt._client.is_connected():
-            await mqtt.disconnect()
+    assert TASK is None
+    TASK = create_task(mqtt_task(), name='MQTT Task')
 
 
-async def connect():
-    global TASK_CONNECT
-    if TASK_CONNECT is None:
-        TASK_CONNECT = create_task(_connect_task())
+def cancel():
+    global TASK
+    if TASK is not None:
+        TASK.cancel()
+        TASK = None
 
 
-async def _connect_task():
-    global TASK_CONNECT
+async def wait_for_connect(timeout: float):
+    if IS_CONNECTED is None:
+        return None
+
     try:
-        await _connect_to_broker()
-    finally:
-        TASK_CONNECT = None
+        await wait_for(IS_CONNECTED.wait(), timeout)
+    except TimeoutError:
+        log.error('Initial mqtt connection failed!')
+        raise InitialMqttConnectionFailedError() from None
+
+    return None
 
 
-async def _connect_to_broker():
-    global MQTT
+async def wait_for_disconnect():
+    if TASK is None:
+        return None
 
-    # # We don't publish anything if we just analyze the data from the reader
-    # if sml2mqtt._args.ARGS.analyze:
-    #     return None
+    try:
+        await TASK
+    except CancelledError:
+        pass
 
+
+QUEUE: Optional[Queue] = None
+
+
+async def mqtt_task():
+    global QUEUE
+
+    from .mqtt_obj import BASE_TOPIC
     config = sml2mqtt.config.CONFIG
 
+    cfg_connection = config.mqtt.connection
+
+    delay = DynDelay(0, 300)
+
     while True:
+        await delay.wait()
+
         try:
-            async with DELAY_CONNECT:
-                # If we are already connected we try to disconnect before we reconnect
-                try:
-                    if MQTT is not None:
-                        if MQTT._client.is_connected():
-                            await MQTT.disconnect()
-                        MQTT = None
-                except Exception as e:
-                    log.error(f'Error while disconnecting: {e}')
+            # since we just pass this into the mqtt wrapper we do not link it to the base topic
+            will_topic = BASE_TOPIC.create_child(
+                topic_fragment=config.mqtt.last_will.topic).set_config(config.mqtt.last_will)
 
-                # since we just pass this into the mqtt wrapper we do not link it to the base topic
-                will_topic = sml2mqtt.mqtt.MqttObj(
-                    config.mqtt.topic, config.mqtt.defaults.qos, config.mqtt.defaults.retain
-                ).update().create_child(config.mqtt.last_will)
-                will_topic.set_config(config.mqtt.last_will)
+            client = Client(
+                hostname=cfg_connection.host,
+                port=cfg_connection.port,
+                username=cfg_connection.user if cfg_connection.user else None,
+                password=cfg_connection.password if cfg_connection.password else None,
+                will=Will(will_topic.topic, payload='OFFLINE', qos=will_topic.qos, retain=will_topic.retain),
+                client_id=cfg_connection.client_id
+            )
 
-                MQTT = Client(
-                    hostname=config.mqtt.connection.host,
-                    port=config.mqtt.connection.port,
-                    username=config.mqtt.connection.user if config.mqtt.connection.user else None,
-                    password=config.mqtt.connection.password if config.mqtt.connection.password else None,
-                    will=Will(will_topic.topic, payload='OFFLINE', qos=will_topic.qos, retain=will_topic.retain),
-                    client_id=config.mqtt.connection.client_id
-                )
+            log.debug(f'Connecting to {cfg_connection.host}:{cfg_connection.port}')
 
-                log.debug(f'Connecting to {config.mqtt.connection.host}:{config.mqtt.connection.port}')
-                await MQTT.connect()
+            async with client:
                 log.debug('Success!')
+                delay.reset()
+                QUEUE = Queue()
+                IS_CONNECTED.set()
 
                 # signal that we are online
                 will_topic.publish('ONLINE')
-                break
+
+                # worker to publish
+                while True:
+                    topic, value, qos, retain = await QUEUE.get()
+                    await client.publish(topic, value, qos, retain)
+                    QUEUE.task_done()
 
         except MqttError as e:
+            delay.increase()
             log.error(f'{e} ({e.__class__.__name__})')
         except Exception:
+            delay.increase()
             for line in traceback.format_exc().splitlines():
                 log.error(line)
-            return None
+        finally:
+            QUEUE = None
+            IS_CONNECTED.clear()
 
 
-PUBS_FAILED_SINCE: Optional[float] = None
-
-
-async def publish(topic: str, value: Union[int, float, str], qos: int, retain: bool):
-    global PUBS_FAILED_SINCE
-
-    if MQTT is None or not MQTT._client.is_connected():
-        await connect()
-        return None
-
-    # publish message
-    try:
-        await MQTT.publish(topic, value, qos=qos, retain=retain)
-        PUBS_FAILED_SINCE = None
-    except MqttError as e:
-        log.error(f'Error while publishing to {topic}: {e} ({e.__class__.__name__})')
-
-        # If we fail too often we try to reconnect
-        if PUBS_FAILED_SINCE is None:
-            PUBS_FAILED_SINCE = time.time()
-        else:
-            if time.time() - PUBS_FAILED_SINCE >= TIME_BEFORE_RECONNECT:
-                await connect()
+def publish(topic: str, value: Union[int, float, str], qos: int, retain: bool):
+    if QUEUE is not None:
+        QUEUE.put_nowait((topic, value, qos, retain))

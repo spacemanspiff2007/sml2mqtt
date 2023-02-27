@@ -1,11 +1,11 @@
 import signal
 import traceback
-from asyncio import create_task, sleep, Task
+from asyncio import create_task, Task
 from typing import Dict, Optional, Type, Union
 
 import sml2mqtt.mqtt
 from sml2mqtt.__log__ import log
-from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError
+from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, InitialMqttConnectionFailedError
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Return code logic
@@ -68,8 +68,7 @@ async def _shutdown_task():
         print('Shutting down ...')
         log.info('Shutting down ...')
 
-        await sml2mqtt.mqtt.disconnect()
-        await sleep(0.05)
+        sml2mqtt.mqtt.cancel()
 
         # once all devices are stopped the main loop will exit
         for device in sml2mqtt.device.sml_device.ALL_DEVICES.values():
@@ -84,13 +83,18 @@ async def _shutdown_task():
 def shutdown(e: Union[Exception, Type[Exception]]):
     global SHUTDOWN_TASK
 
-    ret_map: Dict[int, Type[Exception]] = {10: DeviceSetupFailedError, 20: AllDevicesFailedError}
+    ret_map: Dict[int, Type[Exception]] = {
+        10: DeviceSetupFailedError,
+        11: InitialMqttConnectionFailedError,
+        20: AllDevicesFailedError
+    }
 
     log_traceback = True
 
     # get return code based on the error
     for ret_code, cls in ret_map.items():   # noqa: B007
         if isinstance(e, cls):
+            log_traceback = False
             break
 
         if e is cls:

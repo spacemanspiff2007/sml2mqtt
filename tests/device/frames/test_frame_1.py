@@ -3,14 +3,13 @@ import logging
 from smllib.reader import SmlFrame
 
 from device.conftest import TestingDevice
-from sml2mqtt import CMD_ARGS, CONFIG
+from sml2mqtt import CONFIG
 from sml2mqtt.config.device import SmlDeviceConfig
 
 
 async def test_frame_no_match_obis_id(device: TestingDevice, no_serial, caplog, monkeypatch,
-                                      sml_frame_1: SmlFrame, sml_frame_1_analyze, ):
+                                      sml_frame_1: SmlFrame, sml_frame_1_analyze, arg_analyze):
     caplog.set_level(logging.DEBUG)
-    monkeypatch.setattr(CMD_ARGS, 'analyze', True)
 
     device.testing_raise_on_status = False
     device.serial_data_read(sml_frame_1)
@@ -27,9 +26,8 @@ testing/device_url/status: ERROR (QOS: 0, retain: False)"""
 
 
 async def test_frame_no_config(device: TestingDevice, no_serial, caplog, monkeypatch,
-                               sml_frame_1: SmlFrame, sml_frame_1_analyze, ):
+                               sml_frame_1: SmlFrame, sml_frame_1_analyze, arg_analyze):
     caplog.set_level(logging.DEBUG)
-    monkeypatch.setattr(CMD_ARGS, 'analyze', True)
     monkeypatch.setattr(CONFIG.general, 'device_id_obis', ['0100600100ff'])
 
     device.testing_raise_on_status = False
@@ -75,9 +73,9 @@ testing/0a0149534b0005020de2/status: SHUTDOWN (QOS: 0, retain: False)"""
 
 
 async def test_frame_with_config(device: TestingDevice, no_serial, caplog, monkeypatch,
-                                 sml_frame_1: SmlFrame, sml_frame_1_analyze, ):
+                                 sml_frame_1: SmlFrame, sml_frame_1_analyze, arg_analyze):
     caplog.set_level(logging.DEBUG)
-    monkeypatch.setattr(CMD_ARGS, 'analyze', True)
+
     monkeypatch.setattr(CONFIG.general, 'device_id_obis', ['0100600100ff'])
     monkeypatch.setitem(CONFIG.devices, '0a0149534b0005020de2', SmlDeviceConfig(
         skip=['010060320101']

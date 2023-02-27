@@ -30,6 +30,7 @@ ALL_DEVICES: Dict[str, 'Device'] = {}
 class Device:
     @classmethod
     async def create(cls, settings: PortSettings, timeout: float, skip_values: Set[str], mqtt_device: MqttObj):
+        device = None
         try:
             device = cls(settings.url, timeout, set(skip_values), mqtt_device)
             device.serial = await sml2mqtt.device.SmlSerial.create(settings, device)
@@ -37,6 +38,10 @@ class Device:
 
             return device
         except Exception as e:
+            if device is None:
+                get_logger('device').error('Setup failed!')
+            else:
+                device.log.error('Setup failed')
             raise DeviceSetupFailedError(e) from None
 
     def __init__(self, url: str, timeout: float, skip_values: Set[str], mqtt_device: MqttObj):
