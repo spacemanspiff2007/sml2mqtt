@@ -1,5 +1,6 @@
 import logging
 import traceback
+from asyncio import Event
 from binascii import b2a_hex
 from typing import Dict, Final, List, Optional, Set
 
@@ -21,6 +22,8 @@ from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, \
 from sml2mqtt.mqtt import MqttObj
 from sml2mqtt.sml_value import SmlValue
 
+Event().set()
+
 ALL_DEVICES: Dict[str, 'Device'] = {}
 
 
@@ -31,6 +34,7 @@ class Device:
             device = cls(settings.url, timeout, set(skip_values), mqtt_device)
             device.serial = await sml2mqtt.device.SmlSerial.create(settings, device)
             ALL_DEVICES[settings.url] = device
+
             return device
         except Exception as e:
             raise DeviceSetupFailedError(e) from None
@@ -54,6 +58,18 @@ class Device:
 
         self.skip_values = skip_values
 
+    def start(self):
+        self.serial.start()
+        self.watchdog.start()
+
+    def stop(self):
+        self.serial.cancel()
+        self.watchdog.cancel()
+
+    def __await__(self):
+        yield from self.serial.wait_for_cancel().__await__()
+        yield from self.watchdog.wait_for_cancel().__await__()
+
     def shutdown(self):
         if not self.status.is_shutdown_status():
             self.set_status(DeviceStatus.SHUTDOWN)
@@ -65,7 +81,7 @@ class Device:
         self.status = new_status
         self.log_status.info(f'{new_status:s}')
 
-        # Don't publish the port open because we don't have the correct name yet
+        # Don't publish the port open because we don't have the correct name from the config yet
         if new_status != DeviceStatus.PORT_OPENED:
             self.mqtt_status.publish(new_status.value)
 
@@ -73,6 +89,7 @@ class Device:
         if all(x.status.is_shutdown_status() for x in ALL_DEVICES.values()):
             # Stop reading from the serial port because we are shutting down
             self.serial.close()
+            self.watchdog.cancel()
             shutdown(AllDevicesFailedError)
         return True
 
@@ -153,7 +170,7 @@ class Device:
             self.stream.clear()
             self.log.warning('Timeout')
 
-    async def serial_data_read(self, data: bytes):
+    def serial_data_read(self, data: bytes):
         frame = None
 
         try:
@@ -170,7 +187,7 @@ class Device:
                 return None
 
             # Process Frame
-            await self.process_frame(frame)
+            self.process_frame(frame)
         except Exception as e:
             # dump frame if possible
             if frame is not None:
@@ -188,7 +205,7 @@ class Device:
             self.set_status(DeviceStatus.ERROR)
             return None
 
-    async def process_frame(self, frame: SmlFrame):
+    def process_frame(self, frame: SmlFrame):
 
         do_analyze = sml2mqtt.CMD_ARGS.analyze
         do_wh_in_kwh = CONFIG.general.wh_in_kwh

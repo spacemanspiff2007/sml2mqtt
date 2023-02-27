@@ -13,7 +13,7 @@ async def test_frame_no_match_obis_id(device: TestingDevice, no_serial, caplog, 
     monkeypatch.setattr(CMD_ARGS, 'analyze', True)
 
     device.testing_raise_on_status = False
-    await device.serial_data_read(sml_frame_1)
+    device.serial_data_read(sml_frame_1)
 
     msg = "\n".join(x.msg for x in caplog.records)
 
@@ -33,7 +33,7 @@ async def test_frame_no_config(device: TestingDevice, no_serial, caplog, monkeyp
     monkeypatch.setattr(CONFIG.general, 'device_id_obis', ['0100600100ff'])
 
     device.testing_raise_on_status = False
-    await device.serial_data_read(sml_frame_1)
+    device.serial_data_read(sml_frame_1)
 
     msg = "\n".join(x.msg for x in caplog.records)
 
@@ -83,7 +83,7 @@ async def test_frame_with_config(device: TestingDevice, no_serial, caplog, monke
         skip=['010060320101']
     ))
 
-    await device.serial_data_read(sml_frame_1)
+    device.serial_data_read(sml_frame_1)
 
     msg = "\n".join(x.msg for x in caplog.records)
 

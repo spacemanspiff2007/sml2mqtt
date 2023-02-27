@@ -6,7 +6,7 @@ import typing
 
 from sml2mqtt.__args__ import get_command_line_args
 from sml2mqtt.__log__ import log, setup_log
-from sml2mqtt.__shutdown__ import get_return_code, setup_signal_handler, shutdown
+from sml2mqtt.__shutdown__ import get_return_code, shutdown, signal_handler_setup
 from sml2mqtt.config import CONFIG
 from sml2mqtt.device import Device
 from sml2mqtt.mqtt import BASE_TOPIC, connect
@@ -18,12 +18,20 @@ async def a_main():
 
     # Create devices for port
     try:
+        devices = []
+
         for port_cfg in CONFIG.ports:
             dev_mqtt = BASE_TOPIC.create_child(port_cfg.url)
-            await Device.create(port_cfg, port_cfg.timeout, set(), dev_mqtt)
+            device = await Device.create(port_cfg, port_cfg.timeout, set(), dev_mqtt)
+            devices.append(device)
+
+        for device in devices:
+            device.start()
 
     except Exception as e:
         shutdown(e)
+
+    return await asyncio.gather(*devices)
 
 
 def main() -> typing.Union[int, str]:
@@ -34,12 +42,12 @@ def main() -> typing.Union[int, str]:
         return 7
 
     # This is needed to make async-mqtt work
+    # see https://github.com/sbtinstruments/asyncio-mqtt
     if platform.system() == 'Windows':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     # Add possibility to stop program with Ctrl + c
-    setup_signal_handler()
-    loop = None
+    signal_handler_setup()
 
     try:
         setup_log()
@@ -50,20 +58,12 @@ def main() -> typing.Union[int, str]:
         BASE_TOPIC.cfg.retain = CONFIG.mqtt.defaults.retain
         BASE_TOPIC.update()
 
-        # setup loop
-        loop = asyncio.get_event_loop()
-        asyncio.set_event_loop(loop)
-        task = loop.create_task(a_main())   # noqa: F841
-        loop.run_forever()
+        asyncio.run(a_main())
     except Exception as e:
         for line in traceback.format_exc().splitlines():
             log.error(line)
             print(e)
         return str(e)
-    finally:
-        if loop is not None:
-            loop.run_until_complete(loop.shutdown_asyncgens())
-            loop.close()
 
     return get_return_code()
 

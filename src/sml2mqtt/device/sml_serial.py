@@ -1,6 +1,6 @@
 import asyncio
-from asyncio import create_task, Task
-from typing import Awaitable, Callable, Final, Optional, TYPE_CHECKING
+from asyncio import CancelledError, create_task, Task
+from typing import Optional, TYPE_CHECKING
 
 from serial_asyncio import create_serial_connection, SerialTransport
 
@@ -36,9 +36,7 @@ class SmlSerial(asyncio.Protocol):
 
         self.transport: Optional[SerialTransport] = None
 
-        self._task: Optional[Task] = None
-
-        self.on_data_cb: Final = Callable[[bytes], Awaitable]
+        self.task: Optional[Task] = None
 
     def connection_made(self, transport):
         self.transport = transport
@@ -54,7 +52,7 @@ class SmlSerial(asyncio.Protocol):
 
     def data_received(self, data: bytes):
         self.transport.pause_reading()
-        create_task(self.device.serial_data_read(data))
+        self.device.serial_data_read(data)
 
     async def _chunk_task(self):
         while True:
@@ -62,18 +60,28 @@ class SmlSerial(asyncio.Protocol):
             self.transport.resume_reading()
 
     def start(self):
-        assert self._task is None
-        self._task = create_task(self._chunk_task(), name=f'Chunk task {self.url:s}')
+        assert self.task is None
+        self.task = create_task(self._chunk_task(), name=f'Chunk task {self.url:s}')
+
+    def cancel(self):
+        self.close()
+
+    async def wait_for_cancel(self):
+        if self.task is None:
+            return False
+        try:
+            await self.task
+        except CancelledError:
+            pass
+        return True
 
     def close(self):
         if not self.transport.is_closing():
             self.transport.close()
 
-        task = self._task
-        self._task = None
+        if (task := self.task) is None:
+            return None
 
         task.cancel()
+        self.task = None
         return task
-
-    async def shutdown(self):
-        await self.close()

@@ -1,9 +1,12 @@
-import asyncio
 import logging
+from asyncio import Task
 from binascii import a2b_hex
+from unittest.mock import Mock
+
+from serial_asyncio import SerialTransport
 
 from sml2mqtt import CMD_ARGS
-from sml2mqtt.device import Device
+from sml2mqtt.device import Device, SmlSerial
 
 
 async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes, monkeypatch):
@@ -11,7 +14,15 @@ async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes,
 
     monkeypatch.setattr(CMD_ARGS, 'analyze', True)
 
-    await device.serial_data_read(a2b_hex(sml_data_1))
+    # we want to test incoming data from the serial port
+    device.serial = SmlSerial()
+    device.serial.device = device
+    device.serial.transport = Mock(SerialTransport)
+    device.serial._task = Mock(Task)
+
+    chunk_size = 100
+    for i in range(0, len(sml_data_1), chunk_size):
+        device.serial.data_received(a2b_hex(sml_data_1[i: i + chunk_size]))
 
     msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records))
 
@@ -223,5 +234,3 @@ testing/00000000000000000000/01004c0700ff (01004c0700ff):
     - <Every: 120>
     - <OnChange>
 '''
-
-    await asyncio.sleep(0.1)

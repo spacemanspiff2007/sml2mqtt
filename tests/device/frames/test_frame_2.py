@@ -16,7 +16,7 @@ async def test_frame_2(device: Device, no_serial, caplog, sml_frame_2: SmlFrame,
         mqtt={'topic': 'xxxx'}
     ))
 
-    await device.process_frame(sml_frame_2)
+    device.process_frame(sml_frame_2)
     await asyncio.sleep(0.01)
 
     assert no_mqtt == [
