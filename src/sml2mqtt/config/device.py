@@ -14,15 +14,15 @@ class WorkaroundOptionEnum(str, Enum):
 
 
 class TransformOptionEnum(str, Enum):
-    factor = 'factor'   #: Factor
-    offset = 'offset'   #: Offset
-    round = 'round'     #: Round
+    factor = 'factor'   #: Use the value as a factor
+    offset = 'offset'   #: Use the value as an offset
+    round = 'round'     #: Round the result to the digits
 
 
 class FilterOptionEnum(str, Enum):
-    diff = 'diff'
-    perc = 'perc'
-    every = 'every'
+    diff = 'diff'    #: Report when difference is greater equal than the value
+    perc = 'perc'    #: Report when percentual change is greater equal the value
+    every = 'every'  #: Report every x seconds
 
 
 TYPE_SML_VALUE_WORKAROUND_CFG = \
@@ -53,11 +53,18 @@ class SmlValueConfig(BaseModel):
 
 
 class SmlDeviceConfig(BaseModel):
-    mqtt: Optional[OptionalMqttPublishConfig]
-    status: Optional[OptionalMqttPublishConfig] = OptionalMqttPublishConfig(topic='status')
+    """Configuration for a sml device"""
+
+    mqtt: Optional[OptionalMqttPublishConfig] = Field(
+        default=None, description='Optional MQTT configuration for this meter.')
+
+    status: Optional[OptionalMqttPublishConfig] = Field(
+        default=OptionalMqttPublishConfig(topic='status'),
+        description='Optional MQTT status topic configuration for this meter'
+    )
 
     skip: Optional[Set[StrictStr]] = Field(
         default=None, description='OBIS codes (HEX) of values that will not be published (optional)')
 
-    values: Dict[str, SmlValueConfig] = Field(
+    values: Dict[StrictStr, SmlValueConfig] = Field(
         default={}, description='Special configurations for each of the values (optional)')

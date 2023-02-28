@@ -121,6 +121,7 @@ One energy meter is connected to the serial port. The serial meter reports OBIS 
 as ``11111111111111111111``.
 
 For this device
+
 * the mqtt topic fragment is set to ``light``
 * the value ``0100010801ff`` will not be published
 * The following values of the device are specially configured:
@@ -129,7 +130,9 @@ For this device
 
     * Will be rounded to one digit
     * Will be published on change **or** at least every hour
-    * The mqtt topic used is ``sml2mqtt/light/energy``
+    * The mqtt topic used is ``sml2mqtt/light/energy``.
+      (Built through ``topic prefix`` + ``device mqtt`` + ``value mqtt``)
+
 
   * Power value (OBIS ``0100100700ff``)
 

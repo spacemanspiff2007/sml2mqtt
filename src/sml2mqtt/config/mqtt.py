@@ -14,10 +14,11 @@ class MqttDefaultPublishConfig(BaseModel):
 
 
 class OptionalMqttPublishConfig(BaseModel):
-    topic: TOPIC_STR = None
-    full_topic: TOPIC_STR = Field(None, alias='full topic')
-    qos: QOS = None
-    retain: StrictBool = None
+    topic: TOPIC_STR = Field(None, description='Topic fragment for building this topic with the parent topic')
+    full_topic: TOPIC_STR = Field(
+        None, alias='full topic', description='Full topic - will ignore the parent topic parts')
+    qos: QOS = Field(None, description='QoS for publishing this value (if set - otherwise use parent)')
+    retain: StrictBool = Field(None, description='Retain for publishing this value (if set - otherwise use parent)')
 
     @validator('topic', 'full_topic')
     def validate_topic(cls, value):
@@ -51,8 +52,8 @@ class MqttConnection(BaseModel):
 
 
 class MqttConfig(BaseModel):
-    connection: MqttConnection = MqttConnection()
+    connection: MqttConnection = Field(default_factory=MqttConnection)
     topic: TOPIC_STR = Field('sml2mqtt', alias='topic prefix')
-    defaults: MqttDefaultPublishConfig = MqttDefaultPublishConfig()
+    defaults: MqttDefaultPublishConfig = Field(default_factory=MqttDefaultPublishConfig)
     last_will: OptionalMqttPublishConfig = Field(
         default_factory=lambda: OptionalMqttPublishConfig(topic='status'), alias='last will')
