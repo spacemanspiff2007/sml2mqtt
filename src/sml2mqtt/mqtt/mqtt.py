@@ -49,16 +49,20 @@ async def wait_for_disconnect():
     if TASK is None:
         return None
 
-    try:
-        await TASK
-    except CancelledError:
-        pass
+    await TASK
 
 
 QUEUE: Optional[Queue] = None
 
 
 async def mqtt_task():
+    try:
+        await _mqtt_task()
+    finally:
+        log.debug('Task finished')
+
+
+async def _mqtt_task():
     global QUEUE
 
     from .mqtt_obj import BASE_TOPIC
@@ -71,7 +75,9 @@ async def mqtt_task():
     payload_offline: Final = 'OFFLINE'
     payload_online: Final = 'ONLINE'
 
-    while True:
+    shutdown = False
+
+    while not shutdown:
         await delay.wait()
 
         try:
@@ -96,11 +102,11 @@ async def mqtt_task():
                 QUEUE = Queue()
                 IS_CONNECTED.set()
 
-                # signal that we are online
-                await client.publish(will_topic.topic, payload_online, will_topic.qos, will_topic.retain)
-
-                # worker to publish
                 try:
+                    # signal that we are online
+                    await client.publish(will_topic.topic, payload_online, will_topic.qos, will_topic.retain)
+
+                    # worker to publish things
                     while True:
                         topic, value, qos, retain = await QUEUE.get()
                         await client.publish(topic, value, qos, retain)
@@ -109,7 +115,7 @@ async def mqtt_task():
                     # The last will testament only gets sent on abnormal disconnect
                     # Since we disconnect gracefully we have to manually sent the offline status
                     await client.publish(will_topic.topic, payload_offline, will_topic.qos, will_topic.retain)
-                    raise
+                    shutdown = True
 
         except MqttError as e:
             delay.increase()

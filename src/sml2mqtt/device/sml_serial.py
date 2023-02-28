@@ -56,7 +56,7 @@ class SmlSerial(asyncio.Protocol):
 
     async def _chunk_task(self):
         while True:
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.2)
             self.transport.resume_reading()
 
     def start(self):
