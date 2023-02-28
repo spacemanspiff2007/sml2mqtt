@@ -118,5 +118,7 @@ Example output for the meter data:
 
 Check if the meter reports the serial number unter obis``0100000009ff``.
 If not it's possible to configure another number for configuration matching.
-If yes replace ``SERIAL_ID_HEX`` in the dummy configuration with this serial number (here ``11111111111111111111``).
+If yes replace ``SERIAL_ID_HEX`` in the dummy configuration with the reported
+serial number (here ``11111111111111111111``).
+Modify the device configuration to your liking.
 Run the analyze command again and see how the output changes and observe the reported values.

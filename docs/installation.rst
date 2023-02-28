@@ -18,7 +18,9 @@ Navigate to the folder in which the virtual environment shall be created (e.g.):
 
     cd /opt/sml2mqtt
 
-If the folder does not exist yet you can create it with the ``mkdir`` command.
+If the folder does not exist yet you can create it with the ``mkdir`` command::
+
+    mkdir /opt/sml2mqtt
 
 
 Create virtual environment (this will create a new subfolder "venv")::
