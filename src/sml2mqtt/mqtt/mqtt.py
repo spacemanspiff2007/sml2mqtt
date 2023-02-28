@@ -1,6 +1,6 @@
 import traceback
 from asyncio import CancelledError, create_task, Event, Queue, Task, TimeoutError, wait_for
-from typing import Optional, Union
+from typing import Final, Optional, Union
 
 from asyncio_mqtt import Client, MqttError, Will
 
@@ -68,6 +68,9 @@ async def mqtt_task():
 
     delay = DynDelay(0, 300)
 
+    payload_offline: Final = 'OFFLINE'
+    payload_online: Final = 'ONLINE'
+
     while True:
         await delay.wait()
 
@@ -81,7 +84,7 @@ async def mqtt_task():
                 port=cfg_connection.port,
                 username=cfg_connection.user if cfg_connection.user else None,
                 password=cfg_connection.password if cfg_connection.password else None,
-                will=Will(will_topic.topic, payload='OFFLINE', qos=will_topic.qos, retain=will_topic.retain),
+                will=Will(will_topic.topic, payload=payload_offline, qos=will_topic.qos, retain=will_topic.retain),
                 client_id=cfg_connection.client_id
             )
 
@@ -94,13 +97,19 @@ async def mqtt_task():
                 IS_CONNECTED.set()
 
                 # signal that we are online
-                will_topic.publish('ONLINE')
+                await client.publish(will_topic.topic, payload_online, will_topic.qos, will_topic.retain)
 
                 # worker to publish
-                while True:
-                    topic, value, qos, retain = await QUEUE.get()
-                    await client.publish(topic, value, qos, retain)
-                    QUEUE.task_done()
+                try:
+                    while True:
+                        topic, value, qos, retain = await QUEUE.get()
+                        await client.publish(topic, value, qos, retain)
+                        QUEUE.task_done()
+                except CancelledError:
+                    # The last will testament only gets sent on abnormal disconnect
+                    # Since we disconnect gracefully we have to manually sent the offline status
+                    await client.publish(will_topic.topic, payload_offline, will_topic.qos, will_topic.retain)
+                    raise
 
         except MqttError as e:
             delay.increase()

@@ -16,10 +16,10 @@ async def test_watchdog_expire():
     w = Watchdog(0.1, m)
     w.start()
 
-    await asyncio.sleep(0.4)
+    await asyncio.sleep(0.15)
     m.assert_called_once()
     w.feed()
-    await asyncio.sleep(0.4)
+    await asyncio.sleep(0.15)
     assert m.call_count == 2
 
     w.cancel()
