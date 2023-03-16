@@ -125,3 +125,17 @@ It is now possible to start, stop, restart and check the status of sml2mqtt with
     sudo systemctl stop sml2mqtt.service
     sudo systemctl restart sml2mqtt.service
     sudo systemctl status sml2mqtt.service
+
+
+Docker
+======================================
+
+Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/sml2mqtt>`_ is available:
+
+.. code-block:: bash
+
+    docker pull spacemanspiff2007/sml2mqtt:latest
+
+
+The docker image has one volume ``/sml2mqtt`` which has to be mounted.
+There the ``config.yml`` will be used or a new ``config.yml`` will be created
