@@ -130,8 +130,6 @@ It is now possible to start, stop, restart and check the status of sml2mqtt with
 Docker
 ======================================
 
-Image
---------------------------------------
 
 Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/sml2mqtt>`_ is available:
 
