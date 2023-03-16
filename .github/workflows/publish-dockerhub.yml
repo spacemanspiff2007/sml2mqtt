@@ -1,8 +1,8 @@
 name: Publish sml2mqtt to dockerhub
-#on:
-#  release:
-#    types: [published]
-on: [push, pull_request]
+on:
+  release:
+    types: [published]
+# on: [push, pull_request]
 
 
 jobs:
