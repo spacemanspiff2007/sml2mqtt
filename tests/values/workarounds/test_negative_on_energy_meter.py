@@ -2,7 +2,7 @@ from typing import Tuple
 
 from smllib.sml import SmlListEntry
 
-from sml2mqtt.value.workarounds import NegativeOnEnergyMeterStatus
+from sml2mqtt.sml_value.workarounds import NegativeOnEnergyMeterStatus
 
 
 def get_entries() -> Tuple[SmlListEntry, SmlListEntry]:

@@ -16,7 +16,7 @@ class NegativeOnEnergyMeterStatus(WorkaroundBase):
     def fix(self, value: SmlListEntry, frame_values: Dict[str, SmlListEntry]) -> SmlListEntry:
         meter = frame_values.get(self.meter_obis)
         if meter is None:
-            raise ValueError(f'Configured meter obis "{self.meter_obis}" not found in current frame')
+            raise ValueError(f'Configured meter obis "{self.meter_obis:s}" not found in current frame')
 
         status = meter.status
         if not isinstance(status, int):
@@ -25,3 +25,5 @@ class NegativeOnEnergyMeterStatus(WorkaroundBase):
         negative = status & 0x20
         if negative:
             value.value *= -1
+
+        return value

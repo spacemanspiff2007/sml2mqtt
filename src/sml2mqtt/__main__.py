@@ -4,26 +4,38 @@ import sys
 import traceback
 import typing
 
-from sml2mqtt.__args__ import get_command_line_args
+from sml2mqtt import mqtt
+from sml2mqtt.__args__ import CMD_ARGS, get_command_line_args
 from sml2mqtt.__log__ import log, setup_log
-from sml2mqtt.__shutdown__ import get_return_code, setup_signal_handler, shutdown
+from sml2mqtt.__shutdown__ import get_return_code, shutdown, signal_handler_setup
 from sml2mqtt.config import CONFIG
 from sml2mqtt.device import Device
-from sml2mqtt.mqtt import BASE_TOPIC, connect
 
 
 async def a_main():
-    await connect()
-    await asyncio.sleep(0.1)  # Wait till mqtt is connected
+    devices = []
 
-    # Create devices for port
     try:
+        if CMD_ARGS.analyze:
+            mqtt.patch_analyze()
+        else:
+            # initial mqtt connect
+            mqtt.start()
+            await mqtt.wait_for_connect(5)
+
+        # Create devices for port
         for port_cfg in CONFIG.ports:
-            dev_mqtt = BASE_TOPIC.create_child(port_cfg.url)
-            await Device.create(port_cfg, port_cfg.timeout, set(), dev_mqtt)
+            dev_mqtt = mqtt.BASE_TOPIC.create_child(port_cfg.url)
+            device = await Device.create(port_cfg, port_cfg.timeout, set(), dev_mqtt)
+            devices.append(device)
+
+        for device in devices:
+            device.start()
 
     except Exception as e:
         shutdown(e)
+
+    return await asyncio.gather(*devices, mqtt.wait_for_disconnect())
 
 
 def main() -> typing.Union[int, str]:
@@ -34,35 +46,25 @@ def main() -> typing.Union[int, str]:
         return 7
 
     # This is needed to make async-mqtt work
+    # see https://github.com/sbtinstruments/asyncio-mqtt
     if platform.system() == 'Windows':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     # Add possibility to stop program with Ctrl + c
-    setup_signal_handler()
-    loop = None
+    signal_handler_setup()
 
     try:
         setup_log()
 
         # setup mqtt base topic
-        BASE_TOPIC.cfg.topic_fragment = CONFIG.mqtt.topic
-        BASE_TOPIC.cfg.qos = CONFIG.mqtt.defaults.qos
-        BASE_TOPIC.cfg.retain = CONFIG.mqtt.defaults.retain
-        BASE_TOPIC.update()
+        mqtt.setup_base_topic(CONFIG.mqtt.topic, CONFIG.mqtt.defaults.qos, CONFIG.mqtt.defaults.retain)
 
-        # setup loop
-        loop = asyncio.get_event_loop_policy().get_event_loop()
-        loop.create_task(a_main())
-        loop.run_forever()
+        asyncio.run(a_main())
     except Exception as e:
         for line in traceback.format_exc().splitlines():
             log.error(line)
             print(e)
         return str(e)
-    finally:
-        if loop is not None:
-            loop.run_until_complete(loop.shutdown_asyncgens())
-            loop.close()
 
     return get_return_code()
 

@@ -1,19 +1,17 @@
 import dataclasses
-from asyncio import create_task
-from typing import List, Optional, Union
+from typing import Any, Callable, Final, List, Optional, Union
 
-from sml2mqtt import CMD_ARGS
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.config import OptionalMqttPublishConfig
 from sml2mqtt.mqtt import publish
 
+from .errors import MqttConfigValuesMissingError, TopicFragmentExpectedError
 
-class TopicFragmentExpected(Exception):
-    pass
+pub_func: Callable[[str, Union[int, float, str], int, bool], Any] = publish
 
 
-class MqttConfigValuesMissing(Exception):
-    pass
+def publish_analyze(topic: str, value: Union[int, float, str], qos: int, retain: bool):
+    get_logger('mqtt.pub').info(f'{topic}: {value} (QOS: {qos}, retain: {retain})')
 
 
 @dataclasses.dataclass
@@ -23,14 +21,11 @@ class MqttCfg:
     qos: Optional[int] = None
     retain: Optional[bool] = None
 
-    def is_full_config(self) -> bool:
-        if self.topic_fragment is None and self.topic_full is None:
-            return False
-        if self.qos is None:
-            return False
-        if self.retain is None:
-            return False
-        return True
+    def set_config(self, config: Optional[OptionalMqttPublishConfig]):
+        self.topic_full = config.full_topic
+        self.topic_fragment = config.topic
+        self.qos = config.qos
+        self.retain = config.retain
 
 
 class MqttObj:
@@ -48,11 +43,7 @@ class MqttObj:
         self.children: List[MqttObj] = []
 
     def publish(self, value: Union[str, int, float, bytes]):
-        # do not publish when the analyze flag is set
-        if CMD_ARGS.analyze:
-            get_logger('mqtt.pub').info(f'{self.topic}: {value} (QOS: {self.qos}, retain: {self.retain})')
-        else:
-            create_task(publish(self.topic, value, self.qos, self.retain))
+        pub_func(self.topic, value, self.qos, self.retain)
 
     def update(self) -> 'MqttObj':
         self._merge_values()
@@ -62,24 +53,30 @@ class MqttObj:
 
     def _merge_values(self) -> 'MqttObj':
 
+        # no parent -> just set the config
         if self.parent is None:
-            if not self.cfg.is_full_config():
-                raise MqttConfigValuesMissing()
+            assert self.cfg.topic_full is None
+            self.topic = self.cfg.topic_fragment    # expect fragment only
+            self.qos = self.cfg.qos
+            self.retain = self.cfg.retain
+            if self.topic is None or self.qos is None or self.retain is None:
+                raise MqttConfigValuesMissingError()
+            return self
 
+        # effective topic
         if self.cfg.topic_full:
             self.topic = self.cfg.topic_full
         else:
             if not self.cfg.topic_fragment:
-                raise TopicFragmentExpected()
-            if self.parent is None:
-                self.topic = self.cfg.topic_fragment
-            else:
-                self.topic = f'{self.parent.topic}/{self.cfg.topic_fragment}'
+                raise TopicFragmentExpectedError()
+            self.topic = f'{self.parent.topic}/{self.cfg.topic_fragment}'
 
+        # effective QOS
         self.qos = self.cfg.qos
         if self.qos is None:
             self.qos = self.parent.qos
 
+        # effective retain
         self.retain = self.cfg.retain
         if self.retain is None:
             self.retain = self.parent.retain
@@ -94,11 +91,7 @@ class MqttObj:
         if cfg is None:
             return self
 
-        local = self.cfg
-        local.topic_full = cfg.full_topic
-        local.topic_fragment = cfg.topic
-        local.qos = cfg.qos
-        local.retain = cfg.retain
+        self.cfg.set_config(cfg)
         self.update()
         return self
 
@@ -111,4 +104,17 @@ class MqttObj:
         return child
 
 
-BASE_TOPIC = MqttObj()
+BASE_TOPIC: Final = MqttObj()
+
+
+def setup_base_topic(topic: str, qos: int, retain: bool):
+    BASE_TOPIC.cfg.topic_fragment = topic
+    BASE_TOPIC.cfg.qos = qos
+    BASE_TOPIC.cfg.retain = retain
+    BASE_TOPIC.update()
+
+
+def patch_analyze():
+    global pub_func
+
+    pub_func = publish_analyze

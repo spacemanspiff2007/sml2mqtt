@@ -1,4 +1,4 @@
-from asyncio import create_task, Event, Task, TimeoutError, wait_for
+from asyncio import CancelledError, create_task, Event, Task, TimeoutError, wait_for
 from typing import Any, Callable, Final, Optional
 
 
@@ -12,13 +12,22 @@ class Watchdog:
         self.task: Optional[Task] = None
 
     def start(self):
-        if self.task is None:
-            self.task = create_task(self.wd_task())
+        assert self.task is None
+        self.task = create_task(self.wd_task())
 
     def cancel(self):
         if self.task is not None:
             self.task.cancel()
             self.task = None
+
+    async def wait_for_cancel(self):
+        if self.task is None:
+            return False
+        try:
+            await self.task
+        except CancelledError:
+            pass
+        return True
 
     def feed(self):
         self.event.set()

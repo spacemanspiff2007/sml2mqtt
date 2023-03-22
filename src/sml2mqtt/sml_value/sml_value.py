@@ -3,27 +3,27 @@ from typing import Dict, Final, Iterable, Optional, Union
 from smllib.sml import SmlListEntry
 
 from sml2mqtt.mqtt import MqttObj
-from sml2mqtt.value.filter import FILTER_OBJ
-from sml2mqtt.value.transformations import TRANSFORM_OBJ
-from sml2mqtt.value.workarounds import WORKAROUND_OBJ
+from sml2mqtt.sml_value.filter import FilterBase
+from sml2mqtt.sml_value.transformations import TransformationBase
+from sml2mqtt.sml_value.workarounds import WorkaroundBase
 
 
 class SmlValue:
     def __init__(self, device: str, obis: str, mqtt: MqttObj,
-                 workarounds: Iterable[WORKAROUND_OBJ],
-                 transformations: Iterable[TRANSFORM_OBJ],
-                 filters: Iterable[FILTER_OBJ]):
+                 workarounds: Iterable[WorkaroundBase],
+                 transformations: Iterable[TransformationBase],
+                 filters: Iterable[FilterBase]):
 
         self.device_id: Final = device
         self.obis: Final = obis
         self.mqtt: Final = mqtt
 
-        self.sml_value: Optional[SmlListEntry] = None
-        self.last_value: Union[None, int, float, str] = None
-
         self.workarounds: Final = workarounds
         self.transformations: Final = transformations
         self.filters: Final = filters
+
+        self.sml_value: Optional[SmlListEntry] = None
+        self.last_value: Union[None, int, float, str] = None
 
     def set_value(self, sml_value: Optional[SmlListEntry], frame_values: Dict[str, SmlListEntry]):
         self.sml_value = sml_value

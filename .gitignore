@@ -3,3 +3,7 @@
 __pycache__
 /build
 /venv/
+
+# sphinx
+build
+make.bat

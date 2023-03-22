@@ -1,11 +1,11 @@
 import signal
 import traceback
-from asyncio import create_task, get_event_loop, sleep, Task
+from asyncio import create_task, Task
 from typing import Dict, Optional, Type, Union
 
 import sml2mqtt.mqtt
 from sml2mqtt.__log__ import log
-from sml2mqtt.errors import AllDevicesFailed, DeviceSetupFailed
+from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, InitialMqttConnectionFailedError
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Return code logic
@@ -32,36 +32,47 @@ def get_return_code() -> int:
 # ----------------------------------------------------------------------------------------------------------------------
 # Signal handlers so we can shutdown gracefully
 # ----------------------------------------------------------------------------------------------------------------------
-def shutdown_handler(sig, frame):
+def _signal_handler_shutdown(sig, frame):
     set_return_code(0)
-    create_task(do_shutdown())
+    do_shutdown()
 
 
-def setup_signal_handler():
-    signal.signal(signal.SIGINT, shutdown_handler)
-    signal.signal(signal.SIGTERM, shutdown_handler)
+def signal_handler_setup():
+    signal.signal(signal.SIGINT, _signal_handler_shutdown)
+    signal.signal(signal.SIGTERM, _signal_handler_shutdown)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Actual shutdown logic
 # ----------------------------------------------------------------------------------------------------------------------
 SHUTDOWN_TASK: Optional[Task] = None
+SHUTDOWN_REQUESTED = False
 
 
-async def do_shutdown():
+def do_shutdown():
+    global SHUTDOWN_TASK, SHUTDOWN_REQUESTED
+
+    if SHUTDOWN_REQUESTED:
+        return None
+
+    if SHUTDOWN_TASK is None:
+        SHUTDOWN_TASK = create_task(_shutdown_task())
+
+    SHUTDOWN_REQUESTED = True
+
+
+async def _shutdown_task():
     global SHUTDOWN_TASK
 
     try:
         print('Shutting down ...')
         log.info('Shutting down ...')
 
+        sml2mqtt.mqtt.cancel()
+
+        # once all devices are stopped the main loop will exit
         for device in sml2mqtt.device.sml_device.ALL_DEVICES.values():
-            device.shutdown()
-
-        await sml2mqtt.mqtt.disconnect()
-        await sleep(0.1)
-
-        get_event_loop().stop()
+            device.stop()
     finally:
         SHUTDOWN_TASK = None
 
@@ -72,13 +83,18 @@ async def do_shutdown():
 def shutdown(e: Union[Exception, Type[Exception]]):
     global SHUTDOWN_TASK
 
-    ret_map: Dict[int, Type[Exception]] = {10: DeviceSetupFailed, 20: AllDevicesFailed}
+    ret_map: Dict[int, Type[Exception]] = {
+        10: DeviceSetupFailedError,
+        11: InitialMqttConnectionFailedError,
+        20: AllDevicesFailedError
+    }
 
     log_traceback = True
 
     # get return code based on the error
-    for ret_code, cls in ret_map.items():
+    for ret_code, cls in ret_map.items():   # noqa: B007
         if isinstance(e, cls):
+            log_traceback = False
             break
 
         if e is cls:
@@ -93,5 +109,4 @@ def shutdown(e: Union[Exception, Type[Exception]]):
 
     set_return_code(ret_code)
 
-    if SHUTDOWN_TASK is None:
-        SHUTDOWN_TASK = create_task(do_shutdown())
+    do_shutdown()

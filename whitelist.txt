@@ -1,0 +1,31 @@
+mqtt
+qos
+
+# sml
+sml
+smllib
+scaler
+sml2mqtt
+
+# python packages
+pydantic
+easyconfig
+unittest
+binascii
+
+# pyserial
+baudrate
+stopbits
+bytesize
+
+# pytest
+autouse
+caplog
+
+# pydantic
+conint
+constr
+validator
+
+# own words
+cfg

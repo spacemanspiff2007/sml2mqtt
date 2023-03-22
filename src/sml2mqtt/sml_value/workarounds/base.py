@@ -1,8 +1,8 @@
-from typing import Dict, TypeVar
+from typing import Dict
 
 from smllib.sml import SmlListEntry
 
-from sml2mqtt.value.__types__ import WORKAROUND_TYPE
+from sml2mqtt.sml_value.__types__ import WORKAROUND_TYPE
 
 
 class WorkaroundBase:
@@ -16,6 +16,3 @@ class WorkaroundBase:
 
     def __repr__(self):
         return f'<{self.__class__.__name__}>'
-
-
-WORKAROUND_OBJ = TypeVar('WORKAROUND_OBJ', bound=WorkaroundBase)

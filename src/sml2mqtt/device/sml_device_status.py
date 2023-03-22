@@ -13,3 +13,6 @@ class DeviceStatus(str, Enum):
 
     def is_shutdown_status(self) -> bool:
         return self.value in (DeviceStatus.PORT_CLOSED, DeviceStatus.ERROR, DeviceStatus.SHUTDOWN)
+
+    def __str__(self) -> str:
+        return self.value

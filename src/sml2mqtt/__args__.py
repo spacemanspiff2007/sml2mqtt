@@ -25,7 +25,7 @@ def get_command_line_args(args=None) -> Type[CommandArgs]:
     parser.add_argument(
         '-a',
         '--analyze',
-        help='Processes exactly one sml message, shows the values of the message and what will be reported',
+        help='Process exactly one sml message, shows the values of the message and what will be reported',
         action='store_true',
         default=False
     )
@@ -61,13 +61,13 @@ def find_config_folder(config_file_str: Optional[str]) -> Path:
                 return config_file
     else:
         config_file = Path(config_file_str).resolve()
-        # Add to check_path so we have a nice error message
+        # Add to check_path, so we have a nice error message
         check_path.append(config_file)
 
         if config_file.is_file():
             return config_file
 
-        # folder exists but not the file -> create
+        # folder exists but not the file -> create file
         if config_file.parent.is_dir():
             return config_file
 

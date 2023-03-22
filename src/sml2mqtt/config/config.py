@@ -2,7 +2,7 @@ from typing import Dict, List, Union
 
 import serial
 from easyconfig import AppBaseModel, BaseModel, create_app_config
-from pydantic import constr, Field, StrictFloat, StrictInt, validator
+from pydantic import constr, Field, StrictFloat, StrictInt, StrictStr, validator
 
 from .device import REPUBLISH_ALIAS, SmlDeviceConfig, SmlValueConfig
 from .logging import LoggingSettings
@@ -50,7 +50,6 @@ class PortSettings(BaseModel):
         return v
 
 
-
 class GeneralSettings(BaseModel):
     wh_in_kwh: bool = Field(True, description='Automatically convert Wh to kWh', alias='Wh in kWh')
     republish_after: int = Field(
@@ -65,16 +64,16 @@ class GeneralSettings(BaseModel):
         False, description='Report the device id even though it does never change',
         alias='report device id', in_file=False
     )
-    device_id_obis: str = Field(
-        '', description='Additional OBIS field for the serial number, default is 0100000009ff',
+    device_id_obis: List[StrictStr] = Field(
+        ['0100000009ff'], description='Additional OBIS fields for the serial number, default is 0100000009ff',
         alias='device id obis', in_file=False
     )
 
 
 class Settings(AppBaseModel):
-    logging: LoggingSettings = LoggingSettings()
-    mqtt: MqttConfig = MqttConfig()
-    general: GeneralSettings = GeneralSettings()
+    logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    mqtt: MqttConfig = Field(default_factory=MqttConfig)
+    general: GeneralSettings = Field(default_factory=GeneralSettings)
     ports: List[PortSettings] = []
     devices: Dict[str, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
 

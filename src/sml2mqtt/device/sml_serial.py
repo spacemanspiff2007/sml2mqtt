@@ -1,6 +1,6 @@
 import asyncio
-from asyncio import create_task, Task
-from typing import Awaitable, Callable, Final, Optional, TYPE_CHECKING
+from asyncio import CancelledError, create_task, Task
+from typing import Optional, TYPE_CHECKING
 
 from serial_asyncio import create_serial_connection, SerialTransport
 
@@ -36,9 +36,7 @@ class SmlSerial(asyncio.Protocol):
 
         self.transport: Optional[SerialTransport] = None
 
-        self.pause_task: Optional[Task] = None
-
-        self.on_data_cb: Final = Callable[[bytes], Awaitable]
+        self.task: Optional[Task] = None
 
     def connection_made(self, transport):
         self.transport = transport
@@ -46,31 +44,44 @@ class SmlSerial(asyncio.Protocol):
 
         self.device.set_status(DeviceStatus.PORT_OPENED)
 
-    def data_received(self, data: bytes):
-        self.pause_serial()
-        create_task(self.device.serial_data_read(data))
-
-    async def resume_serial(self):
-        try:
-            await asyncio.sleep(0.4)
-            self.transport.resume_reading()
-        finally:
-            self.pause_task = None
-
-    def pause_serial(self):
-        self.transport.pause_reading()
-        self.pause_task = create_task(self.resume_serial())
-
     def connection_lost(self, exc):
         self.close()
 
         log.info(f'Port {self.url} was closed')
         self.device.set_status(DeviceStatus.PORT_CLOSED)
 
-    def close(self):
-        if self.pause_task is not None:
-            self.pause_task.cancel()
-            self.pause_task = None
+    def data_received(self, data: bytes):
+        self.transport.pause_reading()
+        self.device.serial_data_read(data)
 
+    async def _chunk_task(self):
+        while True:
+            await asyncio.sleep(0.2)
+            self.transport.resume_reading()
+
+    def start(self):
+        assert self.task is None
+        self.task = create_task(self._chunk_task(), name=f'Chunk task {self.url:s}')
+
+    def cancel(self):
+        self.close()
+
+    async def wait_for_cancel(self):
+        if self.task is None:
+            return False
+        try:
+            await self.task
+        except CancelledError:
+            pass
+        return True
+
+    def close(self):
         if not self.transport.is_closing():
             self.transport.close()
+
+        if (task := self.task) is None:
+            return None
+
+        task.cancel()
+        self.task = None
+        return task

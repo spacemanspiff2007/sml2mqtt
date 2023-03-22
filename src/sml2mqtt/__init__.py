@@ -8,8 +8,7 @@ from sml2mqtt.config import CONFIG
 
 # isort: split
 
-from sml2mqtt import value
-from sml2mqtt.process_value import process_value
+from sml2mqtt import sml_value
 
 # isort: split
 
