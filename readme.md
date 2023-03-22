@@ -17,5 +17,5 @@ from energy meters and report the values through mqtt.
 
 
 # Changelog
-#### X.X.X (2023-02-XX)
-- ...
+#### 2.0.0 (2023-03-22)
+- Release rework
