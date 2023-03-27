@@ -179,7 +179,7 @@ class Device:
     def serial_data_read(self, data: bytes):
         frame = None
 
-        print(f'{monotonic():.3f}: data: {data[:20]}')
+        print(f'{monotonic():.3f}: data[{len(data)}:04d]: {data[:20]}')
 
         try:
             self.watchdog.feed()

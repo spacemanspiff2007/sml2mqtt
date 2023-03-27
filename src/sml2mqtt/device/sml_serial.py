@@ -69,10 +69,10 @@ class SmlSerial(asyncio.Protocol):
             await asyncio.sleep(interval)
 
             if self.last_read is not None:
-                diff_to_interval = monotonic() - self.last_read
+                diff_to_interval = interval - (monotonic() - self.last_read)
                 self.last_read = None
                 print(f'{monotonic():.3f}: diff: {diff_to_interval:.3f}')
-                if diff_to_interval < interval:
+                if diff_to_interval > 0:
                     await asyncio.sleep(diff_to_interval)
 
             print(f'{monotonic():.3f}: resume')
