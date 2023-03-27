@@ -2,6 +2,7 @@ import logging
 import traceback
 from asyncio import Event
 from binascii import b2a_hex
+from time import monotonic
 from typing import Dict, Final, List, Optional, Set
 
 from smllib import SmlFrame, SmlStreamReader
@@ -178,6 +179,8 @@ class Device:
     def serial_data_read(self, data: bytes):
         frame = None
 
+        print(f'{monotonic():.3f}: data: {data[:20]}')
+
         try:
             self.watchdog.feed()
             self.stream.add(data)
@@ -191,6 +194,7 @@ class Device:
                 self.set_status(DeviceStatus.CRC_ERROR)
                 return None
 
+            print(f'{monotonic():.3f}: new frame!')
             # Process Frame
             self.process_frame(frame)
         except Exception as e:
