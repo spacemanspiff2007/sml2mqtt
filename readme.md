@@ -3,8 +3,8 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sml2mqtt)](https://pypi.org/project/sml2mqtt/)
 [![PyPI](https://img.shields.io/pypi/v/sml2mqtt)](https://pypi.org/project/sml2mqtt/)
 [![Downloads](https://pepy.tech/badge/sml2mqtt/month)](https://pepy.tech/project/sml2mqtt)
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/spacemanspiff2007/sml2mqtt?label=docker)
-![Docker Pulls](https://img.shields.io/docker/pulls/spacemanspiff2007/sml2mqtt)
+[![Docker Image Version (latest by date)](https://img.shields.io/docker/v/spacemanspiff2007/sml2mqtt?label=docker)](https://hub.docker.com/r/spacemanspiff2007/sml2mqtt)
+[![Docker Pulls](https://img.shields.io/docker/pulls/spacemanspiff2007/sml2mqtt)](https://hub.docker.com/r/spacemanspiff2007/sml2mqtt)
 
 _A simple yet flexible sml to mqtt bridge_
 
