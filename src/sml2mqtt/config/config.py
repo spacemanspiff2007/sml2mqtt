@@ -65,7 +65,9 @@ class GeneralSettings(BaseModel):
         alias='report device id', in_file=False
     )
     device_id_obis: List[StrictStr] = Field(
-        ['0100000009ff', '0000600100ff', '0100000001ff', '0000600101ff'],
+        # 0100000009ff (1-0:0.0.9*255) : Geräteeinzelidentifikation
+        # 0100600100ff (1-0:96.1.0*255): Produktionsnummer
+        ['0100000009ff', '0100600100ff'],
         description='Additional OBIS fields for the serial number to configuration matching',
         alias='device id obis', in_file=False
     )

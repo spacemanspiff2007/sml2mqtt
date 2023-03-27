@@ -46,7 +46,7 @@ class SmlSerial(asyncio.Protocol):
 
         self.device.set_status(DeviceStatus.PORT_OPENED)
 
-        # so we can read bigger chunks at once
+        # so we can read bigger chunks at once in case someone uses a higher baudrate
         self.transport._max_read_size = 10_240
 
     def connection_lost(self, exc):
@@ -58,7 +58,6 @@ class SmlSerial(asyncio.Protocol):
     def data_received(self, data: bytes):
         self.transport.pause_reading()
         self.last_read = monotonic()
-        print(f'{monotonic():.3f}: pause')
 
         self.device.serial_data_read(data)
 
@@ -71,11 +70,9 @@ class SmlSerial(asyncio.Protocol):
             if self.last_read is not None:
                 diff_to_interval = interval - (monotonic() - self.last_read)
                 self.last_read = None
-                print(f'{monotonic():.3f}: diff: {diff_to_interval:.3f}')
-                if diff_to_interval > 0:
+                if diff_to_interval >= 0.001:
                     await asyncio.sleep(diff_to_interval)
 
-            print(f'{monotonic():.3f}: resume')
             self.transport.resume_reading()
 
     def start(self):
