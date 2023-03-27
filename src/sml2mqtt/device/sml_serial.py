@@ -1,5 +1,6 @@
 import asyncio
 from asyncio import CancelledError, create_task, Task
+from time import monotonic
 from typing import Optional, TYPE_CHECKING
 
 from serial_asyncio import create_serial_connection, SerialTransport
@@ -37,12 +38,16 @@ class SmlSerial(asyncio.Protocol):
         self.transport: Optional[SerialTransport] = None
 
         self.task: Optional[Task] = None
+        self.last_read: Optional[float] = None
 
-    def connection_made(self, transport):
+    def connection_made(self, transport: SerialTransport):
         self.transport = transport
         log.debug(f'Port {self.url} successfully opened')
 
         self.device.set_status(DeviceStatus.PORT_OPENED)
+
+        # so we can read bigger chunks at once in case someone uses a higher baudrate
+        self.transport._max_read_size = 10_240
 
     def connection_lost(self, exc):
         self.close()
@@ -52,11 +57,22 @@ class SmlSerial(asyncio.Protocol):
 
     def data_received(self, data: bytes):
         self.transport.pause_reading()
+        self.last_read = monotonic()
+
         self.device.serial_data_read(data)
 
     async def _chunk_task(self):
+        interval = 0.2
+
         while True:
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(interval)
+
+            if self.last_read is not None:
+                diff_to_interval = interval - (monotonic() - self.last_read)
+                self.last_read = None
+                if diff_to_interval >= 0.001:
+                    await asyncio.sleep(diff_to_interval)
+
             self.transport.resume_reading()
 
     def start(self):
