@@ -269,7 +269,16 @@ class Device:
                 frame_values.pop(drop_obis, None)
 
         for obis_id, frame_value in frame_values.items():
-            self.sml_values[obis_id].set_value(frame_value, frame_values)
+            if (sml_value := self.sml_values.get(obis_id)) is not None:
+                sml_value.set_value(frame_value, frame_values)
+            else:
+                # This can only happen if the device does not report all values with the initial frame
+                # The user then has to skip the obis ids or manually add them to the configuration
+                self.log.error('Unexpected obis id received!')
+                for line in frame_value.format_msg().splitlines():
+                    self.log.error(line)
+                self.set_status(DeviceStatus.ERROR)
+                return None
 
         # There was no Error -> OK
         self.set_status(DeviceStatus.OK)
