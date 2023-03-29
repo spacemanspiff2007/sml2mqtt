@@ -18,6 +18,9 @@ from energy meters and report the values through mqtt.
 
 
 # Changelog
+#### 2.2 (2023-03-29)
+- Small config improvements
+
 #### 2.1 (2023-03-27)
 - Additional obis id for serial number matching
 - Improved serial reading a bit

@@ -39,21 +39,14 @@ async def test_frame_no_config(device: TestingDevice, no_serial, caplog, monkeyp
     assert msg == sml_frame_1_analyze + """
 Found obis id 0100600100ff in the sml frame
 No configuration found for 0a0149534b0005020de2
-Creating default value handler for 010060320101
 Creating default value handler for 0100010800ff
 Creating default value handler for 0100100700ff
+Creating default value handler for 010060320101
 testing/0a0149534b0005020de2/010060320101: ISK (QOS: 0, retain: False)
 testing/0a0149534b0005020de2/0100010800ff: 253.9177 (QOS: 0, retain: False)
 testing/0a0149534b0005020de2/0100100700ff: 272 (QOS: 0, retain: False)
 OK
 testing/0a0149534b0005020de2/status: OK (QOS: 0, retain: False)
-
-testing/0a0149534b0005020de2/010060320101 (010060320101):
-  raw value: ISK
-  pub value: ISK
-  filters:
-    - <Every: 120>
-    - <OnChange>
 
 testing/0a0149534b0005020de2/0100010800ff (0100010800ff):
   raw value: 253.9177
@@ -65,6 +58,13 @@ testing/0a0149534b0005020de2/0100010800ff (0100010800ff):
 testing/0a0149534b0005020de2/0100100700ff (0100100700ff):
   raw value: 272
   pub value: 272
+  filters:
+    - <Every: 120>
+    - <OnChange>
+
+testing/0a0149534b0005020de2/010060320101 (010060320101):
+  raw value: ISK
+  pub value: ISK
   filters:
     - <Every: 120>
     - <OnChange>
