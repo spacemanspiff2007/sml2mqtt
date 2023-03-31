@@ -147,28 +147,33 @@ class Device:
         log_level = logging.DEBUG if not CMD_ARGS.analyze else logging.INFO
         values_config: Dict[str, SmlValueConfig] = device_config.values if device_config is not None else {}
 
-        for obis_id in frame_values:
+        from_frame = frozenset(frame_values) - self.skip_values
+        from_config = frozenset(values_config)
+        default_cfg = from_frame - from_config
+
+        # create entries where we don't have a user config
+        for obis_id in sorted(default_cfg):
+            self.log.log(log_level, f'Creating default value handler for {obis_id}')
+            self.sml_values[obis_id] = SmlValue(
+                self.device_id, obis_id, self.mqtt_device.create_child(obis_id),
+                workarounds=[], transformations=[], filters=sml2mqtt.sml_value.filter_from_config(None)
+            )
+
+        # create entries which are defined by the user
+        for obis_id, value_config in sorted(values_config.items()):
+            # little helper to catch config errors
             if obis_id in self.skip_values:
-                continue
+                self.log.warning(f'Config for {obis_id:s} found but {obis_id:s} is also marked to be skipped')
+            if obis_id not in frame_values:
+                self.log.warning(f'Config for {obis_id:s} found but {obis_id:s} was not reported by the frame')
 
-            value_config = values_config.get(obis_id)
-
-            if device_config is None or value_config is None:
-                self.log.log(log_level, f'Creating default value handler for {obis_id}')
-                value = SmlValue(
-                    self.device_id, obis_id, self.mqtt_device.create_child(obis_id),
-                    workarounds=[], transformations=[], filters=sml2mqtt.sml_value.filter_from_config(None)
-                )
-            else:
-                self.log.log(log_level, f'Creating value handler from config for {obis_id}')
-                value = SmlValue(
-                    self.device_id, obis_id, self.mqtt_device.create_child(obis_id).set_config(value_config.mqtt),
-                    workarounds=sml2mqtt.sml_value.workaround_from_config(value_config.workarounds),
-                    transformations=sml2mqtt.sml_value.transform_from_config(value_config.transformations),
-                    filters=sml2mqtt.sml_value.filter_from_config(value_config.filters),
-                )
-
-            self.sml_values[obis_id] = value
+            self.log.log(log_level, f'Creating value handler from config for {obis_id}')
+            self.sml_values[obis_id] = SmlValue(
+                self.device_id, obis_id, self.mqtt_device.create_child(obis_id).set_config(value_config.mqtt),
+                workarounds=sml2mqtt.sml_value.workaround_from_config(value_config.workarounds),
+                transformations=sml2mqtt.sml_value.transform_from_config(value_config.transformations),
+                filters=sml2mqtt.sml_value.filter_from_config(value_config.filters),
+            )
 
     def serial_data_timeout(self):
         if self.set_status(DeviceStatus.MSG_TIMEOUT):
@@ -264,7 +269,16 @@ class Device:
                 frame_values.pop(drop_obis, None)
 
         for obis_id, frame_value in frame_values.items():
-            self.sml_values[obis_id].set_value(frame_value, frame_values)
+            if (sml_value := self.sml_values.get(obis_id)) is not None:
+                sml_value.set_value(frame_value, frame_values)
+            else:
+                # This can only happen if the device does not report all values with the initial frame
+                # The user then has to skip the obis ids or manually add them to the configuration
+                self.log.error('Unexpected obis id received!')
+                for line in frame_value.format_msg().splitlines():
+                    self.log.error(line)
+                self.set_status(DeviceStatus.ERROR)
+                return None
 
         # There was no Error -> OK
         self.set_status(DeviceStatus.OK)
