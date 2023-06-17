@@ -6,6 +6,7 @@ from sml2mqtt.config.device import FilterOptionEnum, TransformOptionEnum, TYPE_S
 from sml2mqtt.sml_value.filter import ChangeFilter, DiffAbsFilter, \
     DiffFilterBase, DiffPercFilter, FilterBase, RefreshEvery
 from sml2mqtt.sml_value.transformations import FactorTransformation, \
+    MovingAverageTransformation, \
     OffsetTransformation, RoundTransformation, TransformationBase
 from sml2mqtt.sml_value.workarounds import NegativeOnEnergyMeterStatus, WorkaroundBase
 
@@ -58,6 +59,7 @@ def transform_from_config(cfg: TYPE_SML_VALUE_TRANSFORM_CFG) -> List[Transformat
         TransformOptionEnum.factor: FactorTransformation,
         TransformOptionEnum.round: RoundTransformation,
         TransformOptionEnum.offset: OffsetTransformation,
+        TransformOptionEnum.moving_avg: MovingAverageTransformation,
     }
     return _from_config(cfg, class_dict)
 

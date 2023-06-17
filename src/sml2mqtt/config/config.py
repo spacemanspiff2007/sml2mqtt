@@ -94,7 +94,7 @@ def default_config() -> Settings:
                     'OBIS': SmlValueConfig(
                         mqtt=OptionalMqttPublishConfig(topic='OBIS'),
                         workarounds=[{'negative on energy meter status': True}],
-                        transformations=[{'factor': 3}, {'offset': 100}, {'round': 2}],
+                        transformations=[{'factor': 3}, {'offset': 100}, {'round': 2}, {'moving_avg':10}],
                         filters=[{'diff': 10}, {'perc': 10}, {'every': 120}],
                     )
                 }

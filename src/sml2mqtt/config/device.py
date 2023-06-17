@@ -17,6 +17,7 @@ class TransformOptionEnum(str, Enum):
     factor = 'factor'   #: Use the value as a factor
     offset = 'offset'   #: Use the value as an offset
     round = 'round'     #: Round the result to the digits
+    moving_avg = 'moving_avg'  #: Calculate moving average
 
 
 class FilterOptionEnum(str, Enum):
