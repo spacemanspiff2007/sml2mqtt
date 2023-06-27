@@ -2,7 +2,7 @@ import traceback
 from asyncio import CancelledError, create_task, Event, Queue, Task, TimeoutError, wait_for
 from typing import Final, Optional, Union
 
-from asyncio_mqtt import Client, MqttError, Will
+from aiomqtt import Client, MqttError, Will
 
 import sml2mqtt
 from sml2mqtt.__log__ import log as _parent_logger
