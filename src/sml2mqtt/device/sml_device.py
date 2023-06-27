@@ -1,20 +1,19 @@
 import logging
 import traceback
-from asyncio import Event
 from binascii import b2a_hex
-from typing import Dict, Final, List, Optional, Set
+from typing import Dict, Final, List, Optional, Set, Union
 
 from smllib import SmlFrame, SmlStreamReader
 from smllib.errors import CrcError
 from smllib.sml import SmlListEntry
 
 import sml2mqtt
-from sml2mqtt import CMD_ARGS
+from sml2mqtt import CMD_ARGS, mqtt
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.__shutdown__ import shutdown
 from sml2mqtt.config import CONFIG
-from sml2mqtt.config.config import PortSettings
 from sml2mqtt.config.device import SmlDeviceConfig, SmlValueConfig
+from sml2mqtt.config.source import HttpSourceSettings, PortSourceSettings
 from sml2mqtt.device import DeviceStatus
 from sml2mqtt.device.watchdog import Watchdog
 from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, \
@@ -22,18 +21,17 @@ from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, \
 from sml2mqtt.mqtt import MqttObj
 from sml2mqtt.sml_value import SmlValue
 
-Event().set()
-
 ALL_DEVICES: Dict[str, 'Device'] = {}
 
 
 class Device:
     @classmethod
-    async def create(cls, settings: PortSettings, timeout: float, skip_values: Set[str], mqtt_device: MqttObj):
+    async def create(cls, settings: Union[PortSourceSettings, HttpSourceSettings]):
         device = None
         try:
-            device = cls(settings.url, timeout, set(skip_values), mqtt_device)
-            device.serial = await sml2mqtt.device.SmlSerial.create(settings, device)
+            mqtt_device = mqtt.BASE_TOPIC.create_child(settings.get_device_name())
+            device = cls(settings.get_device_name(), settings.get_device_id(), settings.timeout, mqtt_device)
+            device.sml_source = await sml2mqtt.device.sml_sources.create_source(settings, device)
             ALL_DEVICES[settings.url] = device
 
             return device
@@ -44,36 +42,34 @@ class Device:
                 device.log.error('Setup failed')
             raise DeviceSetupFailedError(e) from None
 
-    def __init__(self, url: str, timeout: float, skip_values: Set[str], mqtt_device: MqttObj):
-        self.stream = SmlStreamReader()
-        self.serial: 'sml2mqtt.device.SmlSerial' = None
+    def __init__(self, /, logger_name: str, device_id: str, timeout: float, mqtt_device: MqttObj):
+        self.stream: Final = SmlStreamReader()
+        self.sml_source: 'sml2mqtt.device.sml_sources.SmlSourceBase' = None
         self.watchdog: Final = Watchdog(timeout, self.serial_data_timeout)
 
         self.status: DeviceStatus = DeviceStatus.STARTUP
-        self.mqtt_device: MqttObj = mqtt_device
-        self.mqtt_status: MqttObj = mqtt_device.create_child('status')
+        self.mqtt_device: Final = mqtt_device
+        self.mqtt_status: Final = mqtt_device.create_child('status')
 
-        self.log = get_logger(url.split("/")[-1])
-        self.log_status = get_logger(url.split("/")[-1]).getChild('status')
+        self.log = get_logger(logger_name)
+        self.log_status = self.log.getChild('status')
 
-        self.device_url = url
-        self.device_id: str = url.split("/")[-1]
+        self.device_id: str = device_id
 
         self.sml_values: Dict[str, SmlValue] = {}
+        self.skip_values: Set[str] = set()
 
-        self.skip_values = skip_values
-
-    def start(self):
-        self.serial.start()
+    async def start(self):
+        await self.sml_source.start()
         self.watchdog.start()
 
-    def stop(self):
-        self.serial.cancel()
-        self.watchdog.cancel()
+    async def stop(self):
+        await self.sml_source.stop()
+        self.watchdog.stop()
 
     def __await__(self):
-        yield from self.serial.wait_for_cancel().__await__()
-        yield from self.watchdog.wait_for_cancel().__await__()
+        yield from self.sml_source.wait_for_stop().__await__()
+        yield from self.watchdog.wait_for_stop().__await__()
 
     def shutdown(self):
         if not self.status.is_shutdown_status():
@@ -93,8 +89,8 @@ class Device:
         # If all ports are closed, or we have errors we shut down
         if all(x.status.is_shutdown_status() for x in ALL_DEVICES.values()):
             # Stop reading from the serial port because we are shutting down
-            self.serial.close()
-            self.watchdog.cancel()
+            self.sml_source.stop()
+            self.watchdog.stop()
             shutdown(AllDevicesFailedError)
         return True
 

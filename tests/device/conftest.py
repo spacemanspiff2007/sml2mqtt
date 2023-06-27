@@ -5,9 +5,9 @@ import pytest
 from smllib import SmlFrame, SmlStreamReader
 
 import sml2mqtt.device.sml_device
-import sml2mqtt.device.sml_serial
+import sml2mqtt.device.sml_sources.sml_serial
 from sml2mqtt import CMD_ARGS
-from sml2mqtt.config.config import PortSettings
+from sml2mqtt.config.config import PortSourceSettings
 from sml2mqtt.device import Device, DeviceStatus
 from sml2mqtt.mqtt import MqttObj, patch_analyze
 
@@ -18,8 +18,8 @@ def no_serial(monkeypatch):
     m = Mock()
     m.create = AsyncMock()
 
-    monkeypatch.setattr(sml2mqtt.device, 'SmlSerial', m)
-    monkeypatch.setattr(sml2mqtt.device.sml_serial, 'SmlSerial', m)
+    monkeypatch.setattr(sml2mqtt.device.sml_sources.setup, 'SerialSource', m)
+    # monkeypatch.setattr(sml2mqtt.device.sml_sources.sml_serial, 'SerialSource', m)
     return m
 
 
@@ -63,13 +63,13 @@ class TestingDevice(Device):
 
 
 @pytest.fixture()
-async def device(no_serial):
+async def device(no_serial, monkeypatch):
     device_url = 'device_url'
 
     mqtt_base = MqttObj('testing', 0, False).update()
-    mqtt_device = mqtt_base.create_child(device_url)
+    monkeypatch.setattr(sml2mqtt.mqtt, 'BASE_TOPIC', mqtt_base)
 
-    obj = await TestingDevice.create(PortSettings(url=device_url), 1, set(), mqtt_device)
+    obj = await TestingDevice.create(PortSourceSettings(url=device_url))
 
     return obj
 

@@ -185,7 +185,9 @@ general
 ports
 --------------------------------------
 
-.. autopydantic_model:: sml2mqtt.config.config.PortSettings
+.. autopydantic_model:: sml2mqtt.config.source.PortSourceSettings
+
+.. autopydantic_model:: sml2mqtt.config.source.HttpSourceSettings
 
 mqtt
 --------------------------------------

@@ -5,6 +5,7 @@ from easyconfig import yaml
 from pydantic import BaseModel
 
 import sml2mqtt
+from sml2mqtt.config.source import SmlSourceSettingsBase
 
 
 def test_sample_yaml(pytestconfig):
@@ -72,7 +73,8 @@ def test_config_documentation_complete(pytestconfig):
     existing_objs = set()
     for module_name in [f.stem for f in cfg_model_dir.glob('**/*.py')]:
         module = getattr(sml2mqtt.config, module_name)
-        cfg_objs = [x[1] for x in getmembers(module, lambda x: isclass(x) and issubclass(x, BaseModel))]
+        cfg_objs = [x[1] for x in getmembers(
+            module, lambda x: isclass(x) and issubclass(x, BaseModel) and x is not SmlSourceSettingsBase)]
         cfg_names = {
             f'{obj.__module__}.{obj.__qualname__}' for obj in cfg_objs if not obj.__module__.startswith('easyconfig.')
         }

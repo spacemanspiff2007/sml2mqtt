@@ -1,53 +1,12 @@
 from typing import Dict, List, Union
 
-import serial
 from easyconfig import AppBaseModel, BaseModel, create_app_config
-from pydantic import constr, Field, StrictFloat, StrictInt, StrictStr, validator
+from pydantic import Field, StrictStr
 
 from .device import REPUBLISH_ALIAS, SmlDeviceConfig, SmlValueConfig
 from .logging import LoggingSettings
 from .mqtt import MqttConfig, OptionalMqttPublishConfig
-
-
-class PortSettings(BaseModel):
-    url: constr(strip_whitespace=True, min_length=1, strict=True) = Field(..., description='Device path')
-    timeout: Union[int, float] = Field(
-        default=3, description='Seconds after which a timeout will be detected (default=3)')
-
-    baudrate: int = Field(9600, in_file=False)
-    parity: str = Field('None', in_file=False)
-    stopbits: Union[StrictInt, StrictFloat] = Field(serial.STOPBITS_ONE, in_file=False, alias='stop bits')
-    bytesize: int = Field(serial.EIGHTBITS, in_file=False, alias='byte size')
-
-    @validator('baudrate')
-    def _val_baudrate(cls, v):
-        if v not in serial.Serial.BAUDRATES:
-            raise ValueError(f'must be one of {list(serial.Serial.BAUDRATES)}')
-        return v
-
-    @validator('parity')
-    def _val_parity(cls, v):
-        # Short name
-        if v in serial.PARITY_NAMES:
-            return v
-
-        # Name -> Short name
-        parity_values = {_n: _v for _v, _n in serial.PARITY_NAMES.items()}
-        if v not in parity_values:
-            raise ValueError(f'must be one of {list(parity_values)}')
-        return parity_values[v]
-
-    @validator('stopbits')
-    def _val_stopbits(cls, v):
-        if v not in serial.Serial.STOPBITS:
-            raise ValueError(f'must be one of {list(serial.Serial.STOPBITS)}')
-        return v
-
-    @validator('bytesize')
-    def _val_bytesize(cls, v):
-        if v not in serial.Serial.BYTESIZES:
-            raise ValueError(f'must be one of {list(serial.Serial.BYTESIZES)}')
-        return v
+from .source import HttpSourceSettings, PortSourceSettings
 
 
 class GeneralSettings(BaseModel):
@@ -77,14 +36,14 @@ class Settings(AppBaseModel):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     mqtt: MqttConfig = Field(default_factory=MqttConfig)
     general: GeneralSettings = Field(default_factory=GeneralSettings)
-    ports: List[PortSettings] = []
+    ports: List[Union[HttpSourceSettings, PortSourceSettings]] = []
     devices: Dict[str, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
 
 
 def default_config() -> Settings:
     # File defaults
     s = Settings(
-        ports=[PortSettings(url='COM1', timeout=3), PortSettings(url='/dev/ttyS0', timeout=3), ],
+        ports=[PortSourceSettings(url='COM1', timeout=3), PortSourceSettings(url='/dev/ttyS0', timeout=3), ],
         devices={
             'DEVICE_ID_HEX': SmlDeviceConfig(
                 mqtt=OptionalMqttPublishConfig(topic='DEVICE_BASE_TOPIC'),

@@ -2,21 +2,21 @@ import asyncio
 from time import monotonic
 from unittest.mock import Mock
 
-from sml2mqtt.device import Device, SmlSerial
+from sml2mqtt.device import Device, SerialSource
 from sml2mqtt.mqtt import MqttObj
 
 
 async def test_device_await(device: Device, no_serial, caplog):
-    device = Device('test', 1, set(), MqttObj('testing', 0, False))
-    device.serial = SmlSerial()
-    device.serial.url = 'test'
-    device.serial.transport = Mock()
-    device.serial.transport.is_closing = lambda: False
-    device.start()
+    device = Device('test_log', 'test_id', 1, MqttObj('testing', 0, False))
+    device.sml_source = SerialSource()
+    device.sml_source.url = 'test'
+    device.sml_source.transport = Mock()
+    device.sml_source.transport.is_closing = lambda: False
+    await device.start()
 
     async def cancel():
         await asyncio.sleep(0.3)
-        device.stop()
+        await device.stop()
 
     t = asyncio.create_task(cancel())
     start = monotonic()

@@ -15,12 +15,12 @@ class Watchdog:
         assert self.task is None
         self.task = create_task(self.wd_task())
 
-    def cancel(self):
+    def stop(self):
         if self.task is not None:
             self.task.cancel()
             self.task = None
 
-    async def wait_for_cancel(self):
+    async def wait_for_stop(self):
         if self.task is None:
             return False
         try:

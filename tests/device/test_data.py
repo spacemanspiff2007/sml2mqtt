@@ -5,21 +5,22 @@ from unittest.mock import Mock
 
 from serial_asyncio import SerialTransport
 
-from sml2mqtt.device import Device, SmlSerial
+from sml2mqtt.device import Device
+from sml2mqtt.device.sml_sources import SerialSource
 
 
 async def test_serial_data(device: Device, no_serial, caplog, sml_data_1: bytes, arg_analyze):
     caplog.set_level(logging.DEBUG)
 
     # we want to test incoming data from the serial port
-    device.serial = SmlSerial()
-    device.serial.device = device
-    device.serial.transport = Mock(SerialTransport)
-    device.serial._task = Mock(Task)
+    device.sml_source = SerialSource()
+    device.sml_source.device = device
+    device.sml_source.transport = Mock(SerialTransport)
+    device.sml_source._task = Mock(Task)
 
     chunk_size = 100
     for i in range(0, len(sml_data_1), chunk_size):
-        device.serial.data_received(a2b_hex(sml_data_1[i: i + chunk_size]))
+        device.sml_source.data_received(a2b_hex(sml_data_1[i: i + chunk_size]))
 
     msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records))
 

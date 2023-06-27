@@ -1,13 +1,15 @@
 import asyncio
-from asyncio import CancelledError, create_task, Task
+from asyncio import CancelledError, create_task, Protocol, Task
 from time import monotonic
 from typing import Optional, TYPE_CHECKING
 
 from serial_asyncio import create_serial_connection, SerialTransport
 
 from sml2mqtt.__log__ import get_logger
-from sml2mqtt.config.config import PortSettings
+from sml2mqtt.config.source import PortSourceSettings
 from sml2mqtt.device import DeviceStatus
+
+from .base import SmlSourceBase
 
 if TYPE_CHECKING:
     import sml2mqtt
@@ -16,14 +18,14 @@ if TYPE_CHECKING:
 log = get_logger('serial')
 
 
-class SmlSerial(asyncio.Protocol):
+class SerialSource(Protocol, SmlSourceBase):
     @classmethod
-    async def create(cls, settings: PortSettings, device: 'sml2mqtt.device_id.Device') -> 'SmlSerial':
+    async def create(cls, settings: PortSourceSettings, device: 'sml2mqtt.device.Device') -> 'SerialSource':
         transport, protocol = await create_serial_connection(
             asyncio.get_event_loop(), cls,
             url=settings.url,
             baudrate=settings.baudrate, parity=settings.parity,
-            stopbits=settings.stopbits, bytesize=settings.bytesize)  # type: SerialTransport, SmlSerial
+            stopbits=settings.stopbits, bytesize=settings.bytesize)  # type: SerialTransport, SerialSource
 
         protocol.url = settings.url
         protocol.device = device
@@ -33,7 +35,7 @@ class SmlSerial(asyncio.Protocol):
         super().__init__()
 
         self.url: Optional[str] = None
-        self.device: Optional['sml2mqtt.device_id.Device'] = None
+        self.device: Optional['sml2mqtt.device.Device'] = None
 
         self.transport: Optional[SerialTransport] = None
 
@@ -50,7 +52,7 @@ class SmlSerial(asyncio.Protocol):
         self.transport._max_read_size = 10_240
 
     def connection_lost(self, exc):
-        self.close()
+        self.stop()
 
         log.info(f'Port {self.url} was closed')
         self.device.set_status(DeviceStatus.PORT_CLOSED)
@@ -75,14 +77,11 @@ class SmlSerial(asyncio.Protocol):
 
             self.transport.resume_reading()
 
-    def start(self):
+    async def start(self):
         assert self.task is None
         self.task = create_task(self._chunk_task(), name=f'Chunk task {self.url:s}')
 
-    def cancel(self):
-        self.close()
-
-    async def wait_for_cancel(self):
+    async def wait_for_stop(self):
         if self.task is None:
             return False
         try:
@@ -91,7 +90,7 @@ class SmlSerial(asyncio.Protocol):
             pass
         return True
 
-    def close(self):
+    async def stop(self):
         if not self.transport.is_closing():
             self.transport.close()
 

@@ -1,14 +1,11 @@
 from binascii import a2b_hex
-from unittest.mock import AsyncMock, Mock
 
 import pytest
 from smllib.reader import SmlFrame
 
 import sml2mqtt.device.sml_device
-import sml2mqtt.device.sml_serial
+import sml2mqtt.device.sml_sources.sml_serial
 import sml2mqtt.mqtt.mqtt_obj
-from sml2mqtt.device import Device, DeviceStatus
-from sml2mqtt.mqtt import MqttObj
 
 
 @pytest.fixture

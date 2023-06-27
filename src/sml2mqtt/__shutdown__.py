@@ -72,7 +72,7 @@ async def _shutdown_task():
 
         # once all devices are stopped the main loop will exit
         for device in sml2mqtt.device.sml_device.ALL_DEVICES.values():
-            device.stop()
+            await device.stop()
     finally:
         SHUTDOWN_TASK = None
 
