@@ -21,7 +21,7 @@ def get_source() -> Tuple[HttpSource, Mock, Mock]:
     return source, status_mock, data_mock
 
 
-async def test_ok(aiohttp_server, sml_data_1):
+async def test_ok(sml_data_1):
     source, status_mock, data_mock = get_source()
 
     with aioresponses() as m:
@@ -39,7 +39,7 @@ async def test_ok(aiohttp_server, sml_data_1):
     data_mock.assert_called_once_with(sml_data_1)
 
 
-async def test_400(aiohttp_server, sml_data_1):
+async def test_400(sml_data_1):
     source, status_mock, data_mock = get_source()
 
     with aioresponses() as m:
