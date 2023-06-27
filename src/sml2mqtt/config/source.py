@@ -62,7 +62,7 @@ class PortSourceSettings(SmlSourceSettingsBase):
 
 class HttpSourceSettings(SmlSourceSettingsBase):
     url: AnyHttpUrl = Field(..., description='Url')
-    timeout: Union[int, float] = Field(
+    timeout: Union[StrictInt, StrictFloat] = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')
 
     interval: confloat(ge=0.1) = Field(default=1, description='Delay between requests')
