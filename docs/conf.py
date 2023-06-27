@@ -88,5 +88,5 @@ if not RTD_BUILD:
     nitpick_ignore_regex = [
         (re.compile(r'^py:class'), re.compile(r'pathlib\..+')),
         (re.compile(r'^py:data'), re.compile(r'typing\..+')),
-        (re.compile(r'^py:class'), re.compile(r'pydantic\..+|.+Constrained(?:Str|Int)Value')),
+        (re.compile(r'^py:class'), re.compile(r'pydantic\..+|.+Constrained(?:Str|Int|Float)Value')),
     ]
