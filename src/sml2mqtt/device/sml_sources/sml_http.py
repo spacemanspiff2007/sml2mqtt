@@ -23,7 +23,7 @@ class HttpSource(SmlSourceBase):
         if settings.user or settings.password:
             auth = BasicAuth(settings.user, settings.password)
 
-        return cls(str(settings.url), settings.interval, auth, ClientTimeout(settings.timeout / 2))
+        return cls(device, str(settings.url), settings.interval, auth, timeout=ClientTimeout(settings.timeout / 2))
 
     def __init__(self, device: 'sml2mqtt.device.Device',
                  url: str, interval: float, auth: Optional[BasicAuth], timeout: ClientTimeout) -> None:
