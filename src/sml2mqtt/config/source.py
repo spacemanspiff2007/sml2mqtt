@@ -2,7 +2,7 @@ from typing import Union
 
 import serial
 from easyconfig import BaseModel
-from pydantic import AnyHttpUrl, confloat, constr, Field, StrictFloat, StrictInt, validator
+from pydantic import AnyHttpUrl, confloat, constr, Field, root_validator, StrictFloat, StrictInt, validator
 
 
 class SmlSourceSettingsBase(BaseModel):
@@ -75,3 +75,15 @@ class HttpSourceSettings(SmlSourceSettingsBase):
 
     def get_device_id(self) -> str:
         return self.url.host
+
+    @root_validator
+    def check_timeout_gt_interval(cls, values):
+        if (timeout := values.get('timeout')) is None:
+            return None
+        if (interval := values.get('interval')) is None:
+            return None
+
+        if timeout <= interval:
+            raise ValueError('Timeout must be greater than interval')
+
+        return values
