@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 from easyconfig import BaseModel
 from pydantic import Extra, Field, validator
@@ -7,7 +6,7 @@ from pydantic import Extra, Field, validator
 
 class LoggingSettings(BaseModel):
     level: str = Field('INFO', description='Log level')
-    file: Path = Field('sml2mqtt.log', description='Log file path (absolute or relative to config file)')
+    file: str = Field('sml2mqtt.log', description='Log file path (absolute or relative to config file) or stdout')
 
     class Config:
         extra = Extra.forbid

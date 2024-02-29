@@ -2,6 +2,7 @@ import logging
 import sys
 from datetime import date, datetime
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 import sml2mqtt
 
@@ -39,13 +40,18 @@ def setup_log():
 
     # File Handler
     log_file = sml2mqtt.CONFIG.logging.file
-    if not log_file.is_absolute():
-        log_file = sml2mqtt.CMD_ARGS.config.parent / log_file
-        log_file.resolve()
+    if log_file.lower() == 'stdout':
+        handler = logging.StreamHandler(sys.stdout)
+    else:
+        log_file = Path(log_file)
+        if not log_file.is_absolute():
+            log_file = sml2mqtt.CMD_ARGS.config.parent / log_file
+            log_file.resolve()
 
-    handler = MidnightRotatingFileHandler(
-        str(log_file), maxBytes=1024 * 1024, backupCount=3, encoding='utf-8'
-    )
+        handler = MidnightRotatingFileHandler(
+            str(log_file), maxBytes=1024 * 1024, backupCount=3, encoding='utf-8'
+        )
+
     handler.setFormatter(log_format)
     handler.setLevel(logging.DEBUG)
 

@@ -3,6 +3,7 @@ from sml2mqtt.config.config import PortSourceSettings
 
 
 class SmlSourceBase:
+
     @classmethod
     async def create(cls, settings: PortSourceSettings, device: 'sml2mqtt.device.Device'):
         raise NotImplementedError()

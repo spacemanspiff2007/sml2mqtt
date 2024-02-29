@@ -7,7 +7,7 @@ def test_default():
     assert '\n' + yaml == '''
 logging:
   level: INFO         # Log level
-  file: sml2mqtt.log  # Log file path (absolute or relative to config file)
+  file: sml2mqtt.log  # Log file path (absolute or relative to config file) or stdout
 mqtt:
   connection:
     client id: sml2mqtt

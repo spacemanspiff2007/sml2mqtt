@@ -17,6 +17,7 @@ log = get_logger('http')
 
 
 class HttpSource(SmlSourceBase):
+
     @classmethod
     async def create(cls, settings: HttpSourceSettings, device: 'sml2mqtt.device.Device') -> 'HttpSource':
         auth = None
@@ -26,7 +27,7 @@ class HttpSource(SmlSourceBase):
         return cls(device, str(settings.url), settings.interval, auth, timeout=ClientTimeout(settings.timeout / 2))
 
     def __init__(self, device: 'sml2mqtt.device.Device',
-                 url: str, interval: float, auth: Optional[BasicAuth], timeout: ClientTimeout) -> None:
+                 url: str, interval: float, auth: Optional['BasicAuth'], timeout: 'ClientTimeout') -> None:
         super().__init__()
         self.device: Final = device
 

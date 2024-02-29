@@ -19,6 +19,7 @@ log = get_logger('serial')
 
 
 class SerialSource(Protocol, SmlSourceBase):
+
     @classmethod
     async def create(cls, settings: PortSourceSettings, device: 'sml2mqtt.device.Device') -> 'SerialSource':
         transport, protocol = await create_serial_connection(
@@ -42,7 +43,7 @@ class SerialSource(Protocol, SmlSourceBase):
         self.task: Optional[Task] = None
         self.last_read: Optional[float] = None
 
-    def connection_made(self, transport: SerialTransport):
+    def connection_made(self, transport: 'SerialTransport'):
         self.transport = transport
         log.debug(f'Port {self.url} successfully opened')
 

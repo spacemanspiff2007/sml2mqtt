@@ -8,7 +8,7 @@ from sml2mqtt.config.device import SmlDeviceConfig
 from sml2mqtt.device import Device
 
 
-async def test_frame_2(device: Device, no_serial, caplog, sml_frame_2: SmlFrame, monkeypatch, no_mqtt):
+async def test_frame_2(device: Device, caplog, sml_frame_2: SmlFrame, monkeypatch, no_mqtt):
     caplog.set_level(logging.DEBUG)
 
     monkeypatch.setattr(CONFIG.general, 'device_id_obis', ['0100600100ff'])

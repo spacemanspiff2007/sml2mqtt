@@ -1,4 +1,4 @@
-from asyncio import CancelledError, create_task, Event, Task, TimeoutError, wait_for
+from asyncio import CancelledError, create_task, current_task, Event, Task, TimeoutError, wait_for
 from typing import Any, Callable, Final, Optional
 
 
@@ -33,6 +33,8 @@ class Watchdog:
         self.event.set()
 
     async def wd_task(self):
+        task = current_task()
+
         try:
             make_call = True
             while True:
@@ -50,4 +52,5 @@ class Watchdog:
                     make_call = False
                     self.callback()
         finally:
-            self.task = None
+            if task == self.task:
+                self.task = None

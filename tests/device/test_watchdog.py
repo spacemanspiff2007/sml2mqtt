@@ -48,7 +48,7 @@ async def test_watchdog_no_expire():
     assert w.task is None
 
 
-async def test_watchdog_setup_and_feed(no_serial, sml_data_1):
+async def test_watchdog_setup_and_feed(sml_stream, sml_data_1):
     device_url = 'watchdog_test'
 
     obj = await Device.create(PortSourceSettings(url=device_url, timeout=0.2))
@@ -61,7 +61,7 @@ async def test_watchdog_setup_and_feed(no_serial, sml_data_1):
     for _ in range(5):
         await asyncio.sleep(0.15)
         obj.serial_data_read(a2b_hex(sml_data_1))
-        assert obj.status != DeviceStatus.MSG_TIMEOUT
+        assert obj.status == DeviceStatus.OK
 
     await asyncio.sleep(0.3)
     assert obj.status == DeviceStatus.MSG_TIMEOUT

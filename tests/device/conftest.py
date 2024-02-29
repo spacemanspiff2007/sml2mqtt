@@ -1,5 +1,4 @@
-from typing import Set, Union
-from unittest.mock import AsyncMock, Mock
+from typing import Union
 
 import pytest
 from smllib import SmlFrame, SmlStreamReader
@@ -13,14 +12,15 @@ from sml2mqtt.mqtt import MqttObj, patch_analyze
 
 
 @pytest.fixture()
-def no_serial(monkeypatch):
+def sml_stream(monkeypatch):
 
-    m = Mock()
-    m.create = AsyncMock()
+    async def create_reader_source(settings, device: 'sml2mqtt.device.Device'):
+        device.stream = TestingStreamReader(device.stream)
+        return device.stream
 
-    monkeypatch.setattr(sml2mqtt.device.sml_sources.setup, 'SerialSource', m)
-    # monkeypatch.setattr(sml2mqtt.device.sml_sources.sml_serial, 'SerialSource', m)
-    return m
+    monkeypatch.setattr(sml2mqtt.device.sml_sources, 'create_source', create_reader_source)
+    monkeypatch.setattr(sml2mqtt.device.sml_sources.setup, 'create_source', create_reader_source)
+    return None
 
 
 @pytest.fixture(autouse=True)
@@ -33,6 +33,7 @@ class TestingStreamReader:
     def __init__(self, reader: SmlStreamReader):
         self.reader = reader
         self.data = None
+        self.is_started = False
 
     def add(self, data: Union[SmlFrame, bytes]):
         if isinstance(data, SmlFrame):
@@ -42,18 +43,34 @@ class TestingStreamReader:
             self.data = None
             self.reader.add(data)
 
+    def clear(self):
+        self.reader.clear()
+
     def get_frame(self):
+        assert self.is_started
+
         if self.data is None:
             return self.reader.get_frame()
         return self.data
 
+    async def start(self):
+        assert not self.is_started
+        self.is_started = True
+
+    async def stop(self):
+        assert self.is_started
+        self.is_started = False
+
+    async def wait_for_stop(self):
+        return None
+
 
 class TestingDevice(Device):
 
-    def __init__(self, url: str, timeout: float, skip_values: Set[str], mqtt_device: MqttObj):
-        super().__init__(url, timeout, skip_values, mqtt_device)
-        self.stream = TestingStreamReader(self.stream)
+    def __init__(self, /, logger_name: str, device_id: str, timeout: float, mqtt_device: MqttObj):
+        super().__init__(logger_name, device_id, timeout, mqtt_device)
 
+        self.stream: TestingStreamReader
         self.testing_raise_on_status = True
 
     def set_status(self, new_status: DeviceStatus) -> bool:
@@ -63,7 +80,7 @@ class TestingDevice(Device):
 
 
 @pytest.fixture()
-async def device(no_serial, monkeypatch):
+async def device(sml_stream, monkeypatch):
     device_url = 'device_url'
 
     mqtt_base = MqttObj('testing', 0, False).update()

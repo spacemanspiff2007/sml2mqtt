@@ -1,3 +1,4 @@
+from asyncio import get_running_loop
 from binascii import a2b_hex
 
 import pytest

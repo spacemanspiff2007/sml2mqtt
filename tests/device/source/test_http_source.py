@@ -6,7 +6,7 @@ from aiohttp import ClientTimeout
 from aioresponses import aioresponses
 
 from sml2mqtt.device import DeviceStatus
-from sml2mqtt.device.sml_sources import HttpSource
+from sml2mqtt.device.sml_sources.sml_http import HttpSource
 
 
 def get_source() -> Tuple[HttpSource, Mock, Mock]:
