@@ -12,8 +12,8 @@ from sml2mqtt.mqtt import DynDelay
 log = _parent_logger.getChild('mqtt')
 
 
-TASK: Optional[Task] = None
-IS_CONNECTED: Optional[Event] = None
+TASK: Task | None = None
+IS_CONNECTED: Event | None = None
 
 
 def start():
@@ -52,7 +52,7 @@ async def wait_for_disconnect():
     await TASK
 
 
-QUEUE: Optional[Queue] = None
+QUEUE: Queue[tuple[str, int | float | str, int, bool]] | None = None
 
 
 async def mqtt_task():
@@ -86,12 +86,12 @@ async def _mqtt_task():
                 topic_fragment=config.mqtt.last_will.topic).set_config(config.mqtt.last_will)
 
             client = Client(
-                hostname=cfg_connection.host,
-                port=cfg_connection.port,
+                hostname=cfg_connection.host, port=cfg_connection.port,
+
                 username=cfg_connection.user if cfg_connection.user else None,
                 password=cfg_connection.password if cfg_connection.password else None,
                 will=Will(will_topic.topic, payload=payload_offline, qos=will_topic.qos, retain=will_topic.retain),
-                client_id=cfg_connection.client_id
+                identifier=cfg_connection.identifier
             )
 
             log.debug(f'Connecting to {cfg_connection.host}:{cfg_connection.port}')
@@ -129,6 +129,6 @@ async def _mqtt_task():
             IS_CONNECTED.clear()
 
 
-def publish(topic: str, value: Union[int, float, str], qos: int, retain: bool):
+def publish(topic: str, value: int | float | str, qos: int, retain: bool):
     if QUEUE is not None:
         QUEUE.put_nowait((topic, value, qos, retain))

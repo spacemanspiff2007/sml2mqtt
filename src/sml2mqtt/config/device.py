@@ -55,16 +55,16 @@ class SmlValueConfig(BaseModel):
 class SmlDeviceConfig(BaseModel):
     """Configuration for a sml device"""
 
-    mqtt: Optional[OptionalMqttPublishConfig] = Field(
+    mqtt: OptionalMqttPublishConfig | None = Field(
         default=None, description='Optional MQTT configuration for this meter.')
 
-    status: Optional[OptionalMqttPublishConfig] = Field(
+    status: OptionalMqttPublishConfig | None = Field(
         default=OptionalMqttPublishConfig(topic='status'),
         description='Optional MQTT status topic configuration for this meter'
     )
 
-    skip: Optional[Set[StrictStr]] = Field(
+    skip: set[StrictStr] | None = Field(
         default=None, description='OBIS codes (HEX) of values that will not be published (optional)')
 
-    values: Dict[StrictStr, SmlValueConfig] = Field(
+    values: dict[StrictStr, SmlValueConfig] = Field(
         default={}, description='Special configurations for each of the values (optional)')

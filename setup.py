@@ -1,4 +1,5 @@
-import typing
+from __future__ import annotations
+
 from pathlib import Path
 
 import setuptools  # type: ignore
@@ -6,14 +7,14 @@ import setuptools  # type: ignore
 
 # Load version number without importing HABApp
 def load_version() -> str:
-    version: typing.Dict[str, str] = {}
+    version: dict[str, str] = {}
     with open("src/sml2mqtt/__version__.py") as fp:
         exec(fp.read(), version)
     assert version['__version__'], version
     return version['__version__']
 
 
-def load_req() -> typing.List[str]:
+def load_req() -> list[str]:
     req_file = Path(__file__).with_name('requirements_setup.txt')
     with req_file.open() as f:
         return f.readlines()

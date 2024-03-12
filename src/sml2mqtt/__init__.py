@@ -8,8 +8,4 @@ from sml2mqtt.config import CONFIG
 
 # isort: split
 
-from sml2mqtt import sml_value
-
 # isort: split
-
-import sml2mqtt.device

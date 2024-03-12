@@ -5,8 +5,8 @@ from unittest.mock import call, Mock
 from aiohttp import ClientTimeout
 from aioresponses import aioresponses
 
-from sml2mqtt.device import DeviceStatus
-from sml2mqtt.device.sml_sources.sml_http import HttpSource
+from sml2mqtt.device_old import DeviceStatus
+from sml2mqtt.device_old.sml_sources.sml_http import HttpSource
 
 
 def get_source() -> Tuple[HttpSource, Mock, Mock]:

@@ -1,5 +1,6 @@
 import dataclasses
-from typing import Any, Callable, Final, List, Optional, Union
+from collections.abc import Callable
+from typing import Any, Final
 
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.config import OptionalMqttPublishConfig
@@ -7,21 +8,28 @@ from sml2mqtt.mqtt import publish
 
 from .errors import MqttConfigValuesMissingError, TopicFragmentExpectedError
 
-pub_func: Callable[[str, Union[int, float, str], int, bool], Any] = publish
+
+pub_func: Callable[[str, int | float | str, int, bool], Any] = publish
 
 
-def publish_analyze(topic: str, value: Union[int, float, str], qos: int, retain: bool):
+def publish_analyze(topic: str, value: int | float | str, qos: int, retain: bool):
     get_logger('mqtt.pub').info(f'{topic}: {value} (QOS: {qos}, retain: {retain})')
+
+
+def patch_analyze():
+    global pub_func
+
+    pub_func = publish_analyze
 
 
 @dataclasses.dataclass
 class MqttCfg:
-    topic_full: Optional[str] = None
-    topic_fragment: Optional[str] = None
-    qos: Optional[int] = None
-    retain: Optional[bool] = None
+    topic_full: str | None = None
+    topic_fragment: str | None = None
+    qos: str | None = None
+    retain: str | None = None
 
-    def set_config(self, config: Optional[OptionalMqttPublishConfig]):
+    def set_config(self, config: OptionalMqttPublishConfig | None):
         self.topic_full = config.full_topic
         self.topic_fragment = config.topic
         self.qos = config.qos
@@ -29,7 +37,7 @@ class MqttCfg:
 
 
 class MqttObj:
-    def __init__(self, topic_fragment: Optional[str] = None, qos: Optional[int] = None, retain: Optional[bool] = None):
+    def __init__(self, topic_fragment: str | None = None, qos: int | None = None, retain: bool | None = None):
 
         # Configured parts
         self.cfg = MqttCfg(topic_fragment=topic_fragment, qos=qos, retain=retain)
@@ -39,10 +47,10 @@ class MqttObj:
         self.retain: bool = False
         self.topic: str = ''
 
-        self.parent: Optional[MqttObj] = None
-        self.children: List[MqttObj] = []
+        self.parent: MqttObj | None = None
+        self.children: list[MqttObj] = []
 
-    def publish(self, value: Union[str, int, float, bytes]):
+    def publish(self, value: str | int | float | bytes):
         pub_func(self.topic, value, self.qos, self.retain)
 
     def update(self) -> 'MqttObj':
@@ -87,7 +95,7 @@ class MqttObj:
         self.update()
         return self
 
-    def set_config(self, cfg: Optional[OptionalMqttPublishConfig]) -> 'MqttObj':
+    def set_config(self, cfg: OptionalMqttPublishConfig | None) -> 'MqttObj':
         if cfg is None:
             return self
 
@@ -95,8 +103,8 @@ class MqttObj:
         self.update()
         return self
 
-    def create_child(self, topic_fragment: Optional[str] = None, qos: Optional[int] = None,
-                     retain: Optional[bool] = None) -> 'MqttObj':
+    def create_child(self, topic_fragment: str | None = None, qos: int | None = None,
+                     retain: bool | None = None) -> 'MqttObj':
         child = self.__class__(topic_fragment=topic_fragment, qos=qos, retain=retain)
         child.parent = self
         self.children.append(child)
@@ -112,9 +120,3 @@ def setup_base_topic(topic: str, qos: int, retain: bool):
     BASE_TOPIC.cfg.qos = qos
     BASE_TOPIC.cfg.retain = retain
     BASE_TOPIC.update()
-
-
-def patch_analyze():
-    global pub_func
-
-    pub_func = publish_analyze

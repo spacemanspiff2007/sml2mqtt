@@ -2,18 +2,18 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from typing import Final, Optional, Type
+from typing import Final
 
 
 class CommandArgs:
-    config: Optional[Path] = None
+    config: Path | None = None
     analyze: bool = False
 
 
 CMD_ARGS: Final = CommandArgs
 
 
-def get_command_line_args(args=None) -> Type[CommandArgs]:
+def get_command_line_args(args=None) -> type[CommandArgs]:
 
     parser = argparse.ArgumentParser(description='SML to MQTT bridge')
     parser.add_argument(
@@ -35,13 +35,13 @@ def get_command_line_args(args=None) -> Type[CommandArgs]:
     return CMD_ARGS
 
 
-def find_config_folder(config_file_str: Optional[str]) -> Path:
+def find_config_folder(config_file_str: str | None) -> Path:
     check_path = []
 
     if config_file_str is None:
         # Nothing is specified, we try to find the config automatically
         try:
-            working_dir = Path(os.getcwd())
+            working_dir = Path.cwd()
             check_path.append(working_dir / 'sml2mqtt')
             check_path.append(working_dir.with_name('sml2mqtt'))
             check_path.append(working_dir.parent.with_name('sml2mqtt'))

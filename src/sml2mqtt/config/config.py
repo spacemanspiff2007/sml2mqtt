@@ -23,7 +23,7 @@ class GeneralSettings(BaseModel):
         False, description='Report the device id even though it does never change',
         alias='report device id', in_file=False
     )
-    device_id_obis: List[StrictStr] = Field(
+    device_id_obis: list[StrictStr] = Field(
         # 0100000009ff (1-0:0.0.9*255) : Geräteeinzelidentifikation
         # 0100600100ff (1-0:96.1.0*255): Produktionsnummer
         ['0100000009ff', '0100600100ff'],

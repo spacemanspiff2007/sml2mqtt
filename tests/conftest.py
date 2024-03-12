@@ -1,15 +1,49 @@
-from asyncio import get_running_loop
 from binascii import a2b_hex
 
 import pytest
 from smllib.reader import SmlFrame
 
-import sml2mqtt.device.sml_device
-import sml2mqtt.device.sml_sources.sml_serial
 import sml2mqtt.mqtt.mqtt_obj
+from sml2mqtt.const import SmlFrameValues
 
 
-@pytest.fixture
+class PatchedMonotonic:
+    def __init__(self):
+        self._now: int | float = 0
+        self._mp = pytest.MonkeyPatch()
+
+    def _get_monotonic(self):
+        return self._now
+
+    def patch_name(self, target: str):
+        self._mp.setattr(target, self._get_monotonic)
+
+    def patch(self, target: str | object, name: str | object):
+        self._mp.setattr(target, name, value=self._get_monotonic)
+
+    def undo(self):
+        self._mp.undo()
+
+    def add(self, secs: float):
+        self._now += secs
+
+    def set(self, secs: float):
+        self._now = secs
+
+
+@pytest.fixture()
+def monotonic():
+    p = PatchedMonotonic()
+
+    p.patch_name('sml2mqtt.sml_value.operations.filter.monotonic')
+
+    try:
+        yield p
+    finally:
+        p.undo()
+
+
+@pytest.fixture()
 def no_mqtt(monkeypatch):
 
     pub_list = []
@@ -18,11 +52,10 @@ def no_mqtt(monkeypatch):
         pub_list.append((topic, value, qos, retain))
 
     monkeypatch.setattr(sml2mqtt.mqtt.mqtt_obj, 'pub_func', pub_func)
+    return pub_list
 
-    yield pub_list
 
-
-@pytest.fixture
+@pytest.fixture()
 def sml_data_1():
     data = b'1B1B1B1B01010101760501188E6162006200726500000101760101070000000000000B000000000000000000000101636877007' \
            b'60501188E626200620072650000070177010B000000000000000000000172620165002EC3F47A77078181C78203FF0101010104' \
@@ -35,7 +68,7 @@ def sml_data_1():
     yield data
 
 
-@pytest.fixture
+@pytest.fixture()
 def sml_frame_1():
     data = b'760500531efa620062007263010176010105001bb4fe0b0a0149534b0005020de272620165001bb32e620163a71400760500531e' \
            b'fb620062007263070177010b0a0149534b0005020de2070100620affff72620165001bb32e757707010060320101010101010449' \
@@ -43,10 +76,10 @@ def sml_frame_1():
            b'070100020800ff0101621e52ff62000177070100100700ff0101621b52005301100101016350ba00760500531efc620062007263' \
            b'0201710163ba1900'
 
-    yield SmlFrame(a2b_hex(data))
+    return SmlFrame(a2b_hex(data))
 
 
-@pytest.fixture
+@pytest.fixture()
 def sml_frame_2():
     data = b'7605065850a66200620072630101760107ffffffffffff05021d70370b0a014c475a0003403b4972620165021d7707016326de' \
            b'007605065850a762006200726307017707ffffffffffff0b0a014c475a0003403b49070100620affff72620165021d77077577' \
@@ -55,10 +88,14 @@ def sml_frame_2():
            b'0000000177070100100700ff0101621b52005900000000000000fb010101637264007605065850a86200620072630201710163' \
            b'1c8c00'
 
-    yield SmlFrame(a2b_hex(data))
+    return SmlFrame(a2b_hex(data))
 
+@pytest.fixture()
+def sml_frame_values_1(sml_frame_1):
+    values = sml_frame_1.get_obis()
+    return SmlFrameValues.create(0, values)
 
-@pytest.fixture
+@pytest.fixture()
 def sml_frame_1_analyze():
     msg = """
 Received Frame

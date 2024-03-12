@@ -3,11 +3,11 @@ from typing import Union
 import pytest
 from smllib import SmlFrame, SmlStreamReader
 
-import sml2mqtt.device.sml_device
-import sml2mqtt.device.sml_sources.sml_serial
+import sml2mqtt.device_old.sml_device
+import sml2mqtt.device_old.sml_sources.sml_serial
 from sml2mqtt import CMD_ARGS
 from sml2mqtt.config.config import PortSourceSettings
-from sml2mqtt.device import Device, DeviceStatus
+from sml2mqtt.device_old import Device, DeviceStatus
 from sml2mqtt.mqtt import MqttObj, patch_analyze
 
 

@@ -2,8 +2,8 @@ import asyncio
 from time import monotonic
 from unittest.mock import Mock
 
-from sml2mqtt.device import Device
-from sml2mqtt.device.sml_sources.sml_serial import SerialSource
+from sml2mqtt.device_old import Device
+from sml2mqtt.device_old.sml_sources.sml_serial import SerialSource
 from sml2mqtt.mqtt import MqttObj
 
 

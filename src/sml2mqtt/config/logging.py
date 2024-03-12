@@ -1,7 +1,7 @@
 import logging
 
 from easyconfig import BaseModel
-from pydantic import Extra, Field, validator
+from pydantic import Extra, Field, field_validator
 
 
 class LoggingSettings(BaseModel):
@@ -11,10 +11,11 @@ class LoggingSettings(BaseModel):
     class Config:
         extra = Extra.forbid
 
-    @validator('level')
+    @field_validator('level')
     def validate_logging(cls, value):
         if value not in logging._nameToLevel:
-            raise ValueError(f'Level must be one of {", ".join(logging._nameToLevel)}')
+            msg = f'Level must be one of {", ".join(logging._nameToLevel)}'
+            raise ValueError(msg)
         return value
 
     def set_log_level(self) -> int:

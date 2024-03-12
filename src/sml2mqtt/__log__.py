@@ -6,6 +6,7 @@ from pathlib import Path
 
 import sml2mqtt
 
+
 log = logging.getLogger('sml')
 
 

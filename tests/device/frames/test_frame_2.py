@@ -5,7 +5,7 @@ from smllib.reader import SmlFrame
 
 from sml2mqtt import CONFIG
 from sml2mqtt.config.device import SmlDeviceConfig
-from sml2mqtt.device import Device
+from sml2mqtt.device_old import Device
 
 
 async def test_frame_2(device: Device, caplog, sml_frame_2: SmlFrame, monkeypatch, no_mqtt):

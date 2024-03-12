@@ -1,5 +1,5 @@
 from easyconfig import BaseModel
-from pydantic import conint, constr, Field, StrictBool, validator
+from pydantic import conint, constr, Field, StrictBool, field_validator, model_validator
 
 QOS = conint(ge=0, le=2)
 TOPIC_STR = constr(strip_whitespace=True, min_length=1)
@@ -14,35 +14,35 @@ class MqttDefaultPublishConfig(BaseModel):
 
 
 class OptionalMqttPublishConfig(BaseModel):
-    topic: TOPIC_STR = Field(None, description='Topic fragment for building this topic with the parent topic')
-    full_topic: TOPIC_STR = Field(
+    topic: TOPIC_STR | None = Field(None, description='Topic fragment for building this topic with the parent topic')
+    full_topic: TOPIC_STR | None = Field(
         None, alias='full topic', description='Full topic - will ignore the parent topic parts')
-    qos: QOS = Field(None, description='QoS for publishing this value (if set - otherwise use parent)')
-    retain: StrictBool = Field(None, description='Retain for publishing this value (if set - otherwise use parent)')
+    qos: QOS | None = Field(None, description='QoS for publishing this value (if set - otherwise use parent)')
+    retain: StrictBool | None = Field(None, description='Retain for publishing this value (if set - otherwise use parent)')
 
-    @validator('topic', 'full_topic')
+    @field_validator('topic', 'full_topic')
     def validate_topic(cls, value):
         if value is None:
             return None
 
         if value.endswith('/'):
-            raise ValueError('Topic must not end with "/"')
+            msg = 'Topic must not end with "/"'
+            raise ValueError(msg)
         if value.startswith('/'):
-            raise ValueError('Topic must not start with "/"')
+            msg = 'Topic must not start with "/"'
+            raise ValueError(msg)
         return value
 
-    @validator('full_topic')
-    def check_full_or_partial(cls, v, values):
-        if v is None:
-            return None
-
-        if values.get('topic') is not None:
-            raise ValueError('Topic and full_topic can not be used at the same time!')
-        return v
+    @model_validator(mode='after')
+    def check_full_or_partial(self):
+        if self.topic is not None and self.full_topic is not None:
+            msg = 'Topic and full_topic can not be used at the same time!'
+            raise ValueError(msg)
+        return self
 
 
 class MqttConnection(BaseModel):
-    client_id: STRIPPED_STR = Field('sml2mqtt', alias='client id')
+    identifier: STRIPPED_STR = Field('sml2mqtt')
     host: STRIPPED_STR = 'localhost'
     port: conint(gt=0) = 1883
     user: STRIPPED_STR = ''

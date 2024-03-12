@@ -3,8 +3,8 @@ from binascii import a2b_hex
 from unittest.mock import Mock
 
 from sml2mqtt.config.config import PortSourceSettings
-from sml2mqtt.device import Device, DeviceStatus
-from sml2mqtt.device.watchdog import Watchdog
+from sml2mqtt.device_old import Device, DeviceStatus
+from sml2mqtt.device_old.watchdog import Watchdog
 
 
 async def test_watchdog_expire():

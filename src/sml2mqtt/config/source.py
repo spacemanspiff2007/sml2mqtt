@@ -1,8 +1,15 @@
-from typing import Union
-
 import serial
 from easyconfig import BaseModel
-from pydantic import AnyHttpUrl, confloat, constr, Field, root_validator, StrictFloat, StrictInt, validator
+from pydantic import (
+    AnyHttpUrl,
+    Field,
+    StrictFloat,
+    StrictInt,
+    confloat,
+    constr,
+    field_validator,
+    model_validator,
+)
 
 
 class SmlSourceSettingsBase(BaseModel):
@@ -15,21 +22,22 @@ class SmlSourceSettingsBase(BaseModel):
 
 class PortSourceSettings(SmlSourceSettingsBase):
     url: constr(strip_whitespace=True, min_length=1, strict=True) = Field(..., description='Device path')
-    timeout: Union[StrictInt, StrictFloat] = Field(
+    timeout: StrictInt | StrictFloat = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')
 
     baudrate: int = Field(9600, in_file=False)
     parity: str = Field('None', in_file=False)
-    stopbits: Union[StrictInt, StrictFloat] = Field(serial.STOPBITS_ONE, in_file=False, alias='stop bits')
+    stopbits: StrictInt | StrictFloat = Field(serial.STOPBITS_ONE, in_file=False, alias='stop bits')
     bytesize: int = Field(serial.EIGHTBITS, in_file=False, alias='byte size')
 
-    @validator('baudrate')
+    @field_validator('baudrate')
     def _val_baudrate(cls, v):
         if v not in serial.Serial.BAUDRATES:
-            raise ValueError(f'must be one of {list(serial.Serial.BAUDRATES)}')
+            msg = f'must be one of {list(serial.Serial.BAUDRATES)}'
+            raise ValueError(msg)
         return v
 
-    @validator('parity')
+    @field_validator('parity')
     def _val_parity(cls, v):
         # Short name
         if v in serial.PARITY_NAMES:
@@ -38,19 +46,22 @@ class PortSourceSettings(SmlSourceSettingsBase):
         # Name -> Short name
         parity_values = {_n: _v for _v, _n in serial.PARITY_NAMES.items()}
         if v not in parity_values:
-            raise ValueError(f'must be one of {list(parity_values)}')
+            msg = f'must be one of {list(parity_values)}'
+            raise ValueError(msg)
         return parity_values[v]
 
-    @validator('stopbits')
+    @field_validator('stopbits')
     def _val_stopbits(cls, v):
         if v not in serial.Serial.STOPBITS:
-            raise ValueError(f'must be one of {list(serial.Serial.STOPBITS)}')
+            msg = f'must be one of {list(serial.Serial.STOPBITS)}'
+            raise ValueError(msg)
         return v
 
-    @validator('bytesize')
+    @field_validator('bytesize')
     def _val_bytesize(cls, v):
         if v not in serial.Serial.BYTESIZES:
-            raise ValueError(f'must be one of {list(serial.Serial.BYTESIZES)}')
+            msg = f'must be one of {list(serial.Serial.BYTESIZES)}'
+            raise ValueError(msg)
         return v
 
     def get_device_name(self) -> str:
@@ -62,11 +73,10 @@ class PortSourceSettings(SmlSourceSettingsBase):
 
 class HttpSourceSettings(SmlSourceSettingsBase):
     url: AnyHttpUrl = Field(..., description='Url')
-    timeout: Union[StrictInt, StrictFloat] = Field(
+    timeout: StrictInt | StrictFloat = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')
 
     interval: confloat(ge=0.1) = Field(default=1, description='Delay between requests')
-
     user: str = Field(default='', description='User (if needed)')
     password: str = Field(default='', description='Password (if needed)')
 
@@ -76,14 +86,10 @@ class HttpSourceSettings(SmlSourceSettingsBase):
     def get_device_id(self) -> str:
         return self.url.host
 
-    @root_validator
-    def check_timeout_gt_interval(cls, values):
-        if (timeout := values.get('timeout')) is None:
-            return None
-        if (interval := values.get('interval')) is None:
-            return None
+    @model_validator(mode='after')
+    def check_timeout_gt_interval(self):
+        if self.timeout <= self.interval:
+            msg = 'Timeout must be greater than interval'
+            raise ValueError(msg)
 
-        if timeout <= interval:
-            raise ValueError('Timeout must be greater than interval')
-
-        return values
+        return self

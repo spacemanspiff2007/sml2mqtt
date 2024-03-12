@@ -2,15 +2,11 @@
 line-length = 120
 indent-width = 4
 
-target-version = "py38"
+target-version = "py310"
 src = ["src", "test"]
 
 # https://docs.astral.sh/ruff/settings/#ignore-init-module-imports
 ignore-init-module-imports = true
-
-extend-exclude = [
-    "__init__.py",
-]
 
 select = [
     "E", "W",   # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
@@ -67,5 +63,5 @@ builtins-ignorelist = ["id", "input"]
 
 
 [lint.isort]
-# https://docs.astral.sh/ruff/settings/#isort-lines-after-imports
+# https://docs.astral.sh/ruff/settings/#lint_isort_lines-after-imports
 lines-after-imports = 2

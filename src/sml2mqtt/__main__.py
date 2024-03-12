@@ -9,7 +9,7 @@ from sml2mqtt.__args__ import CMD_ARGS, get_command_line_args
 from sml2mqtt.__log__ import log, setup_log
 from sml2mqtt.__shutdown__ import get_return_code, shutdown, signal_handler_setup
 from sml2mqtt.config import CONFIG
-from sml2mqtt.device import Device
+from sml2mqtt.device_old import Device
 
 
 async def a_main():
