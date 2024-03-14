@@ -9,13 +9,14 @@ from smllib.errors import CrcError
 
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.const import EnhancedSmlFrame
-from sml2mqtt.errors import Sml2MqttExceptionWithLog
+from sml2mqtt.errors import Sml2MqttExceptionWithLog, ObisIdForConfigurationMappingNotFoundError
 from sml2mqtt.mqtt import BASE_TOPIC
 from sml2mqtt.sml_value import SmlValues
 
 from .device_status import DeviceStatus
+from .setup_device import setup_device
 from .watchdog import Watchdog
-
+from .. import CONFIG
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -43,6 +44,7 @@ class SmlDevice:
         self.mqtt_device: Final = BASE_TOPIC.create_child(self.name)
         self.mqtt_status: Final = self.mqtt_device.create_child('status')
 
+        self.device_id: str | None = None
         self.sml_values: Final = SmlValues()
 
         self.frame_handler: Callable[[EnhancedSmlFrame], Any] = self.process_frame
@@ -127,6 +129,27 @@ class SmlDevice:
         self.set_status(DeviceStatus.OK)
 
     def setup_values_from_frame(self, frame: EnhancedSmlFrame):
+        frame_values = frame.get_frame_values(self.log)
+
+        # search frame and see if we get a match
+        for search_obis in CONFIG.general.device_id_obis:
+            if (obis_value := frame_values.get_value(search_obis)) is not None:
+                self.log.debug(f'Found obis id {search_obis:s} in the sml frame')
+                self.device_id = str(obis_value.get_value())
+                break
+        else:
+            searched = ', '.join(CONFIG.general.device_id_obis)
+            self.log.error(f'Found none of the following obis ids in the sml frame: {searched:s}')
+            raise ObisIdForConfigurationMappingNotFoundError()
+
+        # Search configuration to see if we have a special config for the device
+        device_cfg = CONFIG.devices.get(self.device_id)
+        if device_cfg is None:
+            self.log.warning(f'No configuration found for {self.device_id:s}')
+        else:
+            self.log.debug(f'Configuration found for {self.device_id:s}')
+        setup_device(self, frame_values, device_cfg, CONFIG.general)
+
         self.frame_handler = self.process_frame
 
     def analyze_frame(self, frame: EnhancedSmlFrame):
@@ -146,6 +169,9 @@ class SmlDevice:
         # Log setup values
         for line in self.sml_values.describe():
             self.log.info(line)
+
+        # process the frame
+        self.frame_handler(frame)
 
         # shutdown
         self.log.info('')

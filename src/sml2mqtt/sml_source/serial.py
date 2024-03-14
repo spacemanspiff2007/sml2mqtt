@@ -12,7 +12,7 @@ from sml2mqtt.const import DeviceTask
 
 
 if TYPE_CHECKING:
-    from sml2mqtt.config.source import PortSourceSettings
+    from sml2mqtt.config.source import SerialSourceSettings
     from sml2mqtt.const import DeviceProto
 
 
@@ -21,7 +21,7 @@ log = get_logger('serial')
 
 class SerialSource(Protocol):
     @classmethod
-    async def create(cls, device: DeviceProto, settings: PortSourceSettings) -> SerialSource:
+    async def create(cls, device: DeviceProto, settings: SerialSourceSettings) -> SerialSource:
         transport, protocol = await create_serial_connection(
             asyncio.get_event_loop(),
             lambda: cls(device, settings.url),

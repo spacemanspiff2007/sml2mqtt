@@ -39,7 +39,7 @@ class OffsetOperation(ValueOperationBase):
 
 
 class RoundOperation(ValueOperationBase):
-    def __init__(self, digits: int | None = None):
+    def __init__(self, digits: int):
         self.digits: Final = digits if digits else None
 
     @override

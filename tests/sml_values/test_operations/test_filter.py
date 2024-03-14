@@ -2,10 +2,10 @@ from tests.sml_values.test_operations.helper import check_description, check_ope
 
 from sml2mqtt.sml_value.base import SmlValueInfo
 from sml2mqtt.sml_value.operations import (
-    AbsDeltaFilter,
+    AbsDeltaFilterOperation,
     HeartbeatFilterOperation,
     OnChangeFilterOperation,
-    PercDeltaFilter,
+    PercDeltaFilterOperation,
     SkipZeroMeterOperation,
 )
 
@@ -46,7 +46,7 @@ def test_heartbeat(monotonic):
 
 
 def test_diff_percent():
-    f = PercDeltaFilter(5)
+    f = PercDeltaFilterOperation(5)
     check_operation_repr(f, '5%')
 
     assert f.process_value(100, None) == 100
@@ -59,13 +59,13 @@ def test_diff_percent():
     assert f.process_value(99.75, None) == 99.75
 
     check_description(
-        PercDeltaFilter(5),
-        '- DifferenceFilter: 5%'
+        PercDeltaFilterOperation(5),
+        '- DeltaFilter: 5%'
     )
 
 
 def test_diff_abs():
-    f = AbsDeltaFilter(5)
+    f = AbsDeltaFilterOperation(5)
     check_operation_repr(f, '5')
 
     assert f.process_value(10, None) == 10
@@ -78,8 +78,8 @@ def test_diff_abs():
     assert f.process_value(10, None) == 10
 
     check_description(
-        AbsDeltaFilter(5),
-        '- DifferenceFilter: 5'
+        AbsDeltaFilterOperation(5),
+        '- DeltaFilter: 5'
     )
 
 

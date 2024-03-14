@@ -2,7 +2,7 @@ import asyncio
 from binascii import a2b_hex
 from unittest.mock import Mock
 
-from sml2mqtt.config.config import PortSourceSettings
+from sml2mqtt.config.config import SerialSourceSettings
 from sml2mqtt.device_old import Device, DeviceStatus
 from sml2mqtt.device_old.watchdog import Watchdog
 
@@ -51,7 +51,7 @@ async def test_watchdog_no_expire():
 async def test_watchdog_setup_and_feed(sml_stream, sml_data_1):
     device_url = 'watchdog_test'
 
-    obj = await Device.create(PortSourceSettings(url=device_url, timeout=0.2))
+    obj = await Device.create(SerialSourceSettings(url=device_url, timeout=0.2))
     await obj.start()
     assert obj.status == DeviceStatus.STARTUP
 

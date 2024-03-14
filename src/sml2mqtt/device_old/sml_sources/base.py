@@ -1,11 +1,11 @@
 import sml2mqtt.device_old
-from sml2mqtt.config.config import PortSourceSettings
+from sml2mqtt.config.config import SerialSourceSettings
 
 
 class SmlSourceBase:
 
     @classmethod
-    async def create(cls, settings: PortSourceSettings, device: 'sml2mqtt.device.Device'):
+    async def create(cls, settings: SerialSourceSettings, device: 'sml2mqtt.device.Device'):
         raise NotImplementedError()
 
     async def start(self):

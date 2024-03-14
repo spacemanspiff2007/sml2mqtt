@@ -8,9 +8,15 @@ ObisHex = Annotated[
     StringConstraints(to_lower=True, strip_whitespace=True, pattern=r'[0-9a-fA-F]{12}')
 ]
 
+LowerStr = Annotated[
+    str,
+    StringConstraints(to_lower=True, strip_whitespace=True)
+]
+
+
 Number: TypeAlias = StrictInt | StrictFloat
 
 TimeInSeconds = Annotated[
-    Number,
-    'asdf'
+    int | float,
+    ...
 ]

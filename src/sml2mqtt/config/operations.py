@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import TypeAlias, Any
+from typing import Any, TypeAlias
 
 from easyconfig import BaseModel
 from pydantic import (
     Field,
     StrictBool,
-    conlist, model_validator,
+    conlist,
+    model_validator,
 )
 
-from .types import Number, TimeInSeconds, ObisHex  # noqa: TCH001
+from .types import Number, ObisHex, TimeInSeconds  # noqa: TCH001
 
 
 # -------------------------------------------------------------------------------------------------
@@ -87,7 +88,7 @@ class NegativeOnEnergyMeterWorkaround(BaseModel):
 # -------------------------------------------------------------------------------------------------
 # Operations
 # -------------------------------------------------------------------------------------------------
-class OrOperation(BaseModel):
+class Or(BaseModel):
     operations: OperationsListType = Field(
         alias='or', description='A sequence of operations that will be evaluated one after another. '
                                 'As soon as one operation returns a value the sequence will be aborted and '
@@ -95,7 +96,7 @@ class OrOperation(BaseModel):
     )
 
 
-class SequenceOperation(BaseModel):
+class Sequence(BaseModel):
     operations: OperationsListType = Field(
         alias='sequence', description='A sequence of operations that will be evaluated one after another. '
                                       'As soon as one operation blocks a value the whole sequence will be aborted and'
@@ -107,7 +108,7 @@ OperationsType: TypeAlias = (
         OnChangeFilter | DeltaFilter | HeartbeatFilter |
         Factor | Offset | Round |
         NegativeOnEnergyMeterWorkaround |
-        OrOperation | SequenceOperation
+        Or | Sequence
 )
 
 OperationsListType = conlist(item_type=OperationsType, min_length=1)

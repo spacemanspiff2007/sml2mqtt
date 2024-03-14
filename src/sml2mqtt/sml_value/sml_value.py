@@ -1,5 +1,6 @@
+from collections.abc import Generator
 from time import monotonic
-from typing import Final, Generator
+from typing import Final
 
 from sml2mqtt.const import SmlFrameValues
 from sml2mqtt.mqtt import MqttObj
@@ -42,3 +43,4 @@ class SmlValue(OperationContainerBase):
         yield f'  operations:'
         for op in self.operations:
             yield from op.describe(f'    ')
+        yield ''

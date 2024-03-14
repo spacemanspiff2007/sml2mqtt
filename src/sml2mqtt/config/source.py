@@ -1,3 +1,5 @@
+from typing_extensions import override
+
 import serial
 from easyconfig import BaseModel
 from pydantic import (
@@ -16,11 +18,8 @@ class SmlSourceSettingsBase(BaseModel):
     def get_device_name(self) -> str:
         raise NotImplementedError()
 
-    def get_device_id(self) -> str:
-        raise NotImplementedError()
 
-
-class PortSourceSettings(SmlSourceSettingsBase):
+class SerialSourceSettings(SmlSourceSettingsBase):
     url: constr(strip_whitespace=True, min_length=1, strict=True) = Field(..., description='Device path')
     timeout: StrictInt | StrictFloat = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')
@@ -64,10 +63,8 @@ class PortSourceSettings(SmlSourceSettingsBase):
             raise ValueError(msg)
         return v
 
+    @override
     def get_device_name(self) -> str:
-        return self.url.split("/")[-1]
-
-    def get_device_id(self) -> str:
         return self.url.split("/")[-1]
 
 
@@ -80,10 +77,8 @@ class HttpSourceSettings(SmlSourceSettingsBase):
     user: str = Field(default='', description='User (if needed)')
     password: str = Field(default='', description='Password (if needed)')
 
+    @override
     def get_device_name(self) -> str:
-        return self.url.host
-
-    def get_device_id(self) -> str:
         return self.url.host
 
     @model_validator(mode='after')

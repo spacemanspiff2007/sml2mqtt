@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Union
 
 import sml2mqtt
-from sml2mqtt.config.config import PortSourceSettings
+from sml2mqtt.config.config import SerialSourceSettings
 from sml2mqtt.config.source import HttpSourceSettings
 
 if TYPE_CHECKING:
@@ -10,10 +10,10 @@ if TYPE_CHECKING:
 
 
 async def create_source(
-        settings: Union[PortSourceSettings, HttpSourceSettings],
+        settings: Union[SerialSourceSettings, HttpSourceSettings],
         device: 'sml2mqtt.device.Device') -> Union['SerialSource', 'HttpSource']:
 
-    if isinstance(settings, PortSourceSettings):
+    if isinstance(settings, SerialSourceSettings):
         from .sml_serial import SerialSource
         return await SerialSource.create(settings, device)
     if isinstance(settings, HttpSourceSettings):

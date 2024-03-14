@@ -13,7 +13,7 @@ from sml2mqtt.__log__ import get_logger
 from sml2mqtt.__shutdown__ import shutdown
 from sml2mqtt.config import CONFIG
 from sml2mqtt.config.device import SmlDeviceConfig, SmlValueConfig
-from sml2mqtt.config.source import HttpSourceSettings, PortSourceSettings
+from sml2mqtt.config.source import HttpSourceSettings, SerialSourceSettings
 from sml2mqtt.device_old import DeviceStatus
 from sml2mqtt.device_old.watchdog import Watchdog
 from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, \
@@ -26,7 +26,7 @@ ALL_DEVICES: Dict[str, 'Device'] = {}
 
 class Device:
     @classmethod
-    async def create(cls, settings: Union[PortSourceSettings, HttpSourceSettings]):
+    async def create(cls, settings: Union[SerialSourceSettings, HttpSourceSettings]):
         device = None
         try:
             mqtt_device = mqtt.BASE_TOPIC.create_child(settings.get_device_name())

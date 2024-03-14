@@ -53,5 +53,6 @@ class SmlValues:
 
     def describe(self) -> Generator[str, None, None]:
         yield f'Skipped: {", ".join(sorted(self._skipped_ids))}'
+        yield ''
         for value in self._values:
             yield from value.describe()

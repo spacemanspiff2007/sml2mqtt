@@ -28,44 +28,44 @@ class OnChangeFilterOperation(ValueOperationBase):
 
 
 class DeltaFilterBase(ValueOperationBase):
-    def __init__(self, change: int | float):
-        self.change: Final = change
+    def __init__(self, delta: int | float):
+        self.delta: Final = delta
         self.last_value: int | float = -1_000_000_000   # random value which we are unlikely to hit
 
 
-class AbsDeltaFilter(DeltaFilterBase):
+class AbsDeltaFilterOperation(DeltaFilterBase):
     @override
     def process_value(self, value: float, info: SmlValueInfo) -> float | None:
-        if abs(value - self.last_value) < self.change:
+        if abs(value - self.last_value) < self.delta:
             return None
 
         self.last_value = value
         return value
 
     def __repr__(self):
-        return f'<AbsDelta: {self.change} at 0x{id(self):x}>'
+        return f'<AbsDelta: {self.delta} at 0x{id(self):x}>'
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- DeltaFilter: {self.change}'
+        yield f'{indent:s}- DeltaFilter: {self.delta}'
 
 
-class PercDeltaFilter(DeltaFilterBase):
+class PercDeltaFilterOperation(DeltaFilterBase):
     @override
     def process_value(self, value: float, info: SmlValueInfo) -> float | None:
         perc = abs(1 - value / self.last_value) * 100
-        if perc < self.change:
+        if perc < self.delta:
             return None
 
         self.last_value = value
         return value
 
     def __repr__(self):
-        return f'<PercDelta: {self.change}% at 0x{id(self):x}>'
+        return f'<PercDelta: {self.delta}% at 0x{id(self):x}>'
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- DeltaFilter: {self.change}%'
+        yield f'{indent:s}- DeltaFilter: {self.delta}%'
 
 
 class HeartbeatFilterOperation(ValueOperationBase):

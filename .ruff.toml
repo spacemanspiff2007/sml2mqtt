@@ -44,6 +44,8 @@ ignore = [
     "TRY400",   # https://docs.astral.sh/ruff/rules/error-instead-of-exception/
 
     "A003",     # https://docs.astral.sh/ruff/rules/builtin-attribute-shadowing/
+
+    "UP038",    # https://docs.astral.sh/ruff/rules/non-pep604-isinstance/
 ]
 
 

@@ -6,7 +6,7 @@ from smllib import SmlFrame, SmlStreamReader
 import sml2mqtt.device_old.sml_device
 import sml2mqtt.device_old.sml_sources.sml_serial
 from sml2mqtt import CMD_ARGS
-from sml2mqtt.config.config import PortSourceSettings
+from sml2mqtt.config.config import SerialSourceSettings
 from sml2mqtt.device_old import Device, DeviceStatus
 from sml2mqtt.mqtt import MqttObj, patch_analyze
 
@@ -86,7 +86,7 @@ async def device(sml_stream, monkeypatch):
     mqtt_base = MqttObj('testing', 0, False).update()
     monkeypatch.setattr(sml2mqtt.mqtt, 'BASE_TOPIC', mqtt_base)
 
-    obj = await TestingDevice.create(PortSourceSettings(url=device_url))
+    obj = await TestingDevice.create(SerialSourceSettings(url=device_url))
 
     return obj
 

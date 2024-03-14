@@ -6,7 +6,7 @@ from typing import Optional, TYPE_CHECKING
 from serial_asyncio import create_serial_connection, SerialTransport
 
 from sml2mqtt.__log__ import get_logger
-from sml2mqtt.config.source import PortSourceSettings
+from sml2mqtt.config.source import SerialSourceSettings
 from sml2mqtt.device_old import DeviceStatus
 
 from .base import SmlSourceBase
@@ -21,7 +21,7 @@ log = get_logger('serial')
 class SerialSource(Protocol, SmlSourceBase):
 
     @classmethod
-    async def create(cls, settings: PortSourceSettings, device: 'sml2mqtt.device.Device') -> 'SerialSource':
+    async def create(cls, settings: SerialSourceSettings, device: 'sml2mqtt.device.Device') -> 'SerialSource':
         transport, protocol = await create_serial_connection(
             asyncio.get_event_loop(), cls,
             url=settings.url,

@@ -25,8 +25,6 @@ def test_offset():
 
 
 def test_round():
-    o = RoundOperation()
-    check_operation_repr(o, '0')
     o = RoundOperation(0)
     check_operation_repr(o, '0')
 
@@ -66,7 +64,7 @@ def test_description():
     )
 
     check_description(
-        RoundOperation(),
+        RoundOperation(0),
         '- Round: integer'
     )
 
