@@ -32,8 +32,6 @@ class EnhancedSmlFrame(SmlFrame):
             sml_objs: list[SmlListEntry] = self.get_obis()
         except Exception:
             log.info('get_obis failed - try parsing frame')
-            for line in traceback.format_exc().splitlines():
-                log.debug(line)
 
             sml_objs: list[SmlListEntry] = []
             for msg in self.parse_frame():

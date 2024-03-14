@@ -9,7 +9,10 @@ class DeviceProto(Protocol):
     def on_source_data(self, data: bytes):
         ...
 
-    def on_source_error(self, e: Exception):
+    def on_source_failed(self, reason: str):
+        ...
+
+    def on_error(self, e: Exception, *, show_traceback: bool = True):
         ...
 
 

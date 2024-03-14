@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from typing import Final
 
 from typing_extensions import override
@@ -16,6 +17,10 @@ class FactorOperation(ValueOperationBase):
     def __repr__(self):
         return f'<Factor: {self.factor} at 0x{id(self):x}>'
 
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- Factor: {self.factor}'
+
 
 class OffsetOperation(ValueOperationBase):
     def __init__(self, offset: int | float):
@@ -27,6 +32,10 @@ class OffsetOperation(ValueOperationBase):
 
     def __repr__(self):
         return f'<Offset: {self.offset} at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- Offset: {self.offset}'
 
 
 class RoundOperation(ValueOperationBase):
@@ -41,3 +50,7 @@ class RoundOperation(ValueOperationBase):
 
     def __repr__(self):
         return f'<Round: {self.digits if self.digits is not None else 0} at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- Round: {self.digits if self.digits is not None else "integer"}'

@@ -9,11 +9,11 @@ from smllib.errors import CrcError
 
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.const import EnhancedSmlFrame
-from sml2mqtt.device_old import DeviceStatus
 from sml2mqtt.errors import Sml2MqttExceptionWithLog
 from sml2mqtt.mqtt import BASE_TOPIC
 from sml2mqtt.sml_value import SmlValues
 
+from .device_status import DeviceStatus
 from .watchdog import Watchdog
 
 
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 # Dirty:
 # Replace the class SmlFrame which is returned by SmlStreamReader with EnhancedSmlFrame
 assert hasattr(smllib.reader, 'SmlFrame')
-setattr(smllib.reader, '', EnhancedSmlFrame)
+setattr(smllib.reader, 'SmlFrame', EnhancedSmlFrame)
 
 
 class SmlDevice:
@@ -97,22 +97,25 @@ class SmlDevice:
             if frame is not None:
                 frame.log_frame(self.log)
 
-            # Log exception
-            if isinstance(e, Sml2MqttExceptionWithLog):
-                e.log_msg(self.log)
-            else:
+            self.on_error(e)
+
+    def on_error(self, e: Exception, *, show_traceback: bool = True):
+        # Log exception
+        if isinstance(e, Sml2MqttExceptionWithLog):
+            e.log_msg(self.log)
+        else:
+            if show_traceback:
                 for line in traceback.format_exc().splitlines():
                     self.log.error(line)
+            else:
+                self.log.error(e)
 
-            # Signal that an error occurred
-            self.set_status(DeviceStatus.ERROR)
-            return None
-
-    def on_source_error(self, e: Exception):
-        pass
+        # Signal that an error occurred
+        self.set_status(DeviceStatus.ERROR)
+        return None
 
     def on_timeout(self):
-        pass
+        self.set_status(DeviceStatus.MSG_TIMEOUT)
 
     def process_frame(self, frame: EnhancedSmlFrame):
 
@@ -122,3 +125,29 @@ class SmlDevice:
 
         # There was no Error -> OK
         self.set_status(DeviceStatus.OK)
+
+    def setup_values_from_frame(self, frame: EnhancedSmlFrame):
+        self.frame_handler = self.process_frame
+
+    def analyze_frame(self, frame: EnhancedSmlFrame):
+
+        # log Frame and frame description
+        self.log.info('')
+        frame.log_frame(self.log)
+        self.log.info('')
+        for obj in frame.parse_frame():
+            for line in obj.format_msg().splitlines():
+                self.log.info(line)
+        self.log.info('')
+
+        # Setup and process the frame
+        self.setup_values_from_frame(frame)
+
+        # Log setup values
+        for line in self.sml_values.describe():
+            self.log.info(line)
+
+        # shutdown
+        self.log.info('')
+        self.set_status(DeviceStatus.SHUTDOWN)
+        return None

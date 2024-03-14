@@ -1,9 +1,12 @@
+import logging
+import traceback
 from binascii import a2b_hex
 
 import pytest
 from smllib.reader import SmlFrame
 
 import sml2mqtt.mqtt.mqtt_obj
+import sml2mqtt.const.task as task_module
 from sml2mqtt.const import SmlFrameValues
 
 
@@ -178,3 +181,51 @@ Received Frame
   crc16         : 47641
 """
     return msg
+
+
+@pytest.fixture(autouse=True)
+def check_no_logged_error(caplog, request):
+    caplog.set_level(logging.DEBUG)
+
+    yield None
+
+    fail_on = [logging.CRITICAL, logging.ERROR, logging.WARNING]
+
+    markers = request.node.own_markers
+    for marker in markers:
+        if marker.name == 'ignore_log_errors':
+            fail_on.remove(logging.ERROR)
+            fail_on.remove(logging.WARNING)
+        elif marker.name == 'ignore_log_warnings':
+            fail_on.remove(logging.WARNING)
+
+    fail_lvl = min(fail_on)
+
+    msgs = []
+    for fail_lvl, phase in ((logging.WARNING, 'setup'), (fail_lvl, 'call'), (logging.WARNING, 'teardown')):
+        for record in caplog.get_records(phase):
+            if record.levelno < fail_lvl:
+                continue
+            msgs.append(f'{record.name:20s} | {record.levelname:7} | {record.getMessage():s}')
+
+    if msgs:
+        pytest.fail(reason='Error in log:\n' + '\n'.join(msgs))
+
+
+@pytest.fixture(autouse=True)
+def _warp_all_tasks(monkeypatch):
+
+    async def wrapped_future(coro):
+        try:
+            return await coro
+        except Exception:
+            for line in traceback.format_exc().splitlines():
+                logging.getLogger('task_wrap').error(line)
+            raise
+
+    original = task_module.create_task
+
+    def create_task(coro, *, name=None):
+        return original(wrapped_future(coro), name=name)
+
+    monkeypatch.setattr(task_module, 'create_task', create_task)

@@ -1,5 +1,5 @@
 from smllib.sml import SmlListEntry
-from tests.sml_values.test_operations.helper import check_operation_repr
+from tests.sml_values.test_operations.helper import check_operation_repr, check_description
 
 from sml2mqtt.const import SmlFrameValues
 from sml2mqtt.sml_value.base import SmlValueInfo
@@ -48,3 +48,10 @@ def test_keep_positive():
     energy.status = 0x182
 
     assert o.process_value(value, info) == 4189.0
+
+
+def test_description():
+    check_description(
+        NegativeOnEnergyMeterWorkaroundOperation(),
+        '- Negative on status of energy meter 0100010800ff'
+    )

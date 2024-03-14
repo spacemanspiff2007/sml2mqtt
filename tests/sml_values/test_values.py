@@ -11,6 +11,7 @@ from sml2mqtt.errors import (
 from sml2mqtt.mqtt import MqttObj
 from sml2mqtt.sml_value import SmlValue, SmlValues
 from sml2mqtt.sml_value.operations import OnChangeFilterOperation
+from sml_values.test_operations.helper import check_description
 
 
 def test_values(sml_frame_values_1: SmlFrameValues, no_mqtt):
@@ -31,6 +32,21 @@ def test_values(sml_frame_values_1: SmlFrameValues, no_mqtt):
         v.process_frame(sml_frame_values_1)
         assert no_mqtt == [('/energy', 253917.7, 0, False), ('/power', 272, 0, False)]
 
+    # test description
+    check_description(v, [
+        'Skipped: 0100020800ff, 0100600100ff, 010060320101',
+        '<SmlValue>',
+        '  obis : 0100010800ff',
+        '  topic: /energy',
+        '  operations:',
+        '    - OnChangeFilter',
+        '<SmlValue>',
+        '  obis : 0100100700ff',
+        '  topic: /power',
+        '  operations:',
+        '    - OnChangeFilter'
+    ])
+
 
 def get_error_message(e: Sml2MqttExceptionWithLog, caplog) -> list[str]:
     e.log_msg(logging.getLogger('test'))
@@ -45,6 +61,7 @@ def get_error_message(e: Sml2MqttExceptionWithLog, caplog) -> list[str]:
     return msgs
 
 
+@pytest.mark.ignore_log_errors()
 def test_too_much(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
     v = SmlValues()
     v.set_skipped('010060320101', '0100600100ff')
@@ -73,6 +90,7 @@ def test_too_much(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
     ]
 
 
+@pytest.mark.ignore_log_errors()
 def test_missing(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
     v = SmlValues()
     v.set_skipped('010060320101', '0100600100ff', '0100020800ff', '0100010800ff', '0100100700ff')

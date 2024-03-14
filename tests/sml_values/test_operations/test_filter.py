@@ -1,4 +1,4 @@
-from tests.sml_values.test_operations.helper import check_operation_repr
+from tests.sml_values.test_operations.helper import check_description, check_operation_repr
 
 from sml2mqtt.sml_value.base import SmlValueInfo
 from sml2mqtt.sml_value.operations import (
@@ -19,6 +19,11 @@ def test_skip():
     assert f.process_value(1, None) == 1
     assert f.process_value(1.1, None) == 1.1
 
+    check_description(
+        SkipZeroMeterOperation(),
+        '- ZeroMeterFilter'
+    )
+
 
 def test_heartbeat(monotonic):
     f = HeartbeatFilterOperation(30)
@@ -34,6 +39,11 @@ def test_heartbeat(monotonic):
     monotonic.add(0.01)
     assert f.process_value(1, info) == 1
 
+    check_description(
+        HeartbeatFilterOperation(30),
+        '- HeartbeatFilter: 30s'
+    )
+
 
 def test_diff_percent():
     f = PercDiffFilterOperation(5)
@@ -47,6 +57,11 @@ def test_diff_percent():
     assert f.process_value(109.999, None) is None
     assert f.process_value(99.750001, None) is None
     assert f.process_value(99.75, None) == 99.75
+
+    check_description(
+        PercDiffFilterOperation(5),
+        '- DifferenceFilter: 5%'
+    )
 
 
 def test_diff_abs():
@@ -62,6 +77,11 @@ def test_diff_abs():
     assert f.process_value(19.9999, None) is None
     assert f.process_value(10, None) == 10
 
+    check_description(
+        AbsDiffFilterOperation(5),
+        '- DifferenceFilter: 5'
+    )
+
 
 def test_on_change():
     f = OnChangeFilterOperation()
@@ -71,3 +91,8 @@ def test_on_change():
     assert f.process_value(10, None) is None
     assert f.process_value(11, None) == 11
     assert f.process_value(0, None) == 0
+
+    check_description(
+        OnChangeFilterOperation(),
+        '- OnChangeFilter'
+    )

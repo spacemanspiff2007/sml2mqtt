@@ -7,5 +7,5 @@ from .filter import (
     SkipZeroMeterOperation,
 )
 from .math import FactorOperation, OffsetOperation, RoundOperation
-from .or_op import OrOperation
+from .operations import OrOperation, SequenceOperation
 from .workarounds import NegativeOnEnergyMeterWorkaroundOperation

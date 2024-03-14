@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from sml2mqtt.errors import RequiredObisValueNotInFrameError, UnprocessedObisValuesReceivedError
@@ -16,6 +17,13 @@ class SmlValues:
         self._skipped_ids: frozenset[str] = frozenset()
         self._all_ids: frozenset[str] = frozenset()
         self._values: tuple[SmlValue, ...] = ()
+
+    def __repr__(self):
+        return (
+            f'<{self.__class__.__name__:s} '
+            f'processed={",".join(self._processed_ids):s}, '
+            f'skipped={",".join(self._skipped_ids):s}>'
+        )
 
     def set_skipped(self, *obis_ids: str):
         self._skipped_ids = frozenset(obis_ids)
@@ -43,9 +51,7 @@ class SmlValues:
         if obis_missing := self._processed_ids - obis_in_frame:
             raise RequiredObisValueNotInFrameError(*sorted(obis_missing))
 
-    def __repr__(self):
-        return (
-            f'<{self.__class__.__name__:s} '
-            f'processed={",".join(self._processed_ids):s}, '
-            f'skipped={",".join(self._skipped_ids):s}>'
-        )
+    def describe(self) -> Generator[str, None, None]:
+        yield f'Skipped: {", ".join(sorted(self._skipped_ids))}'
+        for value in self._values:
+            yield from value.describe()

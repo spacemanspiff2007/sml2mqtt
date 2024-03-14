@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from time import monotonic
 from typing import Final
 
@@ -21,6 +22,10 @@ class OnChangeFilterOperation(ValueOperationBase):
     def __repr__(self):
         return f'<OnChange at 0x{id(self):x}>'
 
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- OnChangeFilter'
+
 
 class DiffFilterBaseOperation(ValueOperationBase):
     def __init__(self, change: int | float):
@@ -40,6 +45,10 @@ class AbsDiffFilterOperation(DiffFilterBaseOperation):
     def __repr__(self):
         return f'<AbsDiff: {self.change} at 0x{id(self):x}>'
 
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- DifferenceFilter: {self.change}'
+
 
 class PercDiffFilterOperation(DiffFilterBaseOperation):
     @override
@@ -53,6 +62,10 @@ class PercDiffFilterOperation(DiffFilterBaseOperation):
 
     def __repr__(self):
         return f'<PercDiff: {self.change}% at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- DifferenceFilter: {self.change}%'
 
 
 class HeartbeatFilterOperation(ValueOperationBase):
@@ -68,6 +81,10 @@ class HeartbeatFilterOperation(ValueOperationBase):
     def __repr__(self):
         return f'<Heartbeat: {self.every}s at 0x{id(self):x}>'
 
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- HeartbeatFilter: {self.every}s'
+
 
 class SkipZeroMeterOperation(ValueOperationBase):
 
@@ -79,3 +96,7 @@ class SkipZeroMeterOperation(ValueOperationBase):
 
     def __repr__(self):
         return f'<SkipZeroMeter at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- ZeroMeterFilter'

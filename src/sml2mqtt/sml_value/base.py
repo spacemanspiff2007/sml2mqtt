@@ -26,5 +26,14 @@ class ValueOperationBase:
     def process_value(self, value: float, info: SmlValueInfo) -> float | None:
         raise NotImplementedError()
 
-    def describe(self, indent: str = '') -> Generator[str, Any, None]:
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
         raise NotImplementedError()
+
+
+class OperationContainerBase:
+    def __init__(self):
+        self.operations: tuple[ValueOperationBase, ...] = ()
+
+    def add_operation(self, operation: ValueOperationBase):
+        self.operations = (*self.operations, operation)
+        return self

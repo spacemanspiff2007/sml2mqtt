@@ -1,4 +1,5 @@
 import re
+from collections.abc import Iterable
 
 from sml2mqtt.sml_value.base import ValueOperationBase
 
@@ -20,3 +21,10 @@ def check_operation_repr(obj: ValueOperationBase, *values):
     target = f'<{class_name:s}{values_str:s}'
 
     assert target == repr_str, f'\n{target}\n{repr_str}'
+
+
+def check_description(obj: ValueOperationBase, value: str | Iterable[str]):
+    desc = list(obj.describe())
+    value = [value] if isinstance(value, str) else list(value)
+
+    assert desc == value, f'\n{desc}\n{value}'

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from asyncio import Event, Task, TimeoutError, create_task, current_task, wait_for
+from asyncio import Event, TimeoutError, wait_for
 from typing import TYPE_CHECKING, Final
 
+from ..const import DeviceTask
 
 if TYPE_CHECKING:
     from .sml_device import SmlDevice
@@ -14,17 +15,13 @@ class Watchdog:
         self.device: Final = device
 
         self._event: Final = Event()
-        self._task: Task | None = None
+        self._task: Final  = DeviceTask(device, self._wd_task, name=f'Watchdog Task {self.device.name:s}')
 
     async def start(self):
-        assert self._timeout > 0
-        assert self._task is None
-        self._task = create_task(self._wd_task(), name=f'Watchdog {self.device.name:s}')
+        await self._task.start()
 
     async def stop(self):
-        if self._task is not None:
-            self._task.cancel()
-            self._task = None
+        return await self._task.stop()
 
     def set_timeout(self, timeout: float):
         if timeout < 0.1:
@@ -36,32 +33,23 @@ class Watchdog:
         self._event.set()
 
     async def _wd_task(self):
-        task = current_task()
+        make_call = True
+        while True:
+            self._event.clear()
 
-        try:
-            make_call = True
-            while True:
-                self._event.clear()
+            try:
+                await wait_for(self._event.wait(), self._timeout)
+                make_call = True
+                continue
+            except TimeoutError:
+                pass
 
-                try:
-                    await wait_for(self._event.wait(), self._timeout)
-                    make_call = True
-                    continue
-                except TimeoutError:
-                    pass
+            # callback only once!
+            if not make_call:
+                continue
+            make_call = False
 
-                # callback only once!
-                if not make_call:
-                    continue
-                make_call = False
-
-                try:
-                    self.device.on_timeout()
-                except Exception as e:
-                    self.device.on_source_error(e)
-
-        except Exception as e:
-            self.device.on_source_error(e)
-        finally:
-            if task is self._task:
-                self._task = None
+            try:
+                self.device.on_timeout()
+            except Exception as e:
+                self.device.on_error(e)

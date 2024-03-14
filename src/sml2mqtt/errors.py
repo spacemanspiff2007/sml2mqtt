@@ -49,6 +49,24 @@ class ObisIdForConfigurationMappingNotFoundError(Sml2MqttConfigMappingError):
 
 
 # ------------------------------------------------------------------------------------
+# Source Errors
+# ------------------------------------------------------------------------------------
+
+class HttpStatusError(Sml2MqttExceptionWithLog):
+    def __init__(self, status: int):
+        super().__init__()
+        self.status: Final = status
+
+    @override
+    def log_msg(self, log: Logger):
+        log.error(f'Received http status {self.status}')
+
+    def __eq__(self, other):
+        if isinstance(other, HttpStatusError):
+            return self.status == other.status
+        return NotImplemented
+
+# ------------------------------------------------------------------------------------
 # Value Processing Errors
 # ------------------------------------------------------------------------------------
 

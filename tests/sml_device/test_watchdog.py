@@ -4,8 +4,7 @@ import asyncio
 from binascii import a2b_hex
 from unittest.mock import Mock
 
-from sml2mqtt.config.config import PortSourceSettings
-from sml2mqtt.device_old import Device, DeviceStatus
+from sml2mqtt.sml_device import SmlDevice, DeviceStatus
 from sml2mqtt.sml_device.watchdog import Watchdog
 
 
@@ -34,7 +33,6 @@ async def test_watchdog_expire():
 
     # Assert that the task is properly canceled
     await asyncio.sleep(0.05)
-    assert w._task is None
 
 
 async def test_watchdog_no_expire():
@@ -52,13 +50,17 @@ async def test_watchdog_no_expire():
 
     # Assert that the task is properly canceled
     await asyncio.sleep(0.05)
-    assert w._task is None
 
 
-async def test_watchdog_setup_and_feed(sml_stream, sml_data_1):
-    device_url = 'watchdog_test'
+async def test_watchdog_setup_and_feed(sml_data_1):
 
-    obj = await Device.create(PortSourceSettings(url=device_url, timeout=0.2))
+    obj = SmlDevice('test')
+    obj.sml_values.set_skipped(
+        '0100000009ff', '0100010800ff', '0100010801ff', '0100010802ff', '0100020800ff',
+        '0100100700ff', '0100240700ff', '0100380700ff', '01004c0700ff'
+    )
+    obj.watchdog.set_timeout(0.2)
+
     await obj.start()
     assert obj.status == DeviceStatus.STARTUP
 
@@ -67,10 +69,10 @@ async def test_watchdog_setup_and_feed(sml_stream, sml_data_1):
 
     for _ in range(5):
         await asyncio.sleep(0.15)
-        obj.serial_data_read(a2b_hex(sml_data_1))
+        obj.on_source_data(a2b_hex(sml_data_1))
         assert obj.status == DeviceStatus.OK
 
     await asyncio.sleep(0.3)
     assert obj.status == DeviceStatus.MSG_TIMEOUT
 
-    await asyncio.gather(obj, obj.stop())
+    await obj.stop()

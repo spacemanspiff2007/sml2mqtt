@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from typing import Final
 
 from typing_extensions import override
@@ -28,3 +29,7 @@ class NegativeOnEnergyMeterWorkaroundOperation(ValueOperationBase):
 
     def __repr__(self):
         return f'<NegativeOnEnergyMeterWorkaround: {self.meter_obis:s} at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- Negative on status of energy meter {self.meter_obis:s}'

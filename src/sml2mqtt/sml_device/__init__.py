@@ -1,1 +1,1 @@
-from .sml_device import SmlDevice
+from .sml_device import SmlDevice, DeviceStatus
