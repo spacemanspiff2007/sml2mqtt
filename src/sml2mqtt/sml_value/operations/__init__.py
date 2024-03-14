@@ -1,9 +1,9 @@
 from .filter import (
-    AbsDiffFilterOperation,
-    DiffFilterBaseOperation,
+    AbsDeltaFilter,
+    DeltaFilterBase,
     HeartbeatFilterOperation,
     OnChangeFilterOperation,
-    PercDiffFilterOperation,
+    PercDeltaFilter,
     SkipZeroMeterOperation,
 )
 from .math import FactorOperation, OffsetOperation, RoundOperation

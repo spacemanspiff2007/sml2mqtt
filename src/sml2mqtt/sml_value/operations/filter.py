@@ -27,13 +27,13 @@ class OnChangeFilterOperation(ValueOperationBase):
         yield f'{indent:s}- OnChangeFilter'
 
 
-class DiffFilterBaseOperation(ValueOperationBase):
+class DeltaFilterBase(ValueOperationBase):
     def __init__(self, change: int | float):
         self.change: Final = change
         self.last_value: int | float = -1_000_000_000   # random value which we are unlikely to hit
 
 
-class AbsDiffFilterOperation(DiffFilterBaseOperation):
+class AbsDeltaFilter(DeltaFilterBase):
     @override
     def process_value(self, value: float, info: SmlValueInfo) -> float | None:
         if abs(value - self.last_value) < self.change:
@@ -43,14 +43,14 @@ class AbsDiffFilterOperation(DiffFilterBaseOperation):
         return value
 
     def __repr__(self):
-        return f'<AbsDiff: {self.change} at 0x{id(self):x}>'
+        return f'<AbsDelta: {self.change} at 0x{id(self):x}>'
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- DifferenceFilter: {self.change}'
+        yield f'{indent:s}- DeltaFilter: {self.change}'
 
 
-class PercDiffFilterOperation(DiffFilterBaseOperation):
+class PercDeltaFilter(DeltaFilterBase):
     @override
     def process_value(self, value: float, info: SmlValueInfo) -> float | None:
         perc = abs(1 - value / self.last_value) * 100
@@ -61,11 +61,11 @@ class PercDiffFilterOperation(DiffFilterBaseOperation):
         return value
 
     def __repr__(self):
-        return f'<PercDiff: {self.change}% at 0x{id(self):x}>'
+        return f'<PercDelta: {self.change}% at 0x{id(self):x}>'
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- DifferenceFilter: {self.change}%'
+        yield f'{indent:s}- DeltaFilter: {self.change}%'
 
 
 class HeartbeatFilterOperation(ValueOperationBase):
