@@ -1,11 +1,7 @@
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
-from sml2mqtt.config.config import GeneralSettings
-from sml2mqtt.config.device import SmlDeviceConfig
-from sml2mqtt.const import SmlFrameValues
 from sml2mqtt.sml_value import SmlValue
 from sml2mqtt.sml_value.operations import (
     FactorOperation,
@@ -19,6 +15,10 @@ from sml2mqtt.sml_value.setup_operations import setup_operations
 
 
 if TYPE_CHECKING:
+    from sml2mqtt.config.config import GeneralSettings
+    from sml2mqtt.config.device import SmlDeviceConfig
+    from sml2mqtt.const import SmlFrameValues
+    import logging
     from sml2mqtt.sml_device import SmlDevice
 
 
@@ -48,11 +48,12 @@ def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cf
 
 def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig | None, general_cfg: GeneralSettings):
     mqtt_device = device.mqtt_device
-    configured_ids = set()
+    skip_default_setup = set()
 
     mqtt_device.set_topic(device.device_id)
 
     if cfg is not None:
+        # mqtt of device
         mqtt_device.set_config(cfg.mqtt)
         device.mqtt_status.set_config(cfg.status)
 
@@ -61,14 +62,20 @@ def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig 
             skipped_obis.add(device.device_id)
 
         device.sml_values.set_skipped(*skipped_obis)
+        skip_default_setup.update(skipped_obis)
 
         for value_cfg in cfg.values:
             obis = value_cfg.obis
-            configured_ids.add(obis)
+            skip_default_setup.add(obis)
+
+            if obis in cfg.skip:
+                device.log.warning(f'Config for {obis:s} found but {obis:s} is also marked to be skipped')
+            if obis not in frame.obis_ids():
+                device.log.warning(f'Config for {obis:s} found but {obis:s} was not reported by the frame')
 
             sml_value = SmlValue(
                 obis,
-                mqtt_device.create_child().set_config(value_cfg.mqtt)
+                mqtt_device.create_child(topic_fragment=obis).set_config(value_cfg.mqtt)
             )
             device.sml_values.add_value(sml_value)
 
@@ -79,7 +86,8 @@ def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig 
         # No config found -> ignore defaults
         device.sml_values.set_skipped(*general_cfg.device_id_obis)
 
-    for obis, entry in frame.items(skip=configured_ids):
+    # Create default for not
+    for obis, entry in frame.items(skip=skip_default_setup):
         sml_value = SmlValue(obis, mqtt_device.create_child(topic_fragment=obis))
         device.sml_values.add_value(sml_value)
 

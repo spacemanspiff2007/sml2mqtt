@@ -16,7 +16,7 @@ from sml2mqtt.config.device import SmlDeviceConfig, SmlValueConfig
 from sml2mqtt.config.source import HttpSourceSettings, SerialSourceSettings
 from sml2mqtt.device_old import DeviceStatus
 from sml2mqtt.device_old.watchdog import Watchdog
-from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, \
+from sml2mqtt.errors import DeviceFailedError, DeviceSetupFailedError, \
     ObisIdForConfigurationMappingNotFoundError, Sml2MqttConfigMappingError
 from sml2mqtt.mqtt import MqttObj
 from sml2mqtt.sml_value_old import SmlValue
@@ -91,7 +91,7 @@ class Device:
             # Stop reading from the serial port because we are shutting down
             self.sml_source.stop()
             self.watchdog.stop()
-            shutdown(AllDevicesFailedError)
+            shutdown(DeviceFailedError)
         return True
 
     def _select_device_id(self, frame_values: Dict[str, SmlListEntry]) -> str:

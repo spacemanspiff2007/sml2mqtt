@@ -9,7 +9,10 @@ from sml2mqtt.__args__ import CMD_ARGS, get_command_line_args
 from sml2mqtt.__log__ import log, setup_log
 from sml2mqtt.__shutdown__ import get_return_code, shutdown, signal_handler_setup
 from sml2mqtt.config import CONFIG
-from sml2mqtt.device_old import Device
+from sml2mqtt.config.source import SerialSourceSettings, HttpSourceSettings
+from sml2mqtt.sml_device import SmlDevice
+from sml2mqtt.const.task import wait_for_tasks
+from sml2mqtt.sml_source import create_source
 
 
 async def a_main():
@@ -24,8 +27,10 @@ async def a_main():
             await mqtt.wait_for_connect(5)
 
         # Create devices for port
-        for port_cfg in CONFIG.ports:
-            devices.append(await Device.create(port_cfg))
+        for input_cfg in CONFIG.inputs:
+            device = SmlDevice(input_cfg.get_device_name())
+            device.set_source(await create_source(device, settings=input_cfg))
+            devices.append(device)
 
         for device in devices:
             await device.start()
@@ -33,7 +38,7 @@ async def a_main():
     except Exception as e:
         shutdown(e)
 
-    return await asyncio.gather(*devices, mqtt.wait_for_disconnect())
+    return await asyncio.gather(wait_for_tasks(), mqtt.wait_for_disconnect())
 
 
 def main() -> typing.Union[int, str]:

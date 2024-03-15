@@ -1,15 +1,30 @@
+from __future__ import annotations
+
 import logging
 import traceback
-from asyncio import CancelledError, Task, create_task, current_task
-from collections.abc import Callable, Coroutine
-from typing import Final
-
-from .protocols import DeviceProto
+from asyncio import CancelledError, create_task, current_task
+from asyncio import Task as asyncio_Task
+from typing import TYPE_CHECKING, Final
 
 
-TASKS: Final[set[Task]] = set()
+if TYPE_CHECKING:
+    from .protocols import DeviceProto
+    from collections.abc import Callable, Coroutine
+
+
+TASKS: Final[set[asyncio_Task]] = set()
 
 log = logging.getLogger('Tasks')
+
+
+async def wait_for_tasks():
+    while True:
+        for task in TASKS:
+            if not task.done():
+                await task
+                break
+        else:
+            break
 
 
 class Task:
@@ -17,7 +32,7 @@ class Task:
         self._coro: Final = coro
         self._name: Final = name
 
-        self._task: Task | None = None
+        self._task: asyncio_Task | None = None
 
     async def start(self):
         assert self._task is None
@@ -52,7 +67,7 @@ class Task:
                 self._task = None
 
     def process_exception(self, e: Exception):
-        log.error(f'Error in {self._task._name:s}')
+        log.error(f'Error in {self._name:s}')
         for line in traceback.format_exc().splitlines():
             log.error(line)
 
@@ -60,8 +75,8 @@ class Task:
 class DeviceTask(Task):
     def __init__(self, device: DeviceProto, coro: Callable[[], Coroutine], *, name: str):
         super().__init__(coro, name=name)
-
         self._device: Final = device
 
     def process_exception(self, e: Exception):
-        self._device.on_error(e)
+        super().process_exception(e)
+        self._device.on_source_failed(f'Task crashed: {e}')

@@ -9,14 +9,16 @@ from smllib.errors import CrcError
 
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.const import EnhancedSmlFrame
-from sml2mqtt.errors import Sml2MqttExceptionWithLog, ObisIdForConfigurationMappingNotFoundError
+from sml2mqtt.errors import ObisIdForConfigurationMappingNotFoundError, Sml2MqttExceptionWithLog
 from sml2mqtt.mqtt import BASE_TOPIC
 from sml2mqtt.sml_value import SmlValues
+from sml2mqtt.sml_device.sml_devices import ALL_DEVICES
 
+from .. import CONFIG
 from .device_status import DeviceStatus
 from .setup_device import setup_device
 from .watchdog import Watchdog
-from .. import CONFIG
+
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -47,7 +49,7 @@ class SmlDevice:
         self.device_id: str | None = None
         self.sml_values: Final = SmlValues()
 
-        self.frame_handler: Callable[[EnhancedSmlFrame], Any] = self.process_frame
+        self.frame_handler: Callable[[EnhancedSmlFrame], Any] = self.process_first_frame
 
     @property
     def name(self) -> str:
@@ -75,6 +77,8 @@ class SmlDevice:
         self.status = new_status
         self.log_status.info(f'{new_status:s}')
         self.mqtt_status.publish(new_status.value)
+
+        ALL_DEVICES.check_status()
         return True
 
     def on_source_data(self, data: bytes):
@@ -116,6 +120,9 @@ class SmlDevice:
         self.set_status(DeviceStatus.ERROR)
         return None
 
+    def on_source_failed(self, reason: str):
+        pass
+
     def on_timeout(self):
         self.set_status(DeviceStatus.MSG_TIMEOUT)
 
@@ -151,6 +158,10 @@ class SmlDevice:
         setup_device(self, frame_values, device_cfg, CONFIG.general)
 
         self.frame_handler = self.process_frame
+
+    def process_first_frame(self, frame: EnhancedSmlFrame):
+        self.setup_values_from_frame(frame)
+        self.frame_handler(frame)
 
     def analyze_frame(self, frame: EnhancedSmlFrame):
 

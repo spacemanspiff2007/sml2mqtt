@@ -1,14 +1,18 @@
 from __future__ import annotations
 
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, Annotated
+from typing import get_args as _get_args
 
+from annotated_types import Len
 from easyconfig import BaseModel
 from pydantic import (
     Field,
     StrictBool,
     conlist,
     model_validator,
+    BeforeValidator, Discriminator, Tag
 )
+from pydantic_core import PydanticCustomError
 
 from .types import Number, ObisHex, TimeInSeconds  # noqa: TCH001
 
@@ -90,7 +94,7 @@ class NegativeOnEnergyMeterWorkaround(BaseModel):
 # -------------------------------------------------------------------------------------------------
 class Or(BaseModel):
     operations: OperationsListType = Field(
-        alias='or', description='A sequence of operations that will be evaluated one after another. '
+        alias='or', description='A sequence of operations that will be evaluated one after another.\n'
                                 'As soon as one operation returns a value the sequence will be aborted and '
                                 'the returned value will be used.'
     )
@@ -98,10 +102,54 @@ class Or(BaseModel):
 
 class Sequence(BaseModel):
     operations: OperationsListType = Field(
-        alias='sequence', description='A sequence of operations that will be evaluated one after another. '
-                                      'As soon as one operation blocks a value the whole sequence will be aborted and'
+        alias='sequence', description='A sequence of operations that will be evaluated one after another.\n'
+                                      'As soon as one operation blocks a value the whole sequence will be aborted and '
                                       'will return nothing.'
     )
+
+
+# OperationsType: TypeAlias = (
+#         Annotated[OnChangeFilter, Tag('OnChangeFilter')] |
+#         Annotated[DeltaFilter, Tag('DeltaFilter')] |
+#         Annotated[HeartbeatFilter, Tag('HeartbeatFilter')] |
+#         Annotated[Factor, Tag('Factor')] |
+#         Annotated[Offset, Tag('Offset')] |
+#         Annotated[Round, Tag('Round')] |
+#         Annotated[NegativeOnEnergyMeterWorkaround, Tag('NegativeOnEnergyMeterWorkaround')] |
+#         Annotated[Or, Tag('Or')] |
+#         Annotated[Sequence, Tag('Sequence')]
+# )
+#
+#
+# KEYS_TO_TAG: dict[tuple[str, ...], str] = {
+#     (_f.alias if _f.alias is not None else _n): _m.__class__.__name__
+#     for _m in _get_args(OperationsType) for _n, _f in _m.model_fields.items() if _f.exclude is not True
+# }
+#
+# ALLOWED_KEYS: tuple[str, ...] = tuple(sorted({key for keys in KEYS_TO_TAG for key in keys}))
+#
+#
+# def check_allowed_keys(obj: Any):
+#     if isinstance(obj, dict):
+#         return KEYS_TO_TAG.get(tuple(obj))
+#
+#     if isinstance(obj, BaseModel):
+#         return KEYS_TO_TAG.get(tuple(obj.model_fields))
+#
+#     return None
+#
+#
+# OperationsTypeAnnotated: TypeAlias = Annotated[
+#     OperationsType,
+#     Discriminator(
+#         check_allowed_keys,
+#         custom_error_type='invalid_field_names',
+#         custom_error_message='Invalid field names',
+#         custom_error_context={'discriminator': 'check_allowed_keys'}
+#     )
+# ]
+#
+# OperationsListType = Annotated[list[OperationsTypeAnnotated], Len(1)]
 
 
 OperationsType: TypeAlias = (

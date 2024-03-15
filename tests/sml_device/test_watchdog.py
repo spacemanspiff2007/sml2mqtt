@@ -55,6 +55,7 @@ async def test_watchdog_no_expire():
 async def test_watchdog_setup_and_feed(sml_data_1):
 
     obj = SmlDevice('test')
+    obj.frame_handler = obj.process_frame
     obj.sml_values.set_skipped(
         '0100000009ff', '0100010800ff', '0100010801ff', '0100010802ff', '0100020800ff',
         '0100100700ff', '0100240700ff', '0100380700ff', '01004c0700ff'

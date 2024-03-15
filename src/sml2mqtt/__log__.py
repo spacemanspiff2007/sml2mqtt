@@ -35,7 +35,7 @@ def setup_log():
 
     # This is the longest logger name str
     chars = 0
-    for device in sml2mqtt.CONFIG.ports:
+    for device in sml2mqtt.CONFIG.inputs:
         chars = max(len(f'sml.device.{device.url}'), chars)
     log_format = logging.Formatter("[{asctime:s}] [{name:" + str(chars) + "s}] {levelname:8s} | {message:s}", style='{')
 

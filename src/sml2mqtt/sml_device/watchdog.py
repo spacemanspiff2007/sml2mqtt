@@ -23,6 +23,9 @@ class Watchdog:
     async def stop(self):
         return await self._task.stop()
 
+    async def wait_for_stop(self):
+        return await self._task.wait_for_stop()
+
     def set_timeout(self, timeout: float):
         if timeout < 0.1:
             raise ValueError()

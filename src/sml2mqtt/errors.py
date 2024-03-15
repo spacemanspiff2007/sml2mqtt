@@ -18,7 +18,7 @@ class Sml2MqttExceptionWithLog(Sml2MqttException):
         raise NotImplementedError()
 
 
-class AllDevicesFailedError(Sml2MqttException):
+class DeviceFailedError(Sml2MqttException):
     pass
 
 

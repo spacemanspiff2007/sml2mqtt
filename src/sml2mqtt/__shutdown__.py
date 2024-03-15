@@ -5,12 +5,13 @@ from typing import Dict, Optional, Type, Union
 
 import sml2mqtt.mqtt
 from sml2mqtt.__log__ import log
-from sml2mqtt.errors import AllDevicesFailedError, DeviceSetupFailedError, InitialMqttConnectionFailedError
+from sml2mqtt.errors import DeviceFailedError, DeviceSetupFailedError, InitialMqttConnectionFailedError
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Return code logic
 # ----------------------------------------------------------------------------------------------------------------------
-_RETURN_CODE: Optional[int] = None
+_RETURN_CODE: int | None = None
 
 
 def set_return_code(code: int):
@@ -18,7 +19,7 @@ def set_return_code(code: int):
     if _RETURN_CODE is None:
         _RETURN_CODE = code
     else:
-        if _RETURN_CODE != code:
+        if code != _RETURN_CODE:
             log.debug(f'Return code is already set to {_RETURN_CODE}, skip setting {code}!')
 
 
@@ -45,7 +46,7 @@ def signal_handler_setup():
 # ----------------------------------------------------------------------------------------------------------------------
 # Actual shutdown logic
 # ----------------------------------------------------------------------------------------------------------------------
-SHUTDOWN_TASK: Optional[Task] = None
+SHUTDOWN_TASK: Task | None = None
 SHUTDOWN_REQUESTED = False
 
 
@@ -71,8 +72,8 @@ async def _shutdown_task():
         sml2mqtt.mqtt.cancel()
 
         # once all devices are stopped the main loop will exit
-        for device in sml2mqtt.device.sml_device.ALL_DEVICES.values():
-            await device.stop()
+        from sml2mqtt.sml_device import ALL_DEVICES
+        await ALL_DEVICES.stop()
     finally:
         SHUTDOWN_TASK = None
 
@@ -86,7 +87,7 @@ def shutdown(e: Union[Exception, Type[Exception]]):
     ret_map: Dict[int, Type[Exception]] = {
         10: DeviceSetupFailedError,
         11: InitialMqttConnectionFailedError,
-        20: AllDevicesFailedError
+        20: DeviceFailedError
     }
 
     log_traceback = True

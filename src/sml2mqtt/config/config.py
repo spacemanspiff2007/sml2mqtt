@@ -45,13 +45,13 @@ class Settings(AppBaseModel):
 
 def default_config() -> Settings:
     # File defaults
-    s = Settings(
+    return Settings(
         inputs=[SerialSourceSettings(url='COM1', timeout=3), SerialSourceSettings(url='/dev/ttyS0', timeout=3), ],
         devices={
             'DEVICE_ID_HEX': SmlDeviceConfig(
                 mqtt=OptionalMqttPublishConfig(topic='DEVICE_BASE_TOPIC'),
                 status=OptionalMqttPublishConfig(topic='status'),
-                skip=['00112233445566'],
+                skip={'00112233445566'},
                 values=[
                     SmlValueConfig(
                         obis='00112233445566',
@@ -59,18 +59,13 @@ def default_config() -> Settings:
                         operations=[
                             {'negative on energy meter status': True},
                             {'factor': 3}, {'offset': 100}, {'round': 2},
-                            # {'or': [
-                            #     {'delta': 10},
-                            #     {'delta': '10%'},
-                            #     {'heartbeat': 120}
-                            # ]}
+                            {'or': [{'change filter': True}, {'heartbeat filter': 120}]}
                         ]
                     )
                 ]
             )
         }
     )
-    return s
 
 
 CONFIG: Settings = create_app_config(Settings(), default_config)
