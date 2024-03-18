@@ -42,11 +42,11 @@ class SerialSource(Protocol):
 
         self._task: Final = DeviceTask(device, self._chunk_task, name=f'Serial Task {self.device.name:s}')
 
-    async def start(self):
-        await self._task.start()
+    def start(self):
+        self._task.start()
 
-    async def stop(self):
-        return await self._task.stop()
+    async def cancel_and_wait(self):
+        return await self._task.cancel_and_wait()
 
     def connection_made(self, transport: SerialTransport):
         self.transport = transport

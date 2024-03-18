@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import logging
 import traceback
-from asyncio import CancelledError, create_task, current_task
+from asyncio import CancelledError, current_task
 from asyncio import Task as asyncio_Task
+from asyncio import create_task as asyncio_create_task
 from typing import TYPE_CHECKING, Final
 
 
@@ -15,6 +16,14 @@ if TYPE_CHECKING:
 TASKS: Final[set[asyncio_Task]] = set()
 
 log = logging.getLogger('Tasks')
+
+
+def create_task(coro: Coroutine, *, name: str | None = None):
+    task = asyncio_create_task(coro, name=name)
+
+    TASKS.add(task)
+    task.add_done_callback(TASKS.discard)
+    return task
 
 
 async def wait_for_tasks():
@@ -34,26 +43,32 @@ class Task:
 
         self._task: asyncio_Task | None = None
 
-    async def start(self):
-        assert self._task is None
-        self._task = task = create_task(self._coro(), name=self._name)
+    @property
+    def is_running(self) -> bool:
+        if (task := self._task) is None or task.cancelled():
+            return False
+        return True
 
-        TASKS.add(task)
-        task.add_done_callback(TASKS.discard)
+    def start(self):
+        if not self.is_running:
+            self._task = create_task(self._coro(), name=self._name)
 
-    async def stop(self):
-        if self._task is None:
+    def cancel(self) -> asyncio_Task | None:
+        if (task := self._task) is None:
             return None
 
-        task = self._task
-        self._task = None
-
         task.cancel()
+        return task
+
+    async def cancel_and_wait(self) -> bool:
+        if (task := self.cancel()) is None:
+            return False
 
         try:  # noqa: SIM105
             await task
         except CancelledError:
             pass
+        return True
 
     async def _wrapper(self):
         task = current_task()

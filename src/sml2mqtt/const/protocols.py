@@ -19,8 +19,8 @@ class DeviceProto(Protocol):
 
 
 class SourceProto(Protocol):
-    async def start(self):
+    def start(self):
         ...
 
-    async def stop(self):
+    def cancel_and_wait(self):
         ...

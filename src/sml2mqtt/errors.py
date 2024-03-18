@@ -69,7 +69,6 @@ class HttpStatusError(Sml2MqttExceptionWithLog):
 # ------------------------------------------------------------------------------------
 # Value Processing Errors
 # ------------------------------------------------------------------------------------
-
 class UnprocessedObisValuesReceivedError(Sml2MqttExceptionWithLog):
     def __init__(self, *values: SmlListEntry):
         super().__init__()

@@ -8,28 +8,38 @@ import sml2mqtt
 from sml2mqtt.__log__ import log as _parent_logger
 from sml2mqtt.errors import InitialMqttConnectionFailedError
 from sml2mqtt.mqtt import DynDelay
+from sml2mqtt.const import Task
+from sml2mqtt.runtime import on_shutdown
 
 log = _parent_logger.getChild('mqtt')
 
 
-TASK: Task | None = None
 IS_CONNECTED: Event | None = None
 
 
-def start():
-    global TASK, IS_CONNECTED
+async def start():
+    global IS_CONNECTED
+
+    assert not TASK.is_running
 
     IS_CONNECTED = Event()
+    await TASK.start()
 
-    assert TASK is None
-    TASK = create_task(mqtt_task(), name='MQTT Task')
+    on_shutdown(_shutdown, 'Shutdown mqtt')
 
 
-def cancel():
-    global TASK
-    if TASK is not None:
-        TASK.cancel()
-        TASK = None
+async def _shutdown():
+    await TASK.cancel_and_wait()
+
+
+async def mqtt_task():
+    try:
+        await _mqtt_task()
+    finally:
+        log.debug('Task finished')
+
+
+TASK: Final = Task(mqtt_task, name='MQTT Task')
 
 
 async def wait_for_connect(timeout: float):
@@ -45,21 +55,7 @@ async def wait_for_connect(timeout: float):
     return None
 
 
-async def wait_for_disconnect():
-    if TASK is None:
-        return None
-
-    await TASK
-
-
 QUEUE: Queue[tuple[str, int | float | str, int, bool]] | None = None
-
-
-async def mqtt_task():
-    try:
-        await _mqtt_task()
-    finally:
-        log.debug('Task finished')
 
 
 async def _mqtt_task():

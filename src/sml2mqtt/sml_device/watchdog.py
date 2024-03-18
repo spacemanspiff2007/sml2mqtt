@@ -17,14 +17,14 @@ class Watchdog:
         self._event: Final = Event()
         self._task: Final  = DeviceTask(device, self._wd_task, name=f'Watchdog Task {self.device.name:s}')
 
-    async def start(self):
-        await self._task.start()
+    def start(self):
+        self._task.start()
 
-    async def stop(self):
-        return await self._task.stop()
+    def cancel(self):
+        self._task.cancel()
 
-    async def wait_for_stop(self):
-        return await self._task.wait_for_stop()
+    async def cancel_and_wait(self):
+        return await self._task.cancel_and_wait()
 
     def set_timeout(self, timeout: float):
         if timeout < 0.1:

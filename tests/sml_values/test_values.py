@@ -35,16 +35,19 @@ def test_values(sml_frame_values_1: SmlFrameValues, no_mqtt):
     # test description
     check_description(v, [
         'Skipped: 0100020800ff, 0100600100ff, 010060320101',
+        '',
         '<SmlValue>',
         '  obis : 0100010800ff',
         '  topic: /energy',
         '  operations:',
         '    - OnChangeFilter',
+        '',
         '<SmlValue>',
         '  obis : 0100100700ff',
         '  topic: /power',
         '  operations:',
-        '    - OnChangeFilter'
+        '    - OnChangeFilter',
+        '',
     ])
 
 

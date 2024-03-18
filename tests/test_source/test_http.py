@@ -1,8 +1,10 @@
 from aiohttp import ClientTimeout
 from aioresponses import aioresponses
 from helper import wait_for_call
+from sml2mqtt.runtime import do_shutdown_async
 
 from sml2mqtt.sml_source.http import HttpSource
+from sml2mqtt.sml_source.http import close_session
 
 
 async def test_200(sml_data_1, device_mock):
@@ -12,15 +14,17 @@ async def test_200(sml_data_1, device_mock):
     with aioresponses() as m:
         m.get(source.url, body=sml_data_1)
 
-        await source.start()
+        source.start()
         try:
             await wait_for_call(device_mock.on_source_data, 1)
         finally:
-            await source.stop()
+            await source.cancel_and_wait()
 
     device_mock.on_source_data.assert_called_once_with(sml_data_1)
     device_mock.on_source_failed.assert_not_called()
     device_mock.on_error.assert_not_called()
+
+    await close_session()
 
 
 async def test_400(device_mock):
@@ -29,12 +33,14 @@ async def test_400(device_mock):
     with aioresponses() as m:
         m.get(source.url, status=404)
 
-        await source.start()
+        source.start()
         try:
             await wait_for_call(device_mock.on_error, 1)
         finally:
-            await source.stop()
+            await source.cancel_and_wait()
 
     device_mock.on_source_data.assert_not_called()
     device_mock.on_source_failed.assert_not_called()
     device_mock.on_error.assert_called_once()
+
+    await close_session()

@@ -21,7 +21,7 @@ def get_watchdog() -> tuple[Mock, Watchdog]:
 async def test_watchdog_expire():
 
     m, w = get_watchdog()
-    await w.start()
+    w.start()
 
     await asyncio.sleep(0.15)
     m.assert_called_once()
@@ -29,7 +29,7 @@ async def test_watchdog_expire():
     await asyncio.sleep(0.15)
     assert m.call_count == 2
 
-    await w.stop()
+    await w.cancel_and_wait()
 
     # Assert that the task is properly canceled
     await asyncio.sleep(0.05)
@@ -38,7 +38,7 @@ async def test_watchdog_expire():
 async def test_watchdog_no_expire():
 
     m, w = get_watchdog()
-    await w.start()
+    w.start()
 
     for _ in range(4):
         w.feed()
@@ -46,7 +46,7 @@ async def test_watchdog_no_expire():
 
     m.assert_not_called()
 
-    await w.stop()
+    await w.cancel_and_wait()
 
     # Assert that the task is properly canceled
     await asyncio.sleep(0.05)
@@ -76,4 +76,4 @@ async def test_watchdog_setup_and_feed(sml_data_1):
     await asyncio.sleep(0.3)
     assert obj.status == DeviceStatus.MSG_TIMEOUT
 
-    await obj.stop()
+    await obj.cancel_and_wait()

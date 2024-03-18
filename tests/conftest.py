@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import traceback
 from binascii import a2b_hex
@@ -9,7 +10,7 @@ import sml2mqtt.mqtt.mqtt_obj
 import sml2mqtt.const.task as task_module
 from sml2mqtt import CMD_ARGS
 from sml2mqtt.const import SmlFrameValues
-
+from sml2mqtt.runtime import shutdown as shutdown_module
 
 class PatchedMonotonic:
     def __init__(self):
@@ -236,24 +237,26 @@ def check_no_logged_error(caplog, request):
 
     yield None
 
-    fail_on = [logging.CRITICAL, logging.ERROR, logging.WARNING]
+    all_levels = set(logging._levelToName)
+    fail_on_default = {lvl for lvl in all_levels if lvl >= logging.WARNING}
+    fail_on = fail_on_default.copy()
 
     markers = request.node.own_markers
     for marker in markers:
         if marker.name == 'ignore_log_errors':
-            fail_on.remove(logging.ERROR)
-            fail_on.remove(logging.WARNING)
+            fail_on.discard(logging.ERROR)
         elif marker.name == 'ignore_log_warnings':
-            fail_on.remove(logging.WARNING)
-
-    fail_lvl = min(fail_on)
+            fail_on.discard(logging.WARNING)
 
     msgs = []
-    for fail_lvl, phase in ((logging.WARNING, 'setup'), (fail_lvl, 'call'), (logging.WARNING, 'teardown')):
+    for fail_lvls, phase in ((fail_on_default, 'setup'), (fail_on, 'call'), (fail_on_default, 'teardown')):
         for record in caplog.get_records(phase):
-            if record.levelno < fail_lvl:
-                continue
-            msgs.append(f'{record.name:20s} | {record.levelname:7} | {record.getMessage():s}')
+            if record.levelno not in all_levels:
+                msg = f'Unknown log level: {record.levelno}! Supported: {", ".join(all_levels)}'
+                raise ValueError(msg)
+
+            if record.levelno in fail_lvls:
+                msgs.append(f'{record.name:20s} | {record.levelname:7} | {record.getMessage():s}')
 
     if msgs:
         pytest.fail(reason='Error in log:\n' + '\n'.join(msgs))
@@ -270,7 +273,7 @@ def _warp_all_tasks(monkeypatch):
                 logging.getLogger('task_wrap').error(line)
             raise
 
-    original = task_module.create_task
+    original = task_module.asyncio_create_task
 
     def create_task(coro, *, name=None):
         return original(wrapped_future(coro), name=name)
@@ -288,3 +291,14 @@ def arg_analyze(monkeypatch):
     module = sml2mqtt.mqtt.mqtt_obj
     assert hasattr(module, 'pub_func')
     module.pub_func = module.publish
+
+
+@pytest.fixture(autouse=True)
+async def _patch_shutdown(monkeypatch):
+    objs = ()
+    monkeypatch.setattr(shutdown_module, 'SHUTDOWN_OBJS', objs)
+
+    yield
+
+    for obj in objs:
+        await obj.do()

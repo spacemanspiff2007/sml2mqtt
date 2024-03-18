@@ -6,7 +6,7 @@ from sml2mqtt.sml_device import SmlDevice
 
 
 @pytest.mark.ignore_log_warnings()
-def test_device_analyze(no_mqtt, caplog, sml_data_1: bytes, arg_analyze, sml_frame_1_analyze):
+async def test_device_analyze(no_mqtt, caplog, sml_data_1: bytes, arg_analyze, sml_frame_1_analyze):
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
 

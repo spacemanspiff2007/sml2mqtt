@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
-from sml2mqtt.__shutdown__ import shutdown
+from sml2mqtt.runtime import do_shutdown
 from sml2mqtt.errors import DeviceFailedError
 
 from .device_status import DeviceStatus
@@ -28,16 +28,16 @@ class SmlDevices:
         for device in self._devices:
             await device.start()
 
-    async def stop(self):
+    async def cancel_and_wait(self):
         for device in self._devices:
-            await device.stop()
+            await device.cancel_and_wait()
 
     def check_status(self):
         if any(device.status is DeviceStatus.SOURCE_FAILED for device in self._devices):
-            return shutdown(DeviceFailedError)
+            return do_shutdown()
 
         if all(device.status.is_shutdown_status() for device in self._devices):
-            return shutdown(DeviceFailedError)
+            return do_shutdown()
 
         return None
 

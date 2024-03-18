@@ -8,6 +8,7 @@ from aiohttp import BasicAuth, ClientSession, ClientTimeout
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.const import DeviceTask
 from sml2mqtt.errors import HttpStatusError
+from sml2mqtt.runtime import on_shutdown
 
 
 if TYPE_CHECKING:
@@ -18,29 +19,21 @@ if TYPE_CHECKING:
 log = get_logger('http')
 
 SESSION: ClientSession | None = None
-SESSION_CTR: int = 0
 
 
 async def get_session() -> ClientSession:
-    global SESSION, SESSION_CTR
+    global SESSION
 
     if SESSION is not None:
-        SESSION_CTR += 1
         return SESSION
 
     SESSION = ClientSession()
-    SESSION_CTR += 1
+    on_shutdown(close_session, 'Close http session')
     return SESSION
 
 
 async def close_session():
-    global SESSION, SESSION_CTR
-
-    SESSION_CTR -= 1
-    if SESSION_CTR > 0:
-        return None
-
-    SESSION_CTR = 0
+    global SESSION
 
     if (session := SESSION) is not None:
         SESSION = None
@@ -70,11 +63,11 @@ class HttpSource:
         self.interval = interval
         self._task: Final = DeviceTask(device, self._http_task, name=f'Http Task {self.device.name:s}')
 
-    async def start(self):
-        await self._task.start()
+    def start(self):
+        self._task.start()
 
-    async def stop(self):
-        return await self._task.stop()
+    async def cancel_and_wait(self):
+        return await self._task.cancel_and_wait()
 
     async def _http_task(self):
         log.debug(f'Requesting data from {self.url}')
@@ -85,20 +78,17 @@ class HttpSource:
             self.device.on_source_failed(f'Could not create client session: {e}')
             return None
 
-        try:
-            while True:
-                await sleep(self.interval)
+        while True:
+            await sleep(self.interval)
 
-                try:
-                    resp = await session.get(self.url, auth=self.auth, timeout=self.timeout)
-                    if resp.status != 200:
-                        raise HttpStatusError(resp.status)  # noqa: TRY301
+            try:
+                resp = await session.get(self.url, auth=self.auth, timeout=self.timeout)
+                if resp.status != 200:
+                    raise HttpStatusError(resp.status)  # noqa: TRY301
 
-                    payload = await resp.read()
-                except Exception as e:
-                    self.device.on_error(e, show_traceback=False)
-                    continue
+                payload = await resp.read()
+            except Exception as e:
+                self.device.on_error(e, show_traceback=False)
+                continue
 
-                self.device.on_source_data(payload)
-        finally:
-            await close_session()
+            self.device.on_source_data(payload)

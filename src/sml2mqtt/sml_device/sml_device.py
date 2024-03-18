@@ -62,13 +62,13 @@ class SmlDevice:
 
     async def start(self):
         if self._source is not None:
-            await self._source.start()
-        await self.watchdog.start()
+            self._source.start()
+        self.watchdog.start()
 
-    async def stop(self):
+    async def cancel_and_wait(self):
         if self._source is not None:
-            await self._source.stop()
-        await self.watchdog.stop()
+            await self._source.cancel_and_wait()
+        await self.watchdog.cancel_and_wait()
 
     def set_status(self, new_status: DeviceStatus) -> bool:
         if self.status == new_status:
