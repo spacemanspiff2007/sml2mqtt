@@ -8,7 +8,7 @@ from sml2mqtt.__args__ import CMD_ARGS, get_command_line_args
 from sml2mqtt.__log__ import log, setup_log
 from sml2mqtt.config import CONFIG
 from sml2mqtt.const.task import wait_for_tasks
-from sml2mqtt.runtime import do_shutdown_async, signal_handler_setup, on_shutdown
+from sml2mqtt.runtime import do_shutdown_async, on_shutdown, signal_handler_setup
 from sml2mqtt.sml_device import ALL_DEVICES, SmlDevice
 from sml2mqtt.sml_source import create_source
 
@@ -17,7 +17,7 @@ async def a_main():
     # Add possibility to stop program with Ctrl + c
     signal_handler_setup()
 
-    on_shutdown(ALL_DEVICES.cancel_and_wait(), 'Stop devices')
+    on_shutdown(ALL_DEVICES.cancel_and_wait, 'Stop devices')
 
     try:
         if CMD_ARGS.analyze:

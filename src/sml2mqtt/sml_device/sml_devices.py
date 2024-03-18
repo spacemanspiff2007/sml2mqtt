@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final
 
 from sml2mqtt.runtime import do_shutdown
-from sml2mqtt.errors import DeviceFailedError
 
 from .device_status import DeviceStatus
 

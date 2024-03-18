@@ -6,6 +6,6 @@ from .filter import (
     PercDeltaFilterOperation,
     SkipZeroMeterOperation,
 )
-from .math import FactorOperation, OffsetOperation, RoundOperation
+from .math import FactorOperation, OffsetOperation, RoundOperation, LimitValueOperation
 from .operations import OrOperation, SequenceOperation
 from .workarounds import NegativeOnEnergyMeterWorkaroundOperation
