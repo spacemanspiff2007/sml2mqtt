@@ -1,10 +1,8 @@
 from tests.sml_values.test_operations.helper import check_description, check_operation_repr
 
-from sml2mqtt.sml_value.base import SmlValueInfo
 from sml2mqtt.sml_value.operations import (
     AbsDeltaFilterOperation,
     HeartbeatFilterOperation,
-    RepublishFilterOperation,
     OnChangeFilterOperation,
     PercDeltaFilterOperation,
     SkipZeroMeterOperation,
@@ -32,37 +30,23 @@ def test_heartbeat(monotonic):
 
     assert f.process_value(1, None) == 1
 
-    monotonic.add(29.99)
-    assert f.process_value(1, None) is None
+    monotonic.add(15)
+    assert f.process_value(2, None) is None
+
+    monotonic.add(14.99)
+    assert f.process_value(3, None) is None
 
     monotonic.add(0.01)
-    assert f.process_value(1, None) == 1
-    assert f.process_value(1, None) is None
+    assert f.process_value(None, None) == 3
+    assert f.process_value(2, None) is None
+
+    monotonic.add(30.01)
+    assert f.process_value(5, None) == 5
+    assert f.process_value(5, None) is None
 
     check_description(
         HeartbeatFilterOperation(30),
         '- HeartbeatFilter: 30s'
-    )
-
-
-def test_republish(monotonic):
-    f = RepublishFilterOperation(30)
-    check_operation_repr(f, '30s')
-
-    info = SmlValueInfo(None, None, 0)
-
-    assert f.process_value(1, info) == 1
-    assert f.process_value(None, info) is None
-
-    monotonic.add(29.99)
-    assert f.process_value(None, info) is None
-
-    monotonic.add(0.01)
-    assert f.process_value(None, info) == 1
-
-    check_description(
-        RepublishFilterOperation(30),
-        '- RepublishFilter: 30s'
     )
 
 

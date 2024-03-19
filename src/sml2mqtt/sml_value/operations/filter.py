@@ -116,27 +116,3 @@ class HeartbeatFilterOperation(ValueOperationBase):
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
         yield f'{indent:s}- HeartbeatFilter: {self.every}s'
-
-
-class RepublishFilterOperation(ValueOperationBase):
-    def __init__(self, every: int | float):
-        self.every: Final = every
-        self.last_value: float | None = None
-
-    @override
-    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
-        if value is not None:
-            self.last_value = value
-            return value
-
-        if monotonic() - info.last_pub < self.every:
-            return None
-
-        return self.last_value
-
-    def __repr__(self):
-        return f'<Republish: {self.every}s at 0x{id(self):x}>'
-
-    @override
-    def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- RepublishFilter: {self.every}s'

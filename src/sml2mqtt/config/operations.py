@@ -62,12 +62,14 @@ class HeartbeatFilter(BaseModel):
     )
 
 
-class RepublishFilter(BaseModel):
+# -------------------------------------------------------------------------------------------------
+# Actions
+# -------------------------------------------------------------------------------------------------
+class RefreshAction(BaseModel):
     every: TimeInSeconds = Field(
-        alias='republish filter',
-        description='Filter which lets every value pass. When no value is received '
+        alias='refresh action',
+        description='Action which lets every value pass. When no value is received '
                     '(e.g. because an earlier filter blocks) this filter will produce the last value every interval.'
-                    'Makes only sense as the last filter.'
     )
 
 

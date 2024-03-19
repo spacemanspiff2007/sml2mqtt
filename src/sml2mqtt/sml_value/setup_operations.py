@@ -1,6 +1,6 @@
 from collections.abc import Callable
-from typing import Any, Protocol
 from inspect import signature as get_signature
+from typing import Any, Protocol
 
 from pydantic import BaseModel
 
@@ -8,30 +8,31 @@ from sml2mqtt.config.operations import (
     DeltaFilter,
     Factor,
     HeartbeatFilter,
-    RepublishFilter,
     NegativeOnEnergyMeterWorkaround,
     Offset,
     OnChangeFilter,
     OperationsType,
     Or,
+    RefreshAction,
     Round,
     Sequence,
-    VirtualMeter
+    VirtualMeter,
 )
 from sml2mqtt.sml_value.base import OperationContainerBase, ValueOperationBase
 from sml2mqtt.sml_value.operations import (
     AbsDeltaFilterOperation,
+    DateTimeFinder,
     FactorOperation,
     HeartbeatFilterOperation,
-    RepublishFilterOperation,
     NegativeOnEnergyMeterWorkaroundOperation,
     OffsetOperation,
     OnChangeFilterOperation,
     OrOperation,
     PercDeltaFilterOperation,
+    RefreshActionOperation,
     RoundOperation,
     SequenceOperation,
-    VirtualMeterOperation, DateTimeFinder,
+    VirtualMeterOperation,
 )
 
 
@@ -77,7 +78,7 @@ def create_sequence(operations: list[OperationsType]):
 MAPPING = {
     OnChangeFilter: create_OnChangeFilter,
     HeartbeatFilter: HeartbeatFilterOperation,
-    RepublishFilter: RepublishFilterOperation,
+    RefreshAction: RefreshActionOperation,
     DeltaFilter: create_DeltaFilter,
 
     Factor: FactorOperation,
