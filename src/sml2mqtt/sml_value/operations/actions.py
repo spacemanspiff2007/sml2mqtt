@@ -31,4 +31,4 @@ class RefreshActionOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Refresh action: {self.every}s'
+        yield f'{indent:s}- RefreshAction: {self.every}s'

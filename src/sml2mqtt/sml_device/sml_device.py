@@ -71,7 +71,7 @@ class SmlDevice:
         await self.watchdog.cancel_and_wait()
 
     def set_status(self, new_status: DeviceStatus) -> bool:
-        if self.status == new_status:
+        if self.status == new_status or self.status.is_shutdown_status():
             return False
 
         self.status = new_status
@@ -160,7 +160,12 @@ class SmlDevice:
         self.frame_handler = self.process_frame
 
     def process_first_frame(self, frame: EnhancedSmlFrame):
-        self.setup_values_from_frame(frame)
+        try:
+            self.setup_values_from_frame(frame)
+        except Exception as e:
+            self.set_status(DeviceStatus.SHUTDOWN)
+            self.on_error(e)
+            return None
         self.frame_handler(frame)
 
     def analyze_frame(self, frame: EnhancedSmlFrame):

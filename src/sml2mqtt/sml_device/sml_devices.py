@@ -32,7 +32,7 @@ class SmlDevices:
             await device.cancel_and_wait()
 
     def check_status(self):
-        if any(device.status is DeviceStatus.SOURCE_FAILED for device in self._devices):
+        if any(device.status in (DeviceStatus.SOURCE_FAILED, DeviceStatus.SHUTDOWN) for device in self._devices):
             return do_shutdown()
 
         if all(device.status.is_shutdown_status() for device in self._devices):

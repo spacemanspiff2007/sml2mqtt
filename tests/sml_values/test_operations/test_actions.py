@@ -23,5 +23,5 @@ def test_refresh_action(monotonic):
 
     check_description(
         RefreshActionOperation(30),
-        '- Refresh action: 30s'
+        '- RefreshAction: 30s'
     )
