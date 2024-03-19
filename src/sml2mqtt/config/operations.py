@@ -200,6 +200,7 @@ class VirtualMeter(BaseModel):
 
 OperationsType: TypeAlias = (
         OnChangeFilter | DeltaFilter | HeartbeatFilter |
+        RefreshAction |
         Factor | Offset | Round |
         NegativeOnEnergyMeterWorkaround |
         Or | Sequence |

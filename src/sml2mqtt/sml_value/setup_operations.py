@@ -78,8 +78,9 @@ def create_sequence(operations: list[OperationsType]):
 MAPPING = {
     OnChangeFilter: create_OnChangeFilter,
     HeartbeatFilter: HeartbeatFilterOperation,
-    RefreshAction: RefreshActionOperation,
     DeltaFilter: create_DeltaFilter,
+
+    RefreshAction: RefreshActionOperation,
 
     Factor: FactorOperation,
     Offset: OffsetOperation,
