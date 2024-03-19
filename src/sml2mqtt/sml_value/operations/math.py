@@ -11,7 +11,9 @@ class FactorOperation(ValueOperationBase):
         self.factor: Final = factor
 
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
         return value * self.factor
 
     def __repr__(self):
@@ -27,7 +29,9 @@ class OffsetOperation(ValueOperationBase):
         self.offset: Final = offset
 
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
         return value + self.offset
 
     def __repr__(self):
@@ -43,7 +47,10 @@ class RoundOperation(ValueOperationBase):
         self.digits: Final = digits if digits else None
 
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
+
         if isinstance(value, int):
             return value
         return round(value, self.digits)
@@ -64,7 +71,10 @@ class LimitValueOperation(ValueOperationBase):
         self.ignore: Final = ignore
 
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
+
         if self.min is not None and value < self.min:
             return self.min if not self.ignore else None
 

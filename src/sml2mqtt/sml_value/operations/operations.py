@@ -9,11 +9,12 @@ class OrOperation(ValueOperationBase, OperationContainerBase):
 
     @override
     def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+        ret: float | None = None
         for op in self.operations:
-            if (ret := op.process_value(value, info)) is not None:
-                return ret
+            if (call := op.process_value(value, info)) is not None and ret is None:
+                ret = call
 
-        return None
+        return ret
 
     def __repr__(self):
         return f'<Or at 0x{id(self):x}>'
@@ -29,8 +30,7 @@ class SequenceOperation(ValueOperationBase, OperationContainerBase):
     @override
     def process_value(self, value: float, info: SmlValueInfo) -> float | None:
         for op in self.operations:
-            if (value := op.process_value(value, info)) is None:
-                return None
+            value = op.process_value(value, info)
         return value
 
     def __repr__(self):

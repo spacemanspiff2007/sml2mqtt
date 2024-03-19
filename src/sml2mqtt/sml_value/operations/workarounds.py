@@ -12,7 +12,10 @@ class NegativeOnEnergyMeterWorkaroundOperation(ValueOperationBase):
         self.meter_obis: Final[str] = '0100010800ff' if meter_obis is None else meter_obis
 
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
+
         if (meter := info.frame.get_value(self.meter_obis)) is None:
             raise RequiredObisValueNotInFrameError(self.meter_obis)
 

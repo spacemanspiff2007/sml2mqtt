@@ -12,7 +12,10 @@ class OnChangeFilterOperation(ValueOperationBase):
         self.last_value: int | float | str | None = None
 
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
+
         if self.last_value == value:
             return None
 
@@ -35,7 +38,10 @@ class DeltaFilterBase(ValueOperationBase):
 
 class AbsDeltaFilterOperation(DeltaFilterBase):
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
+
         if abs(value - self.last_value) < self.delta:
             return None
 
@@ -52,7 +58,10 @@ class AbsDeltaFilterOperation(DeltaFilterBase):
 
 class PercDeltaFilterOperation(DeltaFilterBase):
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
+
         perc = abs(1 - value / self.last_value) * 100
         if perc < self.delta:
             return None
@@ -68,29 +77,11 @@ class PercDeltaFilterOperation(DeltaFilterBase):
         yield f'{indent:s}- DeltaFilter: {self.delta}%'
 
 
-class HeartbeatFilterOperation(ValueOperationBase):
-    def __init__(self, every: int | float):
-        self.every: Final = every
-
-    @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
-        if monotonic() - info.last_pub < self.every:
-            return None
-        return value
-
-    def __repr__(self):
-        return f'<Heartbeat: {self.every}s at 0x{id(self):x}>'
-
-    @override
-    def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- HeartbeatFilter: {self.every}s'
-
-
 class SkipZeroMeterOperation(ValueOperationBase):
 
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
-        if value < 0.1:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None or value < 0.1:
             return None
         return value
 
@@ -100,3 +91,52 @@ class SkipZeroMeterOperation(ValueOperationBase):
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
         yield f'{indent:s}- ZeroMeterFilter'
+
+
+class HeartbeatFilterOperation(ValueOperationBase):
+    def __init__(self, every: int | float):
+        self.every: Final = every
+        self.last_time: float = -1_000_000_000
+        self.last_value: float | None = None
+
+    @override
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is not None:
+            self.last_value = value
+
+        if monotonic() - self.last_time < self.every:
+            return None
+
+        self.last_time = monotonic()
+        return self.last_value
+
+    def __repr__(self):
+        return f'<Heartbeat: {self.every}s at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- HeartbeatFilter: {self.every}s'
+
+
+class RepublishFilterOperation(ValueOperationBase):
+    def __init__(self, every: int | float):
+        self.every: Final = every
+        self.last_value: float | None = None
+
+    @override
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is not None:
+            self.last_value = value
+            return value
+
+        if monotonic() - info.last_pub < self.every:
+            return None
+
+        return self.last_value
+
+    def __repr__(self):
+        return f'<Republish: {self.every}s at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- RepublishFilter: {self.every}s'

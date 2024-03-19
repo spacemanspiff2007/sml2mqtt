@@ -10,7 +10,7 @@ ObisHex = Annotated[
 
 LowerStr = Annotated[
     str,
-    StringConstraints(to_lower=True, strip_whitespace=True)
+    StringConstraints(to_lower=True, strip_whitespace=True, strict=True)
 ]
 
 

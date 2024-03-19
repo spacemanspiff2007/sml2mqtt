@@ -9,7 +9,7 @@ from sml2mqtt.sml_value.operations import (
     OnChangeFilterOperation,
     OrOperation,
     SequenceOperation,
-    SkipZeroMeterOperation,
+    SkipZeroMeterOperation, RepublishFilterOperation,
 )
 from sml2mqtt.sml_value.setup_operations import setup_operations
 
@@ -39,11 +39,8 @@ def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cf
 
     log.info(f'No filters found for {sml_value.obis}, creating default filters')
 
-    or_op = OrOperation()
-    sml_value.add_operation(or_op)
-
-    or_op.add_operation(OnChangeFilterOperation())
-    or_op.add_operation(HeartbeatFilterOperation(general_cfg.republish_after))
+    sml_value.add_operation(OnChangeFilterOperation())
+    sml_value.add_operation(RepublishFilterOperation(general_cfg.republish_after))
 
 
 def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig | None, general_cfg: GeneralSettings):

@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from typing import Any, Protocol
+from inspect import signature as get_signature
 
 from pydantic import BaseModel
 
@@ -7,6 +8,7 @@ from sml2mqtt.config.operations import (
     DeltaFilter,
     Factor,
     HeartbeatFilter,
+    RepublishFilter,
     NegativeOnEnergyMeterWorkaround,
     Offset,
     OnChangeFilter,
@@ -14,12 +16,14 @@ from sml2mqtt.config.operations import (
     Or,
     Round,
     Sequence,
+    VirtualMeter
 )
 from sml2mqtt.sml_value.base import OperationContainerBase, ValueOperationBase
 from sml2mqtt.sml_value.operations import (
     AbsDeltaFilterOperation,
     FactorOperation,
     HeartbeatFilterOperation,
+    RepublishFilterOperation,
     NegativeOnEnergyMeterWorkaroundOperation,
     OffsetOperation,
     OnChangeFilterOperation,
@@ -27,6 +31,7 @@ from sml2mqtt.sml_value.operations import (
     PercDeltaFilterOperation,
     RoundOperation,
     SequenceOperation,
+    VirtualMeterOperation, DateTimeFinder,
 )
 
 
@@ -39,6 +44,18 @@ def create_DeltaFilter(delta: int | float, is_percent: bool): # noqa: 802
         return PercDeltaFilterOperation(delta=delta)
 
     return AbsDeltaFilterOperation(delta=delta)
+
+
+def create_VirtualMeter(model: VirtualMeter): # noqa: 802
+    dows, days = model.get_dows_and_days()
+    finder = DateTimeFinder()
+    for time in model.times:
+        finder.add_time(time)
+    for dow in dows:
+        finder.add_dow(dow)
+    for day in days:
+        finder.add_day(day)
+    return VirtualMeterOperation(finder, start_now=model.start_now)
 
 
 def create_workaround_negative_on_energy_meter(enabled_or_obis: bool | str):
@@ -60,6 +77,7 @@ def create_sequence(operations: list[OperationsType]):
 MAPPING = {
     OnChangeFilter: create_OnChangeFilter,
     HeartbeatFilter: HeartbeatFilterOperation,
+    RepublishFilter: RepublishFilterOperation,
     DeltaFilter: create_DeltaFilter,
 
     Factor: FactorOperation,
@@ -70,6 +88,8 @@ MAPPING = {
 
     Or: create_or,
     Sequence: create_sequence,
+
+    VirtualMeter: create_VirtualMeter
 }
 
 
@@ -88,7 +108,11 @@ class _HasOperationsProto(Protocol):
 def setup_operations(parent: OperationContainerBase, cfg_parent: _HasOperationsProto):
     for cfg in cfg_parent.operations:
         factory = get_operation_factory(cfg)
-        if (operation_obj := factory(**cfg.model_dump())) is None:
+
+        signature = get_signature(factory)
+        pass_model = list(signature.parameters) == ['model']
+
+        if (operation_obj := factory(**(cfg.model_dump() if not pass_model else {'model': cfg}))) is None:
             continue
 
         assert isinstance(operation_obj, ValueOperationBase)

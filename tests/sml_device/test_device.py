@@ -51,9 +51,8 @@ Skipped: 0100000009ff, 0100600100ff
   obis : 0100000009ff
   topic: /00000000000000000000/0100000009ff
   operations:
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 <SmlValue>
   obis : 0100010800ff
@@ -61,9 +60,8 @@ Skipped: 0100000009ff, 0100600100ff
   operations:
     - Factor: 0.001
     - ZeroMeterFilter
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 <SmlValue>
   obis : 0100010801ff
@@ -71,9 +69,8 @@ Skipped: 0100000009ff, 0100600100ff
   operations:
     - Factor: 0.001
     - ZeroMeterFilter
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 <SmlValue>
   obis : 0100010802ff
@@ -81,9 +78,8 @@ Skipped: 0100000009ff, 0100600100ff
   operations:
     - Factor: 0.001
     - ZeroMeterFilter
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 <SmlValue>
   obis : 0100020800ff
@@ -91,40 +87,35 @@ Skipped: 0100000009ff, 0100600100ff
   operations:
     - Factor: 0.001
     - ZeroMeterFilter
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 <SmlValue>
   obis : 0100100700ff
   topic: /00000000000000000000/0100100700ff
   operations:
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 <SmlValue>
   obis : 0100240700ff
   topic: /00000000000000000000/0100240700ff
   operations:
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 <SmlValue>
   obis : 0100380700ff
   topic: /00000000000000000000/0100380700ff
   operations:
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 <SmlValue>
   obis : 01004c0700ff
   topic: /00000000000000000000/01004c0700ff
   operations:
-    - Or:
-      - OnChangeFilter
-      - HeartbeatFilter: 120s
+    - OnChangeFilter
+    - RepublishFilter: 120s
 
 '''

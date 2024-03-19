@@ -1,5 +1,5 @@
 from smllib.sml import SmlListEntry
-from tests.sml_values.test_operations.helper import check_operation_repr, check_description
+from tests.sml_values.test_operations.helper import check_description, check_operation_repr
 
 from sml2mqtt.const import SmlFrameValues
 from sml2mqtt.sml_value.base import SmlValueInfo
@@ -27,6 +27,11 @@ def get_info() -> SmlValueInfo:
 def test_repr():
     o = NegativeOnEnergyMeterWorkaroundOperation()
     check_operation_repr(o, '0100010800ff')
+
+
+def test_none():
+    o = NegativeOnEnergyMeterWorkaroundOperation()
+    assert o.process_value(None, get_info()) is None
 
 
 def test_make_negative():

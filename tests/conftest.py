@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import traceback
 from binascii import a2b_hex
@@ -6,11 +5,12 @@ from binascii import a2b_hex
 import pytest
 from smllib.reader import SmlFrame
 
-import sml2mqtt.mqtt.mqtt_obj
 import sml2mqtt.const.task as task_module
+import sml2mqtt.mqtt.mqtt_obj
 from sml2mqtt import CMD_ARGS
 from sml2mqtt.const import SmlFrameValues
 from sml2mqtt.runtime import shutdown as shutdown_module
+
 
 class PatchedMonotonic:
     def __init__(self):
@@ -41,6 +41,7 @@ def monotonic():
     p = PatchedMonotonic()
 
     p.patch_name('sml2mqtt.sml_value.operations.filter.monotonic')
+    p.patch_name('sml2mqtt.sml_value.operations.time_series.monotonic')
 
     try:
         yield p
@@ -263,7 +264,7 @@ def check_no_logged_error(caplog, request):
 
 
 @pytest.fixture(autouse=True)
-def _warp_all_tasks(monkeypatch):
+def _wrap_all_tasks(monkeypatch):
 
     async def wrapped_future(coro):
         try:

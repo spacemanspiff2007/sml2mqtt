@@ -57,9 +57,9 @@ def test_or_last_exit():
 
 
 def test_or_first_exit():
-    m = get_mock_group(OrOperation, 3, None, None)
+    m = get_mock_group(OrOperation, 3, 99, 77)
     assert m.process_value(1) == 3
-    m.assert_called(1, '-', '-')
+    m.assert_called(1, 1, 1)
 
 
 def test_or_single():
@@ -93,6 +93,9 @@ def test_or_description():
         ]
     )
 
+    assert o.process_value(0, None) == 3
+    assert o.process_value(None, None) is None
+
 
 def test_seq_no_exit():
     m = get_mock_group(SequenceOperation, 1, 2, 3)
@@ -101,9 +104,9 @@ def test_seq_no_exit():
 
 
 def test_seq_first_exit():
-    m = get_mock_group(SequenceOperation, None, 1, 1)
+    m = get_mock_group(SequenceOperation, None, 2, None)
     assert m.process_value(1) is None
-    m.assert_called(1, '-', '-')
+    m.assert_called(1, None, 2)
 
 
 def test_seq_last_exit():

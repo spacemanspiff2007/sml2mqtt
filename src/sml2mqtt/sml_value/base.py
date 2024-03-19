@@ -23,7 +23,7 @@ class SmlValueInfo:
 
 
 class ValueOperationBase:
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
         raise NotImplementedError()
 
     def describe(self, indent: str = '') -> Generator[str, None, None]:

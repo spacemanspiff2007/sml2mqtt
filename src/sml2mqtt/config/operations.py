@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import date, time
+from enum import Enum
 from typing import Any, TypeAlias, Annotated
 from typing import get_args as _get_args
 
@@ -10,11 +12,11 @@ from pydantic import (
     StrictBool,
     conlist,
     model_validator,
-    BeforeValidator, Discriminator, Tag
+    BeforeValidator, Discriminator, Tag, constr, field_validator
 )
 from pydantic_core import PydanticCustomError
 
-from .types import Number, ObisHex, TimeInSeconds  # noqa: TCH001
+from .types import Number, ObisHex, TimeInSeconds, LowerStr  # noqa: TCH001
 
 
 # -------------------------------------------------------------------------------------------------
@@ -56,8 +58,16 @@ class DeltaFilter(BaseModel):
 class HeartbeatFilter(BaseModel):
     every: TimeInSeconds = Field(
         alias='heartbeat filter',
-        description='Filter which lets a value pass periodically so that the value gets published '
-                    'every specified interval.'
+        description='Filter which lets a value pass periodically every specified interval.'
+    )
+
+
+class RepublishFilter(BaseModel):
+    every: TimeInSeconds = Field(
+        alias='republish filter',
+        description='Filter which lets every value pass. When no value is received '
+                    '(e.g. because an earlier filter blocks) this filter will produce the last value every interval.'
+                    'Makes only sense as the last filter.'
     )
 
 
@@ -108,6 +118,40 @@ class Sequence(BaseModel):
     )
 
 
+def generate_day_names() -> dict[str, int]:
+    # names of weekdays in local language
+    day_names: dict[str, int] = {date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
+    day_names.update({date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)})
+
+    # abbreviations in German and English
+    day_names.update({"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7})
+    day_names.update({"Mon": 1, "Tue": 2, "Wed": 3, "Thu": 4, "Fri": 5, "Sat": 6, "Sun": 7})
+    return {k.lower(): v for k, v in day_names.items()}
+
+
+DayOfWeekStr = Enum('DayOfWeekStr', {k: k for k in generate_day_names()}, type=str)
+DayOfMonth = Annotated[int, Field(ge=1, le=31, strict=True)]
+
+
+# -------------------------------------------------------------------------------------------------
+# VirtualMeter
+# -------------------------------------------------------------------------------------------------
+class VirtualMeter(BaseModel):
+    start_now: bool = Field(
+        alias='start now', description='Immediately start the virtual meter instead of after the next reset'
+    )
+    times: list[time] = Field(
+        description='Time(s) of day when the meter will reset', min_length=1,
+    )
+    days: list[DayOfMonth | DayOfWeekStr] = Field(
+        description='Days of month or weekdays where the time(s) will be checked'
+    )
+
+    def get_dows_and_days(self) -> tuple[list[int], list[int]]:
+        names = generate_day_names()
+        return [names[n] for n in self.days if not isinstance(n, int)], [n for n in self.days if isinstance(n, int)]
+
+
 # OperationsType: TypeAlias = (
 #         Annotated[OnChangeFilter, Tag('OnChangeFilter')] |
 #         Annotated[DeltaFilter, Tag('DeltaFilter')] |
@@ -156,7 +200,8 @@ OperationsType: TypeAlias = (
         OnChangeFilter | DeltaFilter | HeartbeatFilter |
         Factor | Offset | Round |
         NegativeOnEnergyMeterWorkaround |
-        Or | Sequence
+        Or | Sequence |
+        VirtualMeter
 )
 
 OperationsListType = conlist(item_type=OperationsType, min_length=1)
