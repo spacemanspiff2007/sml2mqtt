@@ -5,7 +5,7 @@ from typing import Annotated, Union, get_args, get_origin
 
 import pytest
 
-from sml2mqtt.config.operations import Sequence, Offset
+from sml2mqtt.config.operations import Sequence, Offset, OperationsModels
 from sml2mqtt.sml_value.operations import SequenceOperation, OffsetOperation, VirtualMeterOperation
 from sml2mqtt.sml_value.setup_operations import MAPPING, setup_operations
 
@@ -52,6 +52,16 @@ def test_field_to_init(config_model, operation):
 
         else:
             assert cfg_field.annotation == param.annotation
+
+
+def test_all_models_in_mapping():
+    if missing := set(OperationsModels) - set(MAPPING):
+        msg = f'Missing in OperationsModels: {", ".join(m.__name__ for m in missing)}'
+        raise ValueError(msg)
+
+    if missing := set(MAPPING) - set(OperationsModels):
+        msg = f'Missing in MAPPING: {", ".join(m.__name__ for m in missing)}'
+        raise ValueError(msg)
 
 
 def test_simple():

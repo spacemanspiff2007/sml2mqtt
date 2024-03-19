@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, time
 from enum import Enum
-from typing import Any, TypeAlias, Annotated
+from typing import Any, TypeAlias, Annotated, Union, Final
 from typing import get_args as _get_args
 
 from annotated_types import Len
@@ -154,57 +154,52 @@ class VirtualMeter(BaseModel):
         return [names[n] for n in self.days if not isinstance(n, int)], [n for n in self.days if isinstance(n, int)]
 
 
-# OperationsType: TypeAlias = (
-#         Annotated[OnChangeFilter, Tag('OnChangeFilter')] |
-#         Annotated[DeltaFilter, Tag('DeltaFilter')] |
-#         Annotated[HeartbeatFilter, Tag('HeartbeatFilter')] |
-#         Annotated[Factor, Tag('Factor')] |
-#         Annotated[Offset, Tag('Offset')] |
-#         Annotated[Round, Tag('Round')] |
-#         Annotated[NegativeOnEnergyMeterWorkaround, Tag('NegativeOnEnergyMeterWorkaround')] |
-#         Annotated[Or, Tag('Or')] |
-#         Annotated[Sequence, Tag('Sequence')]
-# )
-#
-#
-# KEYS_TO_TAG: dict[tuple[str, ...], str] = {
-#     (_f.alias if _f.alias is not None else _n): _m.__class__.__name__
-#     for _m in _get_args(OperationsType) for _n, _f in _m.model_fields.items() if _f.exclude is not True
-# }
-#
-# ALLOWED_KEYS: tuple[str, ...] = tuple(sorted({key for keys in KEYS_TO_TAG for key in keys}))
-#
-#
-# def check_allowed_keys(obj: Any):
-#     if isinstance(obj, dict):
-#         return KEYS_TO_TAG.get(tuple(obj))
-#
-#     if isinstance(obj, BaseModel):
-#         return KEYS_TO_TAG.get(tuple(obj.model_fields))
-#
-#     return None
-#
-#
-# OperationsTypeAnnotated: TypeAlias = Annotated[
-#     OperationsType,
-#     Discriminator(
-#         check_allowed_keys,
-#         custom_error_type='invalid_field_names',
-#         custom_error_message='Invalid field names',
-#         custom_error_context={'discriminator': 'check_allowed_keys'}
-#     )
-# ]
-#
-# OperationsListType = Annotated[list[OperationsTypeAnnotated], Len(1)]
+# -------------------------------------------------------------------------------------------------
 
-
-OperationsType: TypeAlias = (
-        OnChangeFilter | DeltaFilter | HeartbeatFilter |
-        RefreshAction |
-        Factor | Offset | Round |
-        NegativeOnEnergyMeterWorkaround |
-        Or | Sequence |
+OperationsModels = (
+        OnChangeFilter, DeltaFilter, HeartbeatFilter,
+        RefreshAction,
+        Factor, Offset, Round,
+        NegativeOnEnergyMeterWorkaround,
+        Or, Sequence,
         VirtualMeter
 )
 
-OperationsListType = conlist(item_type=OperationsType, min_length=1)
+# noinspection PyTypeHints
+OperationsType: TypeAlias = Union[tuple(Annotated[o, Tag(o.__name__)] for o in OperationsModels)]  # noqa: UP007
+
+
+MODEL_FIELD_MAP: Final[dict[str, frozenset[str]]] = {
+    _m.__name__ : frozenset(
+        _f.alias if _f.alias is not None else _n for _n, _f in _m.model_fields.items() if _f.exclude is not True
+    )
+    for _m in OperationsModels
+}
+
+
+def check_allowed_keys(obj: Any):
+    keys = set(obj) if isinstance(obj, dict) else set(obj.model_fields)
+
+    # let's see if we have a 100% match
+    for name, fields in MODEL_FIELD_MAP.items():
+        if keys == fields:
+            return name
+    return None
+
+
+OperationsTypeAnnotated: TypeAlias = Annotated[
+    OperationsType,
+    Discriminator(
+        check_allowed_keys,
+        custom_error_type='invalid_key_names',
+        custom_error_message='Invalid key names',
+        custom_error_context={'discriminator': 'check_allowed_keys'}
+    )
+]
+
+OperationsListType = Annotated[list[OperationsTypeAnnotated], Len(1)]
+
+
+def cleanup_validation_errors(msg: str) -> str:
+    # In the ValidationError there is the Model and the field, but the user should only be concerned by the field name
+    return msg.replace('Or.or', 'or').replace('Sequence.sequence', 'sequence')
