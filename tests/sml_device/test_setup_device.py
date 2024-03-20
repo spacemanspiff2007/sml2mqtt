@@ -11,7 +11,7 @@ from sml2mqtt.sml_value.operations import OnChangeFilterOperation
 
 
 @pytest.mark.ignore_log_warnings()
-def test_warnings(no_mqtt, caplog, sml_frame_values_1):
+def test_warnings(no_mqtt, caplog, sml_frame_1_values):
     device = SmlDevice('test_device')
     device.mqtt_device.cfg.topic_full = 'test_device/device_id'
 
@@ -23,7 +23,7 @@ def test_warnings(no_mqtt, caplog, sml_frame_values_1):
     )
     general_cfg = GeneralSettings()
 
-    setup_device(device, sml_frame_values_1, device_cfg, general_cfg)
+    setup_device(device, sml_frame_1_values, device_cfg, general_cfg)
 
     # This is what will be reported
     msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.test_device' and x.levelno == logging.WARNING, caplog.records))

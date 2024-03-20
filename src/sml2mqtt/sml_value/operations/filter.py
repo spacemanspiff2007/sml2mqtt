@@ -27,7 +27,7 @@ class OnChangeFilterOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- OnChangeFilter'
+        yield f'{indent:s}- On change Filter'
 
 
 class DeltaFilterBase(ValueOperationBase):
@@ -53,7 +53,7 @@ class AbsDeltaFilterOperation(DeltaFilterBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- DeltaFilter: {self.delta}'
+        yield f'{indent:s}- Delta Filter: {self.delta}'
 
 
 class PercDeltaFilterOperation(DeltaFilterBase):
@@ -74,7 +74,7 @@ class PercDeltaFilterOperation(DeltaFilterBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- DeltaFilter: {self.delta}%'
+        yield f'{indent:s}- Delta Filter: {self.delta}%'
 
 
 class SkipZeroMeterOperation(ValueOperationBase):
@@ -115,4 +115,4 @@ class HeartbeatFilterOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- HeartbeatFilter: {self.every}s'
+        yield f'{indent:s}- Heartbeat Filter: {self.every}s'

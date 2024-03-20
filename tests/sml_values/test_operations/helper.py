@@ -25,6 +25,10 @@ def check_operation_repr(obj: ValueOperationBase, *values):
 
 def check_description(obj: ValueOperationBase, value: str | Iterable[str]):
     desc = list(obj.describe())
+    desc_text = '\n'.join(desc)
+    if 'filter' in desc_text.lower():
+        assert 'Filter' in desc_text, desc_text
+
     value = [value] if isinstance(value, str) else list(value)
 
     assert desc == value, f'\n{desc}\n{value}'

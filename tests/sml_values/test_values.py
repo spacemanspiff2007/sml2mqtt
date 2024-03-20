@@ -14,7 +14,7 @@ from sml2mqtt.sml_value.operations import OnChangeFilterOperation
 from sml_values.test_operations.helper import check_description
 
 
-def test_values(sml_frame_values_1: SmlFrameValues, no_mqtt):
+def test_values(sml_frame_1_values: SmlFrameValues, no_mqtt):
     mqtt = MqttObj(qos=0, retain=False)
 
     v = SmlValues()
@@ -29,7 +29,7 @@ def test_values(sml_frame_values_1: SmlFrameValues, no_mqtt):
 
     # The change filter prevents a republish
     for _ in range(10):
-        v.process_frame(sml_frame_values_1)
+        v.process_frame(sml_frame_1_values)
         assert no_mqtt == [('/energy', 253917.7, 0, False), ('/power', 272, 0, False)]
 
     # test description
@@ -40,13 +40,13 @@ def test_values(sml_frame_values_1: SmlFrameValues, no_mqtt):
         '  obis : 0100010800ff',
         '  topic: /energy',
         '  operations:',
-        '    - OnChangeFilter',
+        '    - On change Filter',
         '',
         '<SmlValue>',
         '  obis : 0100100700ff',
         '  topic: /power',
         '  operations:',
-        '    - OnChangeFilter',
+        '    - On change Filter',
         '',
     ])
 
@@ -65,7 +65,7 @@ def get_error_message(e: Sml2MqttExceptionWithLog, caplog) -> list[str]:
 
 
 @pytest.mark.ignore_log_errors()
-def test_too_much(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
+def test_too_much(sml_frame_1_values: SmlFrameValues, no_mqtt, caplog):
     v = SmlValues()
     v.set_skipped('010060320101', '0100600100ff')
 
@@ -77,7 +77,7 @@ def test_too_much(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
     )
 
     with pytest.raises(UnprocessedObisValuesReceivedError) as e:
-        v.process_frame(sml_frame_values_1)
+        v.process_frame(sml_frame_1_values)
 
     assert get_error_message(e.value, caplog) == [
         'Unexpected obis id received!',
@@ -94,7 +94,7 @@ def test_too_much(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
 
 
 @pytest.mark.ignore_log_errors()
-def test_missing(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
+def test_missing(sml_frame_1_values: SmlFrameValues, no_mqtt, caplog):
     v = SmlValues()
     v.set_skipped('010060320101', '0100600100ff', '0100020800ff', '0100010800ff', '0100100700ff')
 
@@ -103,7 +103,7 @@ def test_missing(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
     )
 
     with pytest.raises(RequiredObisValueNotInFrameError) as e:
-        v.process_frame(sml_frame_values_1)
+        v.process_frame(sml_frame_1_values)
 
     assert get_error_message(e.value, caplog) == ['Expected obis id missing in frame: 1100010800ff!']
 
@@ -113,7 +113,7 @@ def test_missing(sml_frame_values_1: SmlFrameValues, no_mqtt, caplog):
     )
 
     with pytest.raises(RequiredObisValueNotInFrameError) as e:
-        v.process_frame(sml_frame_values_1)
+        v.process_frame(sml_frame_1_values)
 
     assert get_error_message(e.value, caplog) == [
         'Expected obis id missing in frame: 1100010800ff!',

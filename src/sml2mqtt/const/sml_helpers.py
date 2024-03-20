@@ -22,9 +22,17 @@ class EnhancedSmlFrame(SmlFrame):
 
         self.timestamp: Final = monotonic()
 
-    def log_frame(self, log: Logger):
-        log.info('Received Frame')
-        log.info(f' -> {b2a_hex(self.buffer)}')
+    def get_frame_str(self):
+        yield 'Received Frame'
+        yield f' -> {b2a_hex(self.buffer)}'
+
+    def get_analyze_str(self) -> Generator[str, None, None]:
+        yield ''
+        yield from self.get_frame_str()
+        yield ''
+        for obj in self.parse_frame():
+            yield from obj.format_msg().splitlines()
+        yield ''
 
     def get_frame_values(self, log: Logger) -> SmlFrameValues:
         # try shortcut, if that fails try parsing the whole frame

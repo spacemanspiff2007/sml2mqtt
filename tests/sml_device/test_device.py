@@ -6,14 +6,14 @@ from sml2mqtt.sml_device import SmlDevice
 
 
 @pytest.mark.ignore_log_warnings()
-async def test_device_analyze(no_mqtt, caplog, sml_data_1: bytes, arg_analyze, sml_frame_1_analyze):
+async def test_device_analyze(no_mqtt, caplog, sml_data_1, arg_analyze, sml_data_1_analyze):
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
 
     # feed data in chunks
     chunk_size = 100
     for i in range(0, len(sml_data_1), chunk_size):
-        device.on_source_data(a2b_hex(sml_data_1[i: i + chunk_size]))
+        device.on_source_data(sml_data_1[i: i + chunk_size])
 
     # This is what will be reported
     msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records))
@@ -33,7 +33,7 @@ async def test_device_analyze(no_mqtt, caplog, sml_data_1: bytes, arg_analyze, s
 
     msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.device_name', caplog.records))
 
-    assert msg == sml_frame_1_analyze + '''
+    assert msg.removeprefix(sml_data_1_analyze) == '''
 Found obis id 0100000009ff in the sml frame
 No configuration found for 00000000000000000000
 No filters found for 0100000009ff, creating default filters
@@ -51,7 +51,7 @@ Skipped: 0100000009ff, 0100600100ff
   obis : 0100000009ff
   topic: /00000000000000000000/0100000009ff
   operations:
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 <SmlValue>
@@ -60,7 +60,7 @@ Skipped: 0100000009ff, 0100600100ff
   operations:
     - Factor: 0.001
     - ZeroMeterFilter
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 <SmlValue>
@@ -69,7 +69,7 @@ Skipped: 0100000009ff, 0100600100ff
   operations:
     - Factor: 0.001
     - ZeroMeterFilter
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 <SmlValue>
@@ -78,7 +78,7 @@ Skipped: 0100000009ff, 0100600100ff
   operations:
     - Factor: 0.001
     - ZeroMeterFilter
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 <SmlValue>
@@ -87,35 +87,35 @@ Skipped: 0100000009ff, 0100600100ff
   operations:
     - Factor: 0.001
     - ZeroMeterFilter
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 <SmlValue>
   obis : 0100100700ff
   topic: /00000000000000000000/0100100700ff
   operations:
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 <SmlValue>
   obis : 0100240700ff
   topic: /00000000000000000000/0100240700ff
   operations:
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 <SmlValue>
   obis : 0100380700ff
   topic: /00000000000000000000/0100380700ff
   operations:
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 <SmlValue>
   obis : 01004c0700ff
   topic: /00000000000000000000/01004c0700ff
   operations:
-    - OnChangeFilter
+    - On change Filter
     - RefreshAction: 120s
 
 '''

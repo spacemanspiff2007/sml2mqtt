@@ -46,7 +46,7 @@ def test_heartbeat(monotonic):
 
     check_description(
         HeartbeatFilterOperation(30),
-        '- HeartbeatFilter: 30s'
+        '- Heartbeat Filter: 30s'
     )
 
 
@@ -65,7 +65,7 @@ def test_diff_percent():
 
     check_description(
         PercDeltaFilterOperation(5),
-        '- DeltaFilter: 5%'
+        '- Delta Filter: 5%'
     )
 
 
@@ -84,7 +84,7 @@ def test_diff_abs():
 
     check_description(
         AbsDeltaFilterOperation(5),
-        '- DeltaFilter: 5'
+        '- Delta Filter: 5'
     )
 
 
@@ -99,5 +99,5 @@ def test_on_change():
 
     check_description(
         OnChangeFilterOperation(),
-        '- OnChangeFilter'
+        '- On change Filter'
     )

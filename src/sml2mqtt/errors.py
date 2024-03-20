@@ -44,8 +44,10 @@ class Sml2MqttConfigMappingError(Sml2MqttException):
     pass
 
 
-class ObisIdForConfigurationMappingNotFoundError(Sml2MqttConfigMappingError):
-    pass
+class ObisIdForConfigurationMappingNotFoundError(Sml2MqttExceptionWithLog):
+    @override
+    def log_msg(self, log: Logger):
+        return None
 
 
 # ------------------------------------------------------------------------------------

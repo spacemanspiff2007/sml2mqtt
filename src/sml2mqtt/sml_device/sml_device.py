@@ -101,7 +101,8 @@ class SmlDevice:
         except Exception as e:
             # dump frame if possible
             if frame is not None:
-                frame.log_frame(self.log)
+                for line in frame.get_frame_str():
+                    self.log.info(line)
 
             self.on_error(e)
 
@@ -171,13 +172,8 @@ class SmlDevice:
     def analyze_frame(self, frame: EnhancedSmlFrame):
 
         # log Frame and frame description
-        self.log.info('')
-        frame.log_frame(self.log)
-        self.log.info('')
-        for obj in frame.parse_frame():
-            for line in obj.format_msg().splitlines():
-                self.log.info(line)
-        self.log.info('')
+        for line in frame.get_analyze_str():
+            self.log.info(line)
 
         # Setup and process the frame
         self.setup_values_from_frame(frame)

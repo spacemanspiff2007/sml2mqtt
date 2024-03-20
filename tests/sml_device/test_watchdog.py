@@ -70,7 +70,7 @@ async def test_watchdog_setup_and_feed(sml_data_1):
 
     for _ in range(5):
         await asyncio.sleep(0.15)
-        obj.on_source_data(a2b_hex(sml_data_1))
+        obj.on_source_data(sml_data_1)
         assert obj.status == DeviceStatus.OK
 
     await asyncio.sleep(0.3)
