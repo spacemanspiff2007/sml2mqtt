@@ -9,5 +9,5 @@ from .filter import (
 )
 from .math import FactorOperation, LimitValueOperation, OffsetOperation, RoundOperation
 from .operations import OrOperation, SequenceOperation
-from .virtual_meter import DateTimeFinder, VirtualMeterOperation
+from .date_time import DateTimeFinder, VirtualMeterOperation, MaxValueOperation, MinValueOperation
 from .workarounds import NegativeOnEnergyMeterWorkaroundOperation

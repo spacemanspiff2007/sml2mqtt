@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from datetime import date, time
 from enum import Enum
-from typing import Any, TypeAlias, Annotated, Union, Final
+from typing import Any, TypeAlias, Annotated, Union, Final, Literal, TypedDict
 from typing import get_args as _get_args
+from typing_extensions import override
 
 from annotated_types import Len
-from easyconfig import BaseModel
+from easyconfig import BaseModel as _BaseModel
 from pydantic import (
     Field,
     StrictBool,
@@ -17,6 +18,12 @@ from pydantic import (
 from pydantic_core import PydanticCustomError
 
 from .types import Number, ObisHex, TimeInSeconds, LowerStr  # noqa: TCH001
+from ..const import DateTimeFinder
+
+
+class BaseModel(_BaseModel):
+    def get_kwargs(self, kwargs: dict | None = None) -> None:
+        return kwargs
 
 
 # -------------------------------------------------------------------------------------------------
@@ -136,22 +143,52 @@ DayOfMonth = Annotated[int, Field(ge=1, le=31, strict=True)]
 
 
 # -------------------------------------------------------------------------------------------------
-# VirtualMeter
+# DateTime
 # -------------------------------------------------------------------------------------------------
-class VirtualMeter(BaseModel):
+class DateTimeBoundKwargs(TypedDict):
+    start_now: bool
+    dt_finder: DateTimeFinder
+
+
+class HasDateTimeFields(BaseModel):
+
     start_now: bool = Field(
         alias='start now', description='Immediately start the virtual meter instead of after the next reset'
     )
-    times: list[time] = Field(
-        description='Time(s) of day when the meter will reset', min_length=1,
+    reset_times: list[time] = Field(
+        default=[], alias='reset times', description='Time(s) of day when the meter will reset', min_length=1,
     )
-    days: list[DayOfMonth | DayOfWeekStr] = Field(
-        description='Days of month or weekdays where the time(s) will be checked'
+    reset_days: list[DayOfMonth | DayOfWeekStr] = Field(
+        default=[], alias='reset days', description='Days of month or weekdays where the time(s) will be checked'
     )
 
-    def get_dows_and_days(self) -> tuple[list[int], list[int]]:
+    @override
+    def get_kwargs(self, kwargs: dict | None = None) -> DateTimeBoundKwargs:
+
         names = generate_day_names()
-        return [names[n] for n in self.days if not isinstance(n, int)], [n for n in self.days if isinstance(n, int)]
+        dows = [names[n] for n in self.reset_days if not isinstance(n, int)]
+        days = [n for n in self.reset_days if isinstance(n, int)]
+
+        finder = DateTimeFinder()
+        for t in self.reset_times:
+            finder.add_time(t)
+        for dow in dows:
+            finder.add_dow(dow)
+        for day in days:
+            finder.add_day(day)
+
+        to_add: DateTimeBoundKwargs = {
+            'dt_finder': finder,
+            'start_now': self.start_now
+        }
+
+        kwargs.update(to_add)
+        # noinspection PyTypeChecker
+        return super().get_kwargs(kwargs)
+
+
+class VirtualMeter(HasDateTimeFields):
+    type: Literal['meter']
 
 
 # -------------------------------------------------------------------------------------------------
@@ -170,7 +207,7 @@ OperationsType: TypeAlias = Union[tuple(Annotated[o, Tag(o.__name__)] for o in O
 
 
 MODEL_FIELD_MAP: Final[dict[str, frozenset[str]]] = {
-    _m.__name__ : frozenset(
+    _m.__name__: frozenset(
         _f.alias if _f.alias is not None else _n for _n, _f in _m.model_fields.items() if _f.exclude is not True
     )
     for _m in OperationsModels

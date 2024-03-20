@@ -4,8 +4,10 @@ from datetime import time
 from typing import Annotated, Union, get_args, get_origin
 
 import pytest
+from pydantic import BaseModel
 
 from sml2mqtt.config.operations import Sequence, Offset, OperationsModels
+import sml2mqtt.config.operations as operations_module
 from sml2mqtt.sml_value.operations import SequenceOperation, OffsetOperation, VirtualMeterOperation
 from sml2mqtt.sml_value.setup_operations import MAPPING, setup_operations
 
@@ -28,30 +30,62 @@ def remove_annotated(obj):
     return ret
 
 
+def get_kwargs_return_annotation(obj) -> None | str:
+    name = 'get_kwargs'
+    if not hasattr(obj, name):
+        raise ValueError()
+
+    if (sig := inspect.signature(getattr(obj, name)).return_annotation) == 'None':
+        return None
+    return sig
+
+
 @pytest.mark.parametrize(('config_model', 'operation'), tuple(MAPPING.items()))
-def test_field_to_init(config_model, operation):
+def test_field_to_init(config_model: type[BaseModel], operation: callable):
     config_model.model_rebuild()
 
     sig_o = inspect.signature(operation)
     params = sig_o.parameters
 
-    if list(params) == ['model']:
-        return None
+    config_provides = {}
 
-    for cfg_name, cfg_field in config_model.model_fields.items():
-        assert cfg_name in params
-        param = params[cfg_name]
+    if get_kwargs_return_annotation(config_model) is not None:
+        processed = set()
+        for config_model_cls in inspect.getmro(config_model):
+            if (return_annotation := get_kwargs_return_annotation(config_model_cls)) is None:
+                break
 
-        if origin_cfg := get_origin(cfg_field.annotation):
+            # Process each function only once
+            if config_model.get_kwargs in processed:
+                continue
+            processed.add(config_model.get_kwargs)
+
+            typed_dict = getattr(operations_module, return_annotation)
+            annotations = inspect.get_annotations(typed_dict)
+
+            for name, fwd_ref in annotations.items():
+                ref_type = fwd_ref._evaluate(vars(operations_module), {}, frozenset())
+                assert name not in config_provides, config_provides
+                config_provides[name] = ref_type
+
+    else:
+        for _cfg_name, _cfg_field in config_model.model_fields.items():
+            config_provides[_cfg_name] = _cfg_field.annotation
+
+    for name, type_hint in config_provides.items():
+        assert name in params
+        param = params[name]
+
+        if origin_cfg := get_origin(type_hint):
             origin_op = get_origin(param.annotation)
             assert_origins_equal(origin_cfg, origin_op)
 
-            args_cfg = remove_annotated(cfg_field.annotation)
+            args_cfg = remove_annotated(type_hint)
             args_op = remove_annotated(param.annotation)
             assert args_cfg == args_op
 
         else:
-            assert cfg_field.annotation == param.annotation
+            assert type_hint == param.annotation
 
 
 def test_all_models_in_mapping():
@@ -82,7 +116,7 @@ def test_simple():
 def test_virtual_meter():
 
     cfg = Sequence(sequence=[
-        {'start now': True, 'times': ['02:00'], 'days': ['mon', 6]},
+        {'type': 'meter', 'start now': True, 'reset times': ['02:00'], 'reset days': ['mon', 6]},
     ])
 
     o = SequenceOperation()
@@ -93,9 +127,9 @@ def test_virtual_meter():
 
     o = o.operations[0]
     assert isinstance(o, VirtualMeterOperation)
-    assert o.dt_finder.times == (time(2, 0), )
-    assert o.dt_finder.days == (6, )
-    assert o.dt_finder.dows == (1, )
+    assert o._dt_finder.times == (time(2, 0), )
+    assert o._dt_finder.days == (6, )
+    assert o._dt_finder.dows == (1, )
 
 
 def test_complex():

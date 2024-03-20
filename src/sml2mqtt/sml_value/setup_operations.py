@@ -47,18 +47,6 @@ def create_DeltaFilter(delta: int | float, is_percent: bool): # noqa: 802
     return AbsDeltaFilterOperation(delta=delta)
 
 
-def create_VirtualMeter(model: VirtualMeter): # noqa: 802
-    dows, days = model.get_dows_and_days()
-    finder = DateTimeFinder()
-    for time in model.times:
-        finder.add_time(time)
-    for dow in dows:
-        finder.add_dow(dow)
-    for day in days:
-        finder.add_day(day)
-    return VirtualMeterOperation(finder, start_now=model.start_now)
-
-
 def create_workaround_negative_on_energy_meter(enabled_or_obis: bool | str):
     if isinstance(enabled_or_obis, str):
         return NegativeOnEnergyMeterWorkaroundOperation(meter_obis=enabled_or_obis)
@@ -91,7 +79,7 @@ MAPPING = {
     Or: create_or,
     Sequence: create_sequence,
 
-    VirtualMeter: create_VirtualMeter
+    VirtualMeter: VirtualMeterOperation
 }
 
 
@@ -111,10 +99,10 @@ def setup_operations(parent: OperationContainerBase, cfg_parent: _HasOperationsP
     for cfg in cfg_parent.operations:
         factory = get_operation_factory(cfg)
 
-        signature = get_signature(factory)
-        pass_model = list(signature.parameters) == ['model']
+        if not (kwargs := cfg.get_kwargs({})):
+            kwargs = cfg.model_dump()
 
-        if (operation_obj := factory(**(cfg.model_dump() if not pass_model else {'model': cfg}))) is None:
+        if (operation_obj := factory(**kwargs)) is None:
             continue
 
         assert isinstance(operation_obj, ValueOperationBase)

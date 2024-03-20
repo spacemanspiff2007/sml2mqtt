@@ -1,5 +1,6 @@
 import re
 from collections.abc import Iterable
+from itertools import zip_longest
 
 from sml2mqtt.sml_value.base import ValueOperationBase
 
@@ -30,5 +31,9 @@ def check_description(obj: ValueOperationBase, value: str | Iterable[str]):
         assert 'Filter' in desc_text, desc_text
 
     value = [value] if isinstance(value, str) else list(value)
+    diffs = [
+        ''.join('^' if a != b else ' ' for a, b in zip_longest(entry_d, entry_v))
+        for entry_d, entry_v in zip(desc, value)
+    ]
 
-    assert desc == value, f'\n{desc}\n{value}'
+    assert desc == value, f'\n{desc}\n{value}\n{diffs}'
