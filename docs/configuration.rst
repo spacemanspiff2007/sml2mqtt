@@ -29,6 +29,11 @@ If the config is specified and it does not yet exist a default configuration fil
 Example
 --------------------------------------
 
+.. py:currentmodule:: sml2mqtt.config.config
+
+..
+    YamlModel: Settings
+
 .. code-block:: yaml
 
     logging:
@@ -37,7 +42,7 @@ Example
 
     mqtt:
       connection:
-        client id: sml2mqtt
+        identifier: sml2mqtt
         host: localhost
         port: 1883
         user: ''
@@ -66,7 +71,7 @@ Example
       republish after: 120             # Republish automatically after this time (if no other every filter is configured)
 
     # Serial port configurations for the sml readers
-    ports:
+    inputs:
     - url: COM1
       timeout: 3
     - url: /dev/ttyS0
@@ -75,44 +80,29 @@ Example
 
     devices:
       # Device configuration by OBIS value 0100000009ff or by url if the device does not report OBIS 0100000009ff
-      11111111111111111111:
+      '11111111111111111111':
         mqtt:
           topic: DEVICE_TOPIC
 
         # OBIS IDs that will not be processed (optional)
         skip:
-        - OBIS
-        - values
-        - to skip
+        - '112233445566'
+        - '778899AABBCC'
 
-        # Configuration how each OBIS value is reported. Create as many OBIS IDs (e.g. 0100010800ff as you like).
-        # Each sub entry (mqtt, workarounds, transformations, filters) is optional and can be omitted
+        # Configuration how each OBIS value is reported. Create as many entries as you like.
+        # It's even possible to process a value multiple times (e.g. to report a daily max value)
         values:
 
-          OBIS:
-            # Sub topic how this value is reported.
+          - obis: '112233445566'
+            # Sub topic how this value is reported (Optional).
             mqtt:
               topic: OBIS
-
-            # Workarounds allow the enabling workarounds (e.g. if the device has strange behaviour)
-            # These are the available workarounds
-            workarounds:
-            - negative on energy meter status: true   # activate this workaround
-
-            # Transformations allow mathematical calculations on the obis value
-            # They are applied in order how they are defined
-            transformations:
-            - factor: 3     # multiply with factor
-            - offset: 100   # add offset
-            - round: 2      # round on two digits
-
-            # Filters control how often a value is published over mqtt.
-            # If one filter is true the value will be published
-            filters:
-            - diff: 10      # report if value difference is >= 10
-            - perc: 10      # report if percentage change is >= 10%
-            - every: 120    # report at least every 120 secs (overrides the value from general)
-
+            # optional, leave if you do not want to process the raw value
+            operations:
+              - negative on energy meter status: true   # activate this workaround
+              - factor: 3                               # multiply with factor
+              - offset: 100                             # add offset
+              - round: 2                                # round on two digits
 
 
 Example devices
@@ -210,12 +200,3 @@ devices
 .. autopydantic_model:: SmlDeviceConfig
 
 .. autopydantic_model:: SmlValueConfig
-
-.. autoclass:: WorkaroundOptionEnum
-   :members:
-
-.. autoclass:: TransformOptionEnum
-   :members:
-
-.. autoclass:: FilterOptionEnum
-   :members:

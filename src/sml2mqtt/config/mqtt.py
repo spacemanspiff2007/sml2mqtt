@@ -1,5 +1,9 @@
+import random
+import string
+
 from easyconfig import BaseModel
-from pydantic import conint, constr, Field, StrictBool, field_validator, model_validator
+from pydantic import Field, StrictBool, conint, constr, field_validator, model_validator
+
 
 QOS = conint(ge=0, le=2)
 TOPIC_STR = constr(strip_whitespace=True, min_length=1)
@@ -42,7 +46,7 @@ class OptionalMqttPublishConfig(BaseModel):
 
 
 class MqttConnection(BaseModel):
-    identifier: STRIPPED_STR = Field('sml2mqtt')
+    identifier: STRIPPED_STR = Field('sml2mqtt-' + ''.join(random.choices(string.ascii_letters, k=13)),)
     host: STRIPPED_STR = 'localhost'
     port: conint(gt=0) = 1883
     user: STRIPPED_STR = ''

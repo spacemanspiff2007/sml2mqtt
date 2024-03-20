@@ -77,6 +77,8 @@ class Task:
             await self._coro()
         except Exception as e:
             self.process_exception(e)
+        except CancelledError:
+            pass
         finally:
             if task is self._task:
                 self._task = None

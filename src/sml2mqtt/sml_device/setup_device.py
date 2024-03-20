@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 from sml2mqtt.sml_value import SmlValue
 from sml2mqtt.sml_value.operations import (
     FactorOperation,
-    HeartbeatFilterOperation,
     OnChangeFilterOperation,
     OrOperation,
+    RefreshActionOperation,
     SequenceOperation,
-    SkipZeroMeterOperation, RefreshActionOperation,
+    SkipZeroMeterOperation,
 )
 from sml2mqtt.sml_value.setup_operations import setup_operations
 

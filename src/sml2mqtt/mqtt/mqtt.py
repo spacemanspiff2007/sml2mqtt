@@ -23,7 +23,7 @@ async def start():
     assert not TASK.is_running
 
     IS_CONNECTED = Event()
-    await TASK.start()
+    TASK.start()
 
     on_shutdown(_shutdown, 'Shutdown mqtt')
 
@@ -44,7 +44,7 @@ TASK: Final = Task(mqtt_task, name='MQTT Task')
 
 async def wait_for_connect(timeout: float):
     if IS_CONNECTED is None:
-        return None
+        raise ValueError()
 
     try:
         await wait_for(IS_CONNECTED.wait(), timeout)

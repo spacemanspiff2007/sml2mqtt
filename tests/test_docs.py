@@ -1,6 +1,8 @@
+from dataclasses import dataclass
 from inspect import getmembers, isclass
 from pathlib import Path
 
+from _pytest.monkeypatch import derive_importpath
 from easyconfig import yaml
 from pydantic import BaseModel
 
@@ -8,56 +10,91 @@ import sml2mqtt
 from sml2mqtt.config.source import SmlSourceSettingsBase
 
 
-def test_sample_yaml(pytestconfig):
-    file = pytestconfig.rootpath / 'docs' / 'configuration.rst'
+@dataclass
+class YamlBlock:
+    file: Path
+    line_no: int
+    model: str
+    lines: list[str]
 
-    all_cfgs = []
+    def validate(self):
+        sample_cfg = '\n'.join(self.lines)
 
-    lines = []
-    add = False
-    indent = 0
+        target, name = derive_importpath(self.model, True)
+        model = getattr(name, target)   # type: BaseModel
 
-    for line in file.read_text().splitlines():
+        try:
+            yaml_obj = yaml.yaml_rt.load(sample_cfg)
+            model.model_validate(yaml_obj)
+        except Exception:
+            print('')
+            print(f'Error in {self.file.parent.name}/{self.file.name}:{self.line_no}')
+            raise
+
+
+def validate_yaml_blocks(file: Path):
+
+    prefix_model = 'yamlmodel: '
+    current_module = ''
+
+    model = ''
+    obj: YamlBlock | None = None
+    indentation = 0
+
+    for line_no, line in enumerate(file.read_text().splitlines()):
         line = line
-        stripped = line.strip()
+        line_low = line.strip().lower()
 
-        if add:
-            if not indent and stripped:
-                while line[indent] == ' ':
-                    indent += 1
+        if line_low.startswith('.. py:currentmodule::'):
+            current_module = line.strip()[21:].strip()
 
-            if stripped and line[0] != ' ':
-                all_cfgs.append(lines)
-                add = False
+        if line_low.startswith(prefix_model):
+            assert not model
+            model = line.strip()[len(prefix_model):]
+            if '.' not in model:
+                if not current_module:
+                    msg = f'currentmodule not set in {file}:{line_no}'
+                    raise ValueError(msg)
+                model = f'{current_module}.{model}'
+
+        if obj is not None:
+            # find out indentation
+            if not indentation and line_low:
+                while line[indentation] == ' ':
+                    indentation += 1
+
+            # we have a non-indented line -> yaml is finished
+            if line_low and line[0] != ' ':
+                obj.validate()
+                obj = None
+                indentation = 0
+                model = ''
                 continue
 
-            lines.append(line[indent:])
+            obj.lines.append(line)
 
-        if stripped.startswith('.. code-block:: yaml') or stripped.startswith('.. code-block:: yml'):
-            add = True
-            lines = []
+        if line_low.startswith(('.. code-block:: yaml', '.. code-block:: yml')):
+            if not model:
+                msg = f'Model object not set in {file}:{line_no}'
+                raise ValueError(msg)
+            if obj is not None:
+                msg = f'Object already set in {file}:{line_no}: {obj.model} line {obj.line_no}'
+                raise ValueError(msg)
 
-    if add:
-        all_cfgs.append(lines)
-
-    assert len(all_cfgs) == 2
-    for cfg_lines in all_cfgs:
-        sample_cfg = '\n'.join(cfg_lines)
-
-        map = yaml.yaml_rt.load(sample_cfg)
-        sml2mqtt.config.config.Settings(**map)
+            obj = YamlBlock(file, line_no, model, [])
 
 
-def test_config_documentation_complete(pytestconfig):
-    cfg_docs: Path = pytestconfig.rootpath / 'docs' / 'configuration.rst'
-    cfg_model_dir: Path = pytestconfig.rootpath / 'src' / 'sml2mqtt' / 'config'
-    assert cfg_model_dir.is_dir()
+def test_yaml_samples(pytestconfig):
+    for file in (pytestconfig.rootpath / 'docs').iterdir():
+        if file.suffix.lower() == '.rst':
+            validate_yaml_blocks(file)
 
-    documented_objs = set()
 
-    # documented config
+def _get_documented_objs(path: Path, objs: set[str]):
+
     current_module = ''
-    for line in (x.strip().replace('  ', '') for x in cfg_docs.read_text().splitlines()):  # type: str
+
+    for line in (x.strip().replace('  ', '') for x in path.read_text().splitlines()):  # type: str
         if line.startswith('.. py:currentmodule::'):
             current_module = line[21:].strip()
             continue
@@ -66,8 +103,16 @@ def test_config_documentation_complete(pytestconfig):
             obj_name = line[23:].strip()
             if current_module:
                 obj_name = f'{current_module}.{obj_name}'
-            assert obj_name not in documented_objs
-            documented_objs.add(obj_name)
+            assert obj_name not in objs
+            objs.add(obj_name)
+
+
+def test_config_documentation_complete(pytestconfig):
+    cfg_model_dir: Path = pytestconfig.rootpath / 'src' / 'sml2mqtt' / 'config'
+    assert cfg_model_dir.is_dir()
+
+    documented_objs = set()
+    _get_documented_objs(pytestconfig.rootpath / 'docs' / 'configuration.rst', documented_objs)
 
     # get Config implementation from source
     existing_objs = set()

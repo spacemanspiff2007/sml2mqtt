@@ -31,6 +31,7 @@ async def a_main():
         for input_cfg in CONFIG.inputs:
             device = ALL_DEVICES.add_device(SmlDevice(input_cfg.get_device_name()))
             device.set_source(await create_source(device, settings=input_cfg))
+            device.watchdog.set_timeout(input_cfg.timeout)
 
         # Start all devices
         await ALL_DEVICES.start()
