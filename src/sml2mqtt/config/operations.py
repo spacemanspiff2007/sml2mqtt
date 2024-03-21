@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from datetime import date, time
 from enum import Enum
-from typing import Any, TypeAlias, Annotated, Union, Final, Literal, TypedDict
+from typing import Any, TypeAlias, Annotated, Union, Final, Literal, TypedDict, final
 from typing import get_args as _get_args
 from typing_extensions import override
 
 from annotated_types import Len
-from easyconfig import BaseModel as _BaseModel
+from easyconfig import BaseModel
 from pydantic import (
     Field,
     StrictBool,
@@ -21,9 +21,8 @@ from .types import Number, ObisHex, TimeInSeconds, LowerStr  # noqa: TCH001
 from ..const import DateTimeFinder
 
 
-class BaseModel(_BaseModel):
-    def get_kwargs(self, kwargs: dict | None = None) -> None:
-        return kwargs
+class EmptyKwargs(TypedDict):
+    pass
 
 
 # -------------------------------------------------------------------------------------------------
@@ -31,6 +30,10 @@ class BaseModel(_BaseModel):
 # -------------------------------------------------------------------------------------------------
 class OnChangeFilter(BaseModel):
     change: Any = Field(alias='change filter', description='Filter which passes only changes')
+
+    @final
+    def get_kwargs_on_change(self) -> EmptyKwargs:
+        return {}
 
 
 class DeltaFilter(BaseModel):
@@ -162,8 +165,8 @@ class HasDateTimeFields(BaseModel):
         default=[], alias='reset days', description='Days of month or weekdays where the time(s) will be checked'
     )
 
-    @override
-    def get_kwargs(self, kwargs: dict | None = None) -> DateTimeBoundKwargs:
+    @final
+    def get_kwargs_dt_fields(self) -> DateTimeBoundKwargs:
 
         names = generate_day_names()
         dows = [names[n] for n in self.reset_days if not isinstance(n, int)]
@@ -177,14 +180,10 @@ class HasDateTimeFields(BaseModel):
         for day in days:
             finder.add_day(day)
 
-        to_add: DateTimeBoundKwargs = {
+        return {
             'dt_finder': finder,
             'start_now': self.start_now
         }
-
-        kwargs.update(to_add)
-        # noinspection PyTypeChecker
-        return super().get_kwargs(kwargs)
 
 
 class VirtualMeter(HasDateTimeFields):
@@ -213,9 +212,23 @@ MODEL_FIELD_MAP: Final[dict[str, frozenset[str]]] = {
     for _m in OperationsModels
 }
 
+MODEL_TYPE_MAP: Final[str, str] = {
+    _get_args(_f.annotation)[0]: _m.__name__
+    for _m in OperationsModels for _n, _f in _m.model_fields.items() if _n == 'type'
+}
+
 
 def check_allowed_keys(obj: Any):
-    keys = set(obj) if isinstance(obj, dict) else set(obj.model_fields)
+    if isinstance(obj, dict):
+        type = obj.get('type')  # noqa: A001
+        keys = set(obj)
+    else:
+        type = getattr(obj, 'type', None)  # noqa: A001
+        keys = set(obj.model_fields)
+
+    # we have a type field
+    if type is not None:
+        return MODEL_TYPE_MAP.get(type)
 
     # let's see if we have a 100% match
     for name, fields in MODEL_FIELD_MAP.items():

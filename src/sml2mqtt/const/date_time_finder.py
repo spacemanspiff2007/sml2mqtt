@@ -12,6 +12,8 @@ class DateTimeFinder:
         self.dows: tuple[int, ...] = ()
         self.days: tuple[int, ...] = ()
 
+        self.enabled: bool = False
+
     @property
     def condition_count(self) -> int:
         return len(self.times) + len(self.dows) + len(self.days)
@@ -20,6 +22,7 @@ class DateTimeFinder:
         if not isinstance(time, dt_time):
             raise TypeError()
         self.times = (*self.times, time)
+        self.enabled = True
         return self
 
     def add_dow(self, dow: int):
@@ -39,7 +42,7 @@ class DateTimeFinder:
         return self
 
     def get_first_reset(self, start_now: bool):
-        return get_now() if start_now else self.calc_next()
+        return get_now() if start_now or not self.enabled else self.calc_next()
 
     def calc_next(self, now: datetime | None = None) -> datetime:
         if now is None:

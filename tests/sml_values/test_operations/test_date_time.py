@@ -164,6 +164,54 @@ def test_virtual_meter_description(now):
     )
 
 
+def test_virtual_meter_start_now_no_times(now):
+    f = DateTimeFinder()
+    f.add_time(time(2))
+
+    dt = DateTimeFactory(hour=1, minute=30)
+    now.set(dt.create(1, microsecond=1))
+
+    o = VirtualMeterOperation(f, start_now=True)
+
+    assert o.process_value(None, None) is None
+    assert o.process_value(33, None) == 0
+    assert o.process_value(34, None) == 1
+
+
+def test_virtual_meter_start_normal_no_times(now):
+    f = DateTimeFinder()
+
+    dt = DateTimeFactory(hour=1, minute=30)
+    now.set(dt.create(1))
+
+    o = VirtualMeterOperation(f, start_now=False)
+    now.set(dt.create(1))
+
+    assert o.process_value(None, None) is None
+    assert o.process_value(33, None) == 0
+    assert o.process_value(34, None) == 1
+
+
+def test_virtual_meter_description_no_times(now):
+    f = DateTimeFinder()
+
+    dt = DateTimeFactory(hour=1, minute=30)
+    now.set(dt.create(1))
+
+    o = VirtualMeterOperation(f, start_now=True)
+    now.set(dt.create(1))
+
+    assert o.process_value(1, None) == 0
+
+    check_description(
+        o, [
+            '- Virtual meter:',
+            '    Offset: 1',
+            '    No resets',
+        ]
+    )
+
+
 def test_max_start_now(now):
     f = DateTimeFinder()
     f.add_time(time(2))

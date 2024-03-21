@@ -15,7 +15,7 @@ class SupportsDateTimeAction(ValueOperationBase):
         self._dt_finder: Final = dt_finder
         self._next_reset: datetime = dt_finder.get_first_reset(start_now)
 
-        if start_now:
+        if start_now or not self._dt_finder.enabled:
             assert not hasattr(self, self._START_NOW_FUNC_ATTR)
             setattr(self, self._START_NOW_FUNC_ATTR, self.process_value)
             self.process_value = self._process_value_start_now
@@ -24,6 +24,9 @@ class SupportsDateTimeAction(ValueOperationBase):
         raise NotImplementedError()
 
     def after_next_reset(self, update: bool = True) -> bool:
+        if not self._dt_finder.enabled:
+            return False
+
         if (now := get_now()) >= self._next_reset:
             if update:
                 self._next_reset = self._dt_finder.calc_next(now)
@@ -45,6 +48,10 @@ class SupportsDateTimeAction(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
+        if not self._dt_finder.enabled:
+            yield f'{indent:s}    No resets'
+            return None
+
         yield f'{indent:s}    Next resets:'
         yield f'{indent:s}     - {self._next_reset}'
 
@@ -65,6 +72,7 @@ class VirtualMeterOperation(SupportsDateTimeAction):
 
     def start_now_logic(self, value, info: SmlValueInfo):
         self.last_value = value
+        self.offset = value
 
     @override
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:

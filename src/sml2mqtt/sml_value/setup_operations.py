@@ -36,10 +36,6 @@ from sml2mqtt.sml_value.operations import (
 )
 
 
-def create_OnChangeFilter(change: Any): # noqa: 802
-    return OnChangeFilterOperation()
-
-
 def create_DeltaFilter(delta: int | float, is_percent: bool): # noqa: 802
     if is_percent:
         return PercDeltaFilterOperation(delta=delta)
@@ -64,7 +60,7 @@ def create_sequence(operations: list[OperationsType]):
 
 
 MAPPING = {
-    OnChangeFilter: create_OnChangeFilter,
+    OnChangeFilter: OnChangeFilterOperation,
     HeartbeatFilter: HeartbeatFilterOperation,
     DeltaFilter: create_DeltaFilter,
 
@@ -91,6 +87,10 @@ def get_operation_factory(obj: BaseModel) -> Callable:
     raise ValueError(msg)
 
 
+def get_kwargs_names(obj: BaseModel) -> list[str]:
+    return [n for n in dir(obj) if n.startswith('get_kwargs_')]
+
+
 class _HasOperationsProto(Protocol):
     operations: list[BaseModel]
 
@@ -99,7 +99,9 @@ def setup_operations(parent: OperationContainerBase, cfg_parent: _HasOperationsP
     for cfg in cfg_parent.operations:
         factory = get_operation_factory(cfg)
 
-        if not (kwargs := cfg.get_kwargs({})):
+        if kwarg_names := get_kwargs_names(cfg):
+            kwargs = {name: value for kwarg_name in kwarg_names for name, value in getattr(cfg, kwarg_name)().items()}
+        else:
             kwargs = cfg.model_dump()
 
         if (operation_obj := factory(**kwargs)) is None:

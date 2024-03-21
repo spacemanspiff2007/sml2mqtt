@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sml2mqtt.config.operations import Sequence, Offset, OperationsModels
 import sml2mqtt.config.operations as operations_module
 from sml2mqtt.sml_value.operations import SequenceOperation, OffsetOperation, VirtualMeterOperation
-from sml2mqtt.sml_value.setup_operations import MAPPING, setup_operations
+from sml2mqtt.sml_value.setup_operations import MAPPING, setup_operations, get_kwargs_names
 
 
 def assert_origins_equal(a, b):
@@ -49,17 +49,9 @@ def test_field_to_init(config_model: type[BaseModel], operation: callable):
 
     config_provides = {}
 
-    if get_kwargs_return_annotation(config_model) is not None:
-        processed = set()
-        for config_model_cls in inspect.getmro(config_model):
-            if (return_annotation := get_kwargs_return_annotation(config_model_cls)) is None:
-                break
-
-            # Process each function only once
-            if config_model.get_kwargs in processed:
-                continue
-            processed.add(config_model.get_kwargs)
-
+    if kwarg_func_names := get_kwargs_names(config_model):
+        for kwarg_func_name in kwarg_func_names:
+            return_annotation = inspect.signature(getattr(config_model, kwarg_func_name)).return_annotation
             typed_dict = getattr(operations_module, return_annotation)
             annotations = inspect.get_annotations(typed_dict)
 
@@ -67,7 +59,6 @@ def test_field_to_init(config_model: type[BaseModel], operation: callable):
                 ref_type = fwd_ref._evaluate(vars(operations_module), {}, frozenset())
                 assert name not in config_provides, config_provides
                 config_provides[name] = ref_type
-
     else:
         for _cfg_name, _cfg_field in config_model.model_fields.items():
             config_provides[_cfg_name] = _cfg_field.annotation
@@ -86,6 +77,9 @@ def test_field_to_init(config_model: type[BaseModel], operation: callable):
 
         else:
             assert type_hint == param.annotation
+
+    if missing := set(params) - set(config_provides):
+        raise ValueError(f'The following arguments are missing for {operation.__name__}: {", ".join(missing)}')
 
 
 def test_all_models_in_mapping():
