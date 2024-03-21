@@ -39,7 +39,7 @@ class Settings(AppBaseModel):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     mqtt: MqttConfig = Field(default_factory=MqttConfig)
     general: GeneralSettings = Field(default_factory=GeneralSettings)
-    inputs: list[HttpSourceSettings | SerialSourceSettings] = []
+    inputs: list[HttpSourceSettings | SerialSourceSettings] = Field([])
     devices: dict[LowerStr, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
 
 
@@ -48,7 +48,7 @@ def default_config() -> Settings:
     return Settings(
         inputs=[SerialSourceSettings(url='COM1', timeout=3), SerialSourceSettings(url='/dev/ttyS0', timeout=3), ],
         devices={
-            'DEVICE_ID_HEX': SmlDeviceConfig(
+            'device_id_hex': SmlDeviceConfig(
                 mqtt=OptionalMqttPublishConfig(topic='DEVICE_BASE_TOPIC'),
                 status=OptionalMqttPublishConfig(topic='status'),
                 skip={'00112233445566'},

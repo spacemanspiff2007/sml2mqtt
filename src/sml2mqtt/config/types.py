@@ -16,7 +16,4 @@ LowerStr = Annotated[
 
 Number: TypeAlias = StrictInt | StrictFloat
 
-TimeInSeconds = Annotated[
-    int | float,
-    ...
-]
+TimeInSeconds: TypeAlias = int | float

@@ -9,6 +9,7 @@ Welcome to sml2mqtt's documentation!
    installation
    configuration
    getting_started
+   operations
 
 
 Indices and tables

@@ -13,7 +13,7 @@ from pydantic import (
     StrictBool,
     conlist,
     model_validator,
-    BeforeValidator, Discriminator, Tag, constr, field_validator
+    BeforeValidator, Discriminator, Tag, constr, field_validator, Strict, StringConstraints, StrictInt, StrictFloat
 )
 from pydantic_core import PydanticCustomError
 
@@ -36,33 +36,40 @@ class OnChangeFilter(BaseModel):
         return {}
 
 
-class DeltaFilter(BaseModel):
-    is_percent: bool = Field(False, exclude=True)
+class DeltaFilterKwargs(TypedDict):
+    delta: int | float
+    is_percent: bool
 
-    delta: int | float = Field(
+
+PERCENT_STR = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+\.?\d*\s*%$')]
+
+
+class DeltaFilter(BaseModel):
+    delta: StrictInt | StrictFloat | PERCENT_STR = Field(
         alias='delta filter',
         description='Filter which passes only when the incoming value is different enough from the previously passed '
                     'value. Can be an absolute value or a percentage'
     )
 
-    @model_validator(mode='before')
-    @classmethod
-    def _check_percentage(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            key_percent = 'is_percent'
-            key_delta = 'delta filter'
+    @final
+    def get_kwargs_delta(self) -> DeltaFilterKwargs:
 
-            if key_percent in data:
-                msg = f'"{key_percent:s}" can not be set'
-                raise ValueError(msg)
+        is_percent = False
+        if isinstance(self.delta, str):
+            delta = self.delta
+            is_percent = delta.endswith('%')
+            delta = delta.removesuffix('%')
+            try:
+                delta = int(delta)
+            except ValueError:
+                delta = float(delta)
+        else:
+            delta = self.delta
 
-            if isinstance(delta := data.get(key_delta), str):
-                delta = delta.strip()
-                if delta.endswith('%'):
-                    data[key_percent] = True
-                    data[key_delta] = delta[:-1].strip()
-
-        return data
+        return {
+            'delta': delta,
+            'is_percent': is_percent
+        }
 
 
 class HeartbeatFilter(BaseModel):
@@ -97,6 +104,28 @@ class Offset(BaseModel):
 class Round(BaseModel):
     digits: int = Field(ge=0, le=6, alias='round', description='Round to the specified digits')
 
+
+class LimitValue(BaseModel):
+    type: Literal['limit value']
+    min: float | None = Field(None, description='minimum value')
+    max: float | None = Field(None, description='maximum value')
+    ignore: bool = Field(
+        False, alias='ignore out of range', description='Instead of limiting the value if it is out of range ignore it'
+    )
+
+    @final
+    def get_kwargs_limit(self) -> LimitValueKwargs:
+        return {
+            'min': self.min,
+            'max': self.max,
+            'ignore': self.ignore
+        }
+
+
+class LimitValueKwargs(TypedDict):
+    min: float | None
+    max: float | None
+    ignore: bool
 
 # -------------------------------------------------------------------------------------------------
 # Workarounds
@@ -221,7 +250,7 @@ class HasIntervalFields(BaseModel):
     )
 
     @final
-    def get_kwargs_dt_fields(self) -> TimeSeriesKwargs:
+    def get_kwargs_interval_fields(self) -> TimeSeriesKwargs:
         return {
             'time_series': TimeSeries(self.interval, wait_for_data=self.wait_for_data),
             'reset_after_value': self.reset_after_value
@@ -245,7 +274,7 @@ class MeanOfInterval(HasIntervalFields):
 OperationsModels = (
     OnChangeFilter, DeltaFilter, HeartbeatFilter,
     RefreshAction,
-    Factor, Offset, Round,
+    Factor, Offset, Round, LimitValue,
     NegativeOnEnergyMeterWorkaround,
     Or, Sequence,
     VirtualMeter, MaxValue, MinValue,

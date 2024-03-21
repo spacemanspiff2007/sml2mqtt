@@ -1,6 +1,5 @@
 from collections.abc import Callable
-from inspect import signature as get_signature
-from typing import Any, Protocol
+from typing import Protocol
 
 from pydantic import BaseModel
 
@@ -8,6 +7,11 @@ from sml2mqtt.config.operations import (
     DeltaFilter,
     Factor,
     HeartbeatFilter,
+    MaxOfInterval,
+    MaxValue,
+    MeanOfInterval,
+    MinOfInterval,
+    MinValue,
     NegativeOnEnergyMeterWorkaround,
     Offset,
     OnChangeFilter,
@@ -16,14 +20,18 @@ from sml2mqtt.config.operations import (
     RefreshAction,
     Round,
     Sequence,
-    VirtualMeter, MinValue, MaxValue, MaxOfInterval, MinOfInterval, MeanOfInterval,
+    VirtualMeter, LimitValue,
 )
 from sml2mqtt.sml_value.base import OperationContainerBase, ValueOperationBase
 from sml2mqtt.sml_value.operations import (
     AbsDeltaFilterOperation,
-    DateTimeFinder,
     FactorOperation,
     HeartbeatFilterOperation,
+    MaxOfIntervalOperation,
+    MaxValueOperation,
+    MeanOfIntervalOperation,
+    MinOfIntervalOperation,
+    MinValueOperation,
     NegativeOnEnergyMeterWorkaroundOperation,
     OffsetOperation,
     OnChangeFilterOperation,
@@ -32,9 +40,7 @@ from sml2mqtt.sml_value.operations import (
     RefreshActionOperation,
     RoundOperation,
     SequenceOperation,
-    VirtualMeterOperation,
-    MinValueOperation,
-    MaxValueOperation, MaxOfIntervalOperation, MinOfIntervalOperation, MeanOfIntervalOperation
+    VirtualMeterOperation, LimitValueOperation,
 )
 
 
@@ -71,6 +77,7 @@ MAPPING = {
     Factor: FactorOperation,
     Offset: OffsetOperation,
     Round: RoundOperation,
+    LimitValue: LimitValueOperation,
 
     NegativeOnEnergyMeterWorkaround: create_workaround_negative_on_energy_meter,
 

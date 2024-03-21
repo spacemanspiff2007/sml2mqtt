@@ -14,6 +14,7 @@ class SmlValueConfig(BaseModel):
     )
 
     operations: OperationsListType = Field(
+        default=[],
         alias='operations',
         description='A sequence of operations that will be evaluated one after another.\n'
                     'As soon as one operation blocks a value the whole sequence will be aborted and '

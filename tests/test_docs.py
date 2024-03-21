@@ -1,13 +1,16 @@
 from dataclasses import dataclass
 from inspect import getmembers, isclass
 from pathlib import Path
+from typing import Callable, Any
 
 from _pytest.monkeypatch import derive_importpath
 from easyconfig import yaml
 from pydantic import BaseModel
 
 import sml2mqtt
+from sml2mqtt.config.operations import HasIntervalFields, HasDateTimeFields
 from sml2mqtt.config.source import SmlSourceSettingsBase
+from sml2mqtt.sml_value.setup_operations import MAPPING, setup_operations
 
 
 @dataclass
@@ -17,24 +20,25 @@ class YamlBlock:
     model: str
     lines: list[str]
 
-    def validate(self):
+    def validate(self, func: Callable[[BaseModel],Any] | None = None):
         sample_cfg = '\n'.join(self.lines)
 
         target, name = derive_importpath(self.model, True)
-        model = getattr(name, target)   # type: BaseModel
+        model_cls = getattr(name, target)   # type: type[BaseModel]
 
         try:
             yaml_obj = yaml.yaml_rt.load(sample_cfg)
-            model.model_validate(yaml_obj)
+            model = model_cls.model_validate(yaml_obj)
+            if func:
+                func(model)
         except Exception:
             print('')
             print(f'Error in {self.file.parent.name}/{self.file.name}:{self.line_no}')
             raise
 
 
-def validate_yaml_blocks(file: Path):
+def validate_yaml_blocks(file: Path, prefix_model: str = 'yamlmodel: ', func: Callable[[BaseModel],Any] | None = None):
 
-    prefix_model = 'yamlmodel: '
     current_module = ''
 
     model = ''
@@ -65,7 +69,7 @@ def validate_yaml_blocks(file: Path):
 
             # we have a non-indented line -> yaml is finished
             if line_low and line[0] != ' ':
-                obj.validate()
+                obj.validate(func)
                 obj = None
                 indentation = 0
                 model = ''
@@ -83,11 +87,26 @@ def validate_yaml_blocks(file: Path):
 
             obj = YamlBlock(file, line_no, model, [])
 
+    if obj:
+        obj.validate(func)
+
 
 def test_yaml_samples(pytestconfig):
+
+    class DummyOperationParent:
+        def add_operation(self, obj):
+            pass
+
+    class HasOperationsModel(BaseModel):
+        operations: list[BaseModel]
+
+    def check_obj(model: BaseModel):
+        if model.__class__ in MAPPING:
+            setup_operations(DummyOperationParent(), HasOperationsModel(operations=[model]))
+
     for file in (pytestconfig.rootpath / 'docs').iterdir():
         if file.suffix.lower() == '.rst':
-            validate_yaml_blocks(file)
+            validate_yaml_blocks(file, func=check_obj)
 
 
 def _get_documented_objs(path: Path, objs: set[str]):
@@ -101,7 +120,8 @@ def _get_documented_objs(path: Path, objs: set[str]):
 
         if line.startswith('.. autopydantic_model::'):
             obj_name = line[23:].strip()
-            if current_module:
+            if '.' not in obj_name:
+                assert current_module
                 obj_name = f'{current_module}.{obj_name}'
             assert obj_name not in objs
             objs.add(obj_name)
@@ -113,13 +133,19 @@ def test_config_documentation_complete(pytestconfig):
 
     documented_objs = set()
     _get_documented_objs(pytestconfig.rootpath / 'docs' / 'configuration.rst', documented_objs)
+    _get_documented_objs(pytestconfig.rootpath / 'docs' / 'operations.rst', documented_objs)
 
     # get Config implementation from source
     existing_objs = set()
     for module_name in [f.stem for f in cfg_model_dir.glob('**/*.py')]:
         module = getattr(sml2mqtt.config, module_name)
-        cfg_objs = [x[1] for x in getmembers(
-            module, lambda x: isclass(x) and issubclass(x, BaseModel) and x is not SmlSourceSettingsBase)]
+        cfg_objs = [
+            x[1] for x in getmembers(
+                module, lambda x: isclass(x) and issubclass(x, BaseModel) and x not in (
+                    SmlSourceSettingsBase, HasIntervalFields, HasDateTimeFields
+                )
+            )
+        ]
         cfg_names = {
             f'{obj.__module__}.{obj.__qualname__}' for obj in cfg_objs if not obj.__module__.startswith('easyconfig.')
         }

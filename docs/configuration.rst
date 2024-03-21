@@ -31,78 +31,74 @@ Example
 
 .. py:currentmodule:: sml2mqtt.config.config
 
+
 ..
     YamlModel: Settings
 
 .. code-block:: yaml
 
     logging:
-      level: INFO                    # Log level
-      file: sml2mqtt.log             # Log file path (absolute or relative to config file)
+      level: INFO         # Log level
+      file: sml2mqtt.log  # Log file path (absolute or relative to config file) or stdout
 
     mqtt:
       connection:
-        identifier: sml2mqtt
+        identifier: sml2mqtt-ZqlFvhSBdDGvJ
         host: localhost
         port: 1883
         user: ''
         password: ''
         tls: false
         tls insecure: false
-
-      # MQTT default configuration
-      # All other topics use these values if no other values for qos/retain are set
-      # It's possible to override
-      #  - topic        (fragment that is used to build the full mqtt topic)
-      #  - full_topic   (will not build the topic from the fragments but rather use the configured value)
-      #  - qos
-      #  - retain
-      # for each (!) mqtt-topic entry
-      defaults:
-        qos: 0
-        retain: false
       topic prefix: sml2mqtt
-
+      defaults:
+        qos: 0         # Default value for QOS if no other QOS value in the config entry is set
+        retain: false  # Default value for retain if no other retain value in the config entry is set
       last will:
-        topic: status
+        topic: status   # Topic fragment for building this topic with the parent topic
 
     general:
-      Wh in kWh: true                  # Automatically convert Wh to kWh
-      republish after: 120             # Republish automatically after this time (if no other every filter is configured)
+      Wh in kWh: true       # Automatically convert Wh to kWh
+      republish after: 120  # Republish automatically after this time (if no other filter configured)
 
-    # Serial port configurations for the sml readers
     inputs:
-    - url: COM1
-      timeout: 3
-    - url: /dev/ttyS0
-      timeout: 3
-
+    - url: COM1   # Device path
+      timeout: 3  # Seconds after which a timeout will be detected (default=3)
+    - url: /dev/ttyS0   # Device path
+      timeout: 3        # Seconds after which a timeout will be detected (default=3)
 
     devices:
-      # Device configuration by OBIS value 0100000009ff or by url if the device does not report OBIS 0100000009ff
-      '11111111111111111111':
-        mqtt:
-          topic: DEVICE_TOPIC
+      # Device configuration by repored id
+      device_id_hex:
 
-        # OBIS IDs that will not be processed (optional)
-        skip:
-        - '112233445566'
-        - '778899AABBCC'
+        mqtt:                           # Optional MQTT configuration for this meter.
+          topic: DEVICE_BASE_TOPIC      # Topic fragment for building this topic with the parent topic
 
-        # Configuration how each OBIS value is reported. Create as many entries as you like.
-        # It's even possible to process a value multiple times (e.g. to report a daily max value)
+        status:                         # Optional MQTT status topic configuration for this meter
+          topic: status                 # Topic fragment for building this topic with the parent topic
+
+        skip:                           # OBIS codes (HEX) of values that will not be published (optional)
+        - '00112233445566'
+
+        # Configurations for each of the values (optional)
         values:
 
-          - obis: '112233445566'
-            # Sub topic how this value is reported (Optional).
-            mqtt:
-              topic: OBIS
-            # optional, leave if you do not want to process the raw value
-            operations:
-              - negative on energy meter status: true   # activate this workaround
-              - factor: 3                               # multiply with factor
-              - offset: 100                             # add offset
-              - round: 2                                # round on two digits
+        - obis: '00112233445566'   # Obis code for this value
+          mqtt:                    # Mqtt config for this value (optional)
+            topic: OBIS            # Topic fragment for building this topic with the parent topic
+
+          # A sequence of operations that will be evaluated one after another.
+          # As soon as one operation blocks a value the whole sequence will be aborted and nothing will be published for this frame.
+          operations:
+          - negative on energy meter status: true   # Make value negative based on an energy meter status. Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
+          - factor: 3   # Factor with which the value gets multiplied
+          - offset: 100   # Offset that gets added on the value
+          - round: 2   # Round to the specified digits
+          - or:   # A sequence of operations that will be evaluated one after another.
+                  # As soon as one operation returns a value the sequence will be aborted and the returned value will be used.
+            - change filter: true   # Filter which passes only changes
+            - heartbeat filter: 120   # Filter which lets a value pass periodically every specified interval.
+
 
 
 Example devices
@@ -132,27 +128,6 @@ For this device
     * The mqtt topic used is ``sml2mqtt/light/power``
 
 
-.. code-block:: yaml
-
-    devices:
-      11111111111111111111:
-        mqtt:
-          topic: light
-        skip:
-        - 0100010801ff
-        values:
-          0100010800ff:
-            mqtt:
-              topic: energy
-            transformations:
-            - round: 1
-            filters:
-            - every: 3600
-          0100100700ff:
-            mqtt:
-              topic: power
-            filters:
-            - perc: 5
 
 
 Configuration Reference

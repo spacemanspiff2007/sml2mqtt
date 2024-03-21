@@ -9,7 +9,7 @@ from sml2mqtt.sml_value.operations import (
     OrOperation,
     RefreshActionOperation,
     SequenceOperation,
-    SkipZeroMeterOperation,
+    SkipZeroMeterOperation, OffsetOperation, RoundOperation, LimitValueOperation,
 )
 from sml2mqtt.sml_value.setup_operations import setup_operations
 
@@ -33,7 +33,7 @@ def _create_default_transformations(sml_value: SmlValue, frame: SmlFrameValues, 
 
 def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cfg: GeneralSettings):
     for op in sml_value.operations:
-        if isinstance(op, (OrOperation, SequenceOperation)) or 'Filter' in op.__class__.__name__:
+        if not isinstance(op, (FactorOperation, OffsetOperation, RoundOperation, LimitValueOperation, SkipZeroMeterOperation)):
             log.debug(f'Found {op.__class__.__name__:s} - skip creating of default filters')
             return None
 
