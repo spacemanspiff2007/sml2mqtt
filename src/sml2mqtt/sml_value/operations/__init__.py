@@ -11,3 +11,4 @@ from .math import FactorOperation, LimitValueOperation, OffsetOperation, RoundOp
 from .operations import OrOperation, SequenceOperation
 from .date_time import DateTimeFinder, VirtualMeterOperation, MaxValueOperation, MinValueOperation
 from .workarounds import NegativeOnEnergyMeterWorkaroundOperation
+from .time_series import MaxOfIntervalOperation, MinOfIntervalOperation, MeanOfIntervalOperation

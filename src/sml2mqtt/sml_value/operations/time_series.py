@@ -1,63 +1,113 @@
-from collections import deque
-from datetime import timedelta
-from time import monotonic
-from typing import Final
 from collections.abc import Generator
 from typing import Final
+from typing import Sequence
 
 from typing_extensions import override
 
-from sml2mqtt.errors import RequiredObisValueNotInFrameError
+from sml2mqtt.const import TimeSeries
 from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
 
 
-class TimeSeries:
-    __slots__ = ('period', 'times', 'values')
+class TimeSeriesOperationBaseBase(ValueOperationBase):
+    def __init__(self, time_series: TimeSeries, reset_after_value: bool):
+        self.time_series: Final = time_series
+        self.reset_after_value: Final = reset_after_value
 
-    def __init__(self, period: int | float | timedelta):
-        self.period: Final = period if isinstance(period, int | str) else period.total_seconds()
-        self.times: Final[deque[float]] = deque()
-        self.values: Final[deque[float]] = deque()
-
-    def add_value(self, value: int | float, timestamp: float):
-        try:
-            # we keep one element that's out of the interval
-            while self.times[1] + self.period < monotonic():
-                self.times.popleft()
-                self.values.popleft()
-        except IndexError:
-            pass
-
-        self.times.append(timestamp)
-        self.values.append(value)
-
-    def get_values(self) -> Generator[float, None, None]:
-        yield from self.values
-
-    def get_duration_values(self):
-        ...
-
-
-class MaxInInterval(ValueOperationBase):
-    def __init__(self, period: int | float | timedelta):
-        self.values = TimeSeries(period)
-
-    @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
-        if value is None:
-            return None
-
-        self.values.add_value(value, info.frame.timestamp)
-
-        for op in self.operations:
-            value = op.process_value(value, info)
-        return value
-
-    def __repr__(self):
-        return f'<Sequence at 0x{id(self):x}>'
+        # Makes only sense in combination
+        if reset_after_value and not time_series.wait_for_data:
+            raise ValueError()
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Sequence:'
-        for o in self.operations:
-            yield from o.describe(indent + '  ')
+        yield f'{indent:s}    Interval: {self.time_series.period}s'
+        yield f'{indent:s}    Wait for data: {self.time_series.wait_for_data}'
+        yield f'{indent:s}    Reset after value: {self.reset_after_value}'
+
+
+class TimeSeriesOperationBase(TimeSeriesOperationBaseBase):
+    def on_values(self, obj: Sequence[float]) -> float | None:
+        raise NotImplementedError()
+
+    @override
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+
+        ts = info.frame.timestamp
+        self.time_series.add_value(value, ts)
+
+        if (values := self.time_series.get_values()) is None:
+            return None
+
+        if self.reset_after_value:
+            self.time_series.clear()
+        return self.on_values(values)
+
+
+class TimeDurationSeriesOperationBase(TimeSeriesOperationBaseBase):
+    def on_values(self, obj: Sequence[tuple[float, float]]) -> float | None:
+        raise NotImplementedError()
+
+    @override
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+
+        ts = info.frame.timestamp
+        self.time_series.add_value(value, ts)
+
+        if (values := self.time_series.get_value_duration(ts)) is None:
+            return None
+
+        if self.reset_after_value:
+            self.time_series.clear()
+        return self.on_values(values)
+
+
+class MaxOfIntervalOperation(TimeSeriesOperationBase):
+
+    @override
+    def on_values(self, obj: Sequence[float]) -> float | None:
+        return max(obj)
+
+    def __repr__(self):
+        return f'<MaxOfInterval: interval={self.time_series.period}s at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- Max of interval:'
+        yield from super().describe(indent)
+
+
+class MinOfIntervalOperation(TimeSeriesOperationBase):
+
+    @override
+    def on_values(self, obj: Sequence[float]) -> float | None:
+        return min(obj)
+
+    def __repr__(self):
+        return f'<MinOfInterval: interval={self.time_series.period}s at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- Min of interval:'
+        yield from super().describe(indent)
+
+
+class MeanOfIntervalOperation(TimeDurationSeriesOperationBase):
+
+    @override
+    def on_values(self, obj: Sequence[tuple[float, float]]) -> float | None:
+        time = 0
+        mean = 0
+        for value, duration in obj:
+            mean += value * duration
+            time += duration
+
+        if time == 0:
+            return None
+        return mean / time
+
+    def __repr__(self):
+        return f'<MeanOfInterval: interval={self.time_series.period}s at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- Mean of interval:'
+        yield from super().describe(indent)

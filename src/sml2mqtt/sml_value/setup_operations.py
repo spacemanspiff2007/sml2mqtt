@@ -16,7 +16,7 @@ from sml2mqtt.config.operations import (
     RefreshAction,
     Round,
     Sequence,
-    VirtualMeter,
+    VirtualMeter, MinValue, MaxValue, MaxOfInterval, MinOfInterval, MeanOfInterval,
 )
 from sml2mqtt.sml_value.base import OperationContainerBase, ValueOperationBase
 from sml2mqtt.sml_value.operations import (
@@ -33,6 +33,8 @@ from sml2mqtt.sml_value.operations import (
     RoundOperation,
     SequenceOperation,
     VirtualMeterOperation,
+    MinValueOperation,
+    MaxValueOperation, MaxOfIntervalOperation, MinOfIntervalOperation, MeanOfIntervalOperation
 )
 
 
@@ -75,7 +77,13 @@ MAPPING = {
     Or: create_or,
     Sequence: create_sequence,
 
-    VirtualMeter: VirtualMeterOperation
+    VirtualMeter: VirtualMeterOperation,
+    MinValue: MinValueOperation,
+    MaxValue: MaxValueOperation,
+
+    MaxOfInterval: MaxOfIntervalOperation,
+    MinOfInterval: MinOfIntervalOperation,
+    MeanOfInterval: MeanOfIntervalOperation,
 }
 
 

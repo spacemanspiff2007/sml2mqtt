@@ -64,7 +64,6 @@ def monotonic():
     p = PatchedMonotonic()
 
     p.patch_name('sml2mqtt.sml_value.operations.filter.monotonic')
-    p.patch_name('sml2mqtt.sml_value.operations.time_series.monotonic')
     p.patch_name('sml2mqtt.sml_value.operations.actions.monotonic')
 
     try:

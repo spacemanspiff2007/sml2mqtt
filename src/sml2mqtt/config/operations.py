@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, time
+from datetime import date, time, timedelta
 from enum import Enum
 from typing import Any, TypeAlias, Annotated, Union, Final, Literal, TypedDict, final
 from typing import get_args as _get_args
@@ -18,7 +18,7 @@ from pydantic import (
 from pydantic_core import PydanticCustomError
 
 from .types import Number, ObisHex, TimeInSeconds, LowerStr  # noqa: TCH001
-from ..const import DateTimeFinder
+from ..const import DateTimeFinder, TimeSeries
 
 
 class EmptyKwargs(TypedDict):
@@ -159,7 +159,7 @@ class HasDateTimeFields(BaseModel):
         alias='start now', description='Immediately start the virtual meter instead of after the next reset'
     )
     reset_times: list[time] = Field(
-        default=[], alias='reset times', description='Time(s) of day when the meter will reset', min_length=1,
+        default=[], alias='reset times', description='Time(s) of day when the meter will reset',
     )
     reset_days: list[DayOfMonth | DayOfWeekStr] = Field(
         default=[], alias='reset days', description='Days of month or weekdays where the time(s) will be checked'
@@ -190,15 +190,66 @@ class VirtualMeter(HasDateTimeFields):
     type: Literal['meter']
 
 
+class MaxValue(HasDateTimeFields):
+    type: Literal['max value']
+
+
+class MinValue(HasDateTimeFields):
+    type: Literal['min value']
+
+
+# -------------------------------------------------------------------------------------------------
+# TimeSeries
+# -------------------------------------------------------------------------------------------------
+class TimeSeriesKwargs(TypedDict):
+    time_series: TimeSeries
+    reset_after_value: bool
+
+
+class HasIntervalFields(BaseModel):
+
+    interval: timedelta = Field(
+        description='Interval duration'
+    )
+
+    wait_for_data: bool = Field(
+        alias='wait for data', description='Only produce a value when data for the whole interval is available'
+    )
+
+    reset_after_value: bool = Field(
+        False, alias='reset after value', description='Clear all data as soon as a value has been produced'
+    )
+
+    @final
+    def get_kwargs_dt_fields(self) -> TimeSeriesKwargs:
+        return {
+            'time_series': TimeSeries(self.interval, wait_for_data=self.wait_for_data),
+            'reset_after_value': self.reset_after_value
+        }
+
+
+class MaxOfInterval(HasIntervalFields):
+    type: Literal['max interval']
+
+
+class MinOfInterval(HasIntervalFields):
+    type: Literal['min interval']
+
+
+class MeanOfInterval(HasIntervalFields):
+    type: Literal['mean interval']
+
+
 # -------------------------------------------------------------------------------------------------
 
 OperationsModels = (
-        OnChangeFilter, DeltaFilter, HeartbeatFilter,
-        RefreshAction,
-        Factor, Offset, Round,
-        NegativeOnEnergyMeterWorkaround,
-        Or, Sequence,
-        VirtualMeter
+    OnChangeFilter, DeltaFilter, HeartbeatFilter,
+    RefreshAction,
+    Factor, Offset, Round,
+    NegativeOnEnergyMeterWorkaround,
+    Or, Sequence,
+    VirtualMeter, MaxValue, MinValue,
+    MaxOfInterval, MinOfInterval, MeanOfInterval,
 )
 
 # noinspection PyTypeHints
@@ -247,7 +298,7 @@ OperationsTypeAnnotated: TypeAlias = Annotated[
     )
 ]
 
-OperationsListType = Annotated[list[OperationsTypeAnnotated], Len(1)]
+OperationsListType = Annotated[list[OperationsTypeAnnotated], Len(min_length=1)]
 
 
 def cleanup_validation_errors(msg: str) -> str:
