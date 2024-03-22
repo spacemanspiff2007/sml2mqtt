@@ -27,7 +27,7 @@ Example
 
 .. code-block:: yaml
 
-    change filter: 'DOES_NOT_MATTER'
+    type: change filter
 
 
 Delta Filter
@@ -336,7 +336,7 @@ Example
 .. code-block:: yaml
 
     or:
-      - change filter: True
+      - type: change filter
       - heartbeat filter: 60
 
 

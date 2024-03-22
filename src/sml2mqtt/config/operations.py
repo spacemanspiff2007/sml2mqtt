@@ -17,7 +17,7 @@ from pydantic import (
 )
 from pydantic_core import PydanticCustomError
 
-from .types import Number, ObisHex, TimeInSeconds, LowerStr  # noqa: TCH001
+from .types import Number, ObisHex, TimeInSeconds, PercentStr  # noqa: TCH001
 from ..const import DateTimeFinder, TimeSeries
 
 
@@ -29,7 +29,8 @@ class EmptyKwargs(TypedDict):
 # Filters
 # -------------------------------------------------------------------------------------------------
 class OnChangeFilter(BaseModel):
-    change: Any = Field(alias='change filter', description='Filter which passes only changes')
+    """A simple filter which lets the value only pass when it's different from the value from before"""
+    type: Literal['change filter'] = Field(description='Filter which passes only changes')
 
     @final
     def get_kwargs_on_change(self) -> EmptyKwargs:
@@ -41,11 +42,8 @@ class DeltaFilterKwargs(TypedDict):
     is_percent: bool
 
 
-PERCENT_STR = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+\.?\d*\s*%$')]
-
-
 class DeltaFilter(BaseModel):
-    delta: StrictInt | StrictFloat | PERCENT_STR = Field(
+    delta: StrictInt | StrictFloat | PercentStr = Field(
         alias='delta filter',
         description='Filter which passes only when the incoming value is different enough from the previously passed '
                     'value. Can be an absolute value or a percentage'
@@ -127,6 +125,7 @@ class LimitValueKwargs(TypedDict):
     max: float | None
     ignore: bool
 
+
 # -------------------------------------------------------------------------------------------------
 # Workarounds
 # -------------------------------------------------------------------------------------------------
@@ -177,11 +176,6 @@ DayOfMonth = Annotated[int, Field(ge=1, le=31, strict=True)]
 # -------------------------------------------------------------------------------------------------
 # DateTime
 # -------------------------------------------------------------------------------------------------
-class DateTimeBoundKwargs(TypedDict):
-    start_now: bool
-    dt_finder: DateTimeFinder
-
-
 class HasDateTimeFields(BaseModel):
 
     start_now: bool = Field(
@@ -213,6 +207,11 @@ class HasDateTimeFields(BaseModel):
             'dt_finder': finder,
             'start_now': self.start_now
         }
+
+
+class DateTimeBoundKwargs(TypedDict):
+    start_now: bool
+    dt_finder: DateTimeFinder
 
 
 class VirtualMeter(HasDateTimeFields):

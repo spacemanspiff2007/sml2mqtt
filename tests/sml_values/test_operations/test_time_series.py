@@ -47,8 +47,8 @@ def test_max():
 
     check_description(
         o, [
-            '- Max of interval:',
-            '    Interval: 5s',
+            '- Max Of Interval:',
+            '    Interval: 5 seconds',
             '    Wait for data: True',
             '    Reset after value: True',
         ]
@@ -68,8 +68,8 @@ def test_min():
 
     check_description(
         o, [
-            '- Min of interval:',
-            '    Interval: 5s',
+            '- Min Of Interval:',
+            '    Interval: 5 seconds',
             '    Wait for data: False',
             '    Reset after value: False',
         ]
@@ -101,8 +101,8 @@ def test_mean():
 
     check_description(
         o, [
-            '- Mean of interval:',
-            '    Interval: 10s',
+            '- Mean Of Interval:',
+            '    Interval: 10 seconds',
             '    Wait for data: True',
             '    Reset after value: False',
         ]

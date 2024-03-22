@@ -9,8 +9,11 @@ class TimeSeries:
 
     def __init__(self, period: float | timedelta, wait_for_data: bool = False):
 
+        if isinstance(period, timedelta):
+            period = int(period.total_seconds()) if not period.microseconds else period.total_seconds()
+
         self.wait_for_data: Final = wait_for_data
-        self.period: Final = period if isinstance(period, (int, float)) else period.total_seconds()
+        self.period: Final = period
         self.times: Final[deque[float]] = deque()
         self.values: Final[deque[float]] = deque()
 

@@ -1,11 +1,11 @@
-from collections.abc import Generator
+from collections.abc import Generator, Sequence
 from typing import Final
-from typing import Sequence
 
 from typing_extensions import override
 
 from sml2mqtt.const import TimeSeries
 from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
+from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class TimeSeriesOperationBaseBase(ValueOperationBase):
@@ -19,7 +19,7 @@ class TimeSeriesOperationBaseBase(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}    Interval: {self.time_series.period}s'
+        yield f'{indent:s}    Interval: {format_period(self.time_series.period)}'
         yield f'{indent:s}    Wait for data: {self.time_series.wait_for_data}'
         yield f'{indent:s}    Reset after value: {self.reset_after_value}'
 
@@ -71,7 +71,7 @@ class MaxOfIntervalOperation(TimeSeriesOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Max of interval:'
+        yield f'{indent:s}- Max Of Interval:'
         yield from super().describe(indent)
 
 
@@ -86,7 +86,7 @@ class MinOfIntervalOperation(TimeSeriesOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Min of interval:'
+        yield f'{indent:s}- Min Of Interval:'
         yield from super().describe(indent)
 
 
@@ -109,5 +109,5 @@ class MeanOfIntervalOperation(TimeDurationSeriesOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Mean of interval:'
+        yield f'{indent:s}- Mean Of Interval:'
         yield from super().describe(indent)

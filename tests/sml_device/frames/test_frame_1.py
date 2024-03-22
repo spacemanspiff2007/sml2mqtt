@@ -51,40 +51,40 @@ Skipped: 0100600100ff
   obis : 010060320101
   topic: /0a0149534b0005020de2/010060320101
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100600100ff
   topic: /0a0149534b0005020de2/0100600100ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100010800ff
   topic: /0a0149534b0005020de2/0100010800ff
   operations:
     - Factor: 0.001
-    - ZeroMeterFilter
-    - On change Filter
-    - RefreshAction: 120s
+    - Zero Meter Filter
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100020800ff
   topic: /0a0149534b0005020de2/0100020800ff
   operations:
     - Factor: 0.001
-    - ZeroMeterFilter
-    - On change Filter
-    - RefreshAction: 120s
+    - Zero Meter Filter
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100100700ff
   topic: /0a0149534b0005020de2/0100100700ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 /0a0149534b0005020de2/010060320101: ISK (QOS: 0, retain: False)
 /0a0149534b0005020de2/0100600100ff: 0a0149534b0005020de2 (QOS: 0, retain: False)
@@ -125,33 +125,33 @@ Skipped: 010060320101, 0a0149534b0005020de2
   obis : 0100600100ff
   topic: /0a0149534b0005020de2/0100600100ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100010800ff
   topic: /0a0149534b0005020de2/0100010800ff
   operations:
     - Factor: 0.001
-    - ZeroMeterFilter
-    - On change Filter
-    - RefreshAction: 120s
+    - Zero Meter Filter
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100020800ff
   topic: /0a0149534b0005020de2/0100020800ff
   operations:
     - Factor: 0.001
-    - ZeroMeterFilter
-    - On change Filter
-    - RefreshAction: 120s
+    - Zero Meter Filter
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100100700ff
   topic: /0a0149534b0005020de2/0100100700ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 /0a0149534b0005020de2/0100600100ff: 0a0149534b0005020de2 (QOS: 0, retain: False)
 /0a0149534b0005020de2/0100010800ff: 253.91770000000002 (QOS: 0, retain: False)

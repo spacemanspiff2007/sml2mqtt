@@ -96,7 +96,7 @@ Example
           - round: 2   # Round to the specified digits
           - or:   # A sequence of operations that will be evaluated one after another.
                   # As soon as one operation returns a value the sequence will be aborted and the returned value will be used.
-            - change filter: true   # Filter which passes only changes
+            - type: change filter   # Filter which passes only changes
             - heartbeat filter: 120   # Filter which lets a value pass periodically every specified interval.
 
 

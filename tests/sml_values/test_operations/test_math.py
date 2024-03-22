@@ -1,10 +1,11 @@
+from tests.sml_values.test_operations.helper import check_description, check_operation_repr
+
 from sml2mqtt.sml_value.operations import (
     FactorOperation,
+    LimitValueOperation,
     OffsetOperation,
-    RoundOperation, LimitValueOperation,
-
+    RoundOperation,
 )
-from tests.sml_values.test_operations.helper import check_operation_repr, check_description
 
 
 def test_factor():
@@ -139,15 +140,15 @@ def test_description():
     # LimitValueOperation
     check_description(
         LimitValueOperation(1, None),
-        ['- Limit value:', '    min: 1', '    ignore out of range: False']
+        ['- Limit Value:', '    min: 1', '    ignore out of range: False']
     )
     check_description(
         LimitValueOperation(None, 7),
-        ['- Limit value:', '    max: 7', '    ignore out of range: False']
+        ['- Limit Value:', '    max: 7', '    ignore out of range: False']
     )
     check_description(
         LimitValueOperation(1, 7, True), [
-            '- Limit value:',
+            '- Limit Value:',
             '    min: 1',
             '    max: 7',
             '    ignore out of range: True'

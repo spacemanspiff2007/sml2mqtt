@@ -5,6 +5,7 @@ from typing import Final
 from typing_extensions import override
 
 from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
+from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class OnChangeFilterOperation(ValueOperationBase):
@@ -27,7 +28,7 @@ class OnChangeFilterOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- On change Filter'
+        yield f'{indent:s}- On Change Filter'
 
 
 class DeltaFilterBase(ValueOperationBase):
@@ -90,7 +91,7 @@ class SkipZeroMeterOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- ZeroMeterFilter'
+        yield f'{indent:s}- Zero Meter Filter'
 
 
 class HeartbeatFilterOperation(ValueOperationBase):
@@ -115,4 +116,4 @@ class HeartbeatFilterOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Heartbeat Filter: {self.every}s'
+        yield f'{indent:s}- Heartbeat Filter: {format_period(self.every)}'

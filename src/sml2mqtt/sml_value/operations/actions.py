@@ -5,6 +5,7 @@ from typing import Final
 from typing_extensions import override
 
 from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
+from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class RefreshActionOperation(ValueOperationBase):
@@ -31,4 +32,4 @@ class RefreshActionOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- RefreshAction: {self.every}s'
+        yield f'{indent:s}- Refresh Action: {format_period(self.every)}'

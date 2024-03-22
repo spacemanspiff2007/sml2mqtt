@@ -154,7 +154,7 @@ def test_virtual_meter_description(now):
 
     check_description(
         o, [
-            '- Virtual meter:',
+            '- Virtual Meter:',
             '    Offset: 1',
             '    Next resets:',
             '     - 2001-01-01 02:00:00',
@@ -205,7 +205,7 @@ def test_virtual_meter_description_no_times(now):
 
     check_description(
         o, [
-            '- Virtual meter:',
+            '- Virtual Meter:',
             '    Offset: 1',
             '    No resets',
         ]
@@ -263,7 +263,7 @@ def test_max_description(now):
 
     check_description(
         o, [
-            '- Max value:',
+            '- Max Value:',
             '    max: 1',
             '    Next resets:',
             '     - 2001-01-01 02:00:00',
@@ -277,7 +277,7 @@ def test_max_description(now):
 
     check_description(
         o, [
-            '- Max value:',
+            '- Max Value:',
             '    max: None',
             '    Next resets:',
             '     - 2001-01-01 02:00:00',
@@ -338,7 +338,7 @@ def test_min_description(now):
 
     check_description(
         o, [
-            '- Min value:',
+            '- Min Value:',
             '    min: 1',
             '    Next resets:',
             '     - 2001-01-01 02:00:00',
@@ -352,7 +352,7 @@ def test_min_description(now):
 
     check_description(
         o, [
-            '- Min value:',
+            '- Min Value:',
             '    min: None',
             '    Next resets:',
             '     - 2001-01-01 02:00:00',

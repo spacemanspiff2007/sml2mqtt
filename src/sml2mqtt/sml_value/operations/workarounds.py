@@ -35,4 +35,4 @@ class NegativeOnEnergyMeterWorkaroundOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Negative on status of energy meter {self.meter_obis:s}'
+        yield f'{indent:s}- Negative On Status Of Energy Meter {self.meter_obis:s}'

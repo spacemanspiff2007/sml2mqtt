@@ -40,13 +40,13 @@ def test_values(sml_frame_1_values: SmlFrameValues, no_mqtt):
         '  obis : 0100010800ff',
         '  topic: /energy',
         '  operations:',
-        '    - On change Filter',
+        '    - On Change Filter',
         '',
         '<SmlValue>',
         '  obis : 0100100700ff',
         '  topic: /power',
         '  operations:',
-        '    - On change Filter',
+        '    - On Change Filter',
         '',
     ])
 

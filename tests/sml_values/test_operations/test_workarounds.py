@@ -58,5 +58,5 @@ def test_keep_positive():
 def test_description():
     check_description(
         NegativeOnEnergyMeterWorkaroundOperation(),
-        '- Negative on status of energy meter 0100010800ff'
+        '- Negative On Status Of Energy Meter 0100010800ff'
     )

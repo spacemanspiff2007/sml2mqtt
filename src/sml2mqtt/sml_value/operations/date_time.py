@@ -95,7 +95,7 @@ class VirtualMeterOperation(SupportsDateTimeAction):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Virtual meter:'
+        yield f'{indent:s}- Virtual Meter:'
         yield f'{indent:s}    Offset: {self.offset}'
         yield from super().describe(indent)
 
@@ -125,7 +125,7 @@ class MaxValueOperation(SupportsDateTimeAction):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Max value:'
+        yield f'{indent:s}- Max Value:'
         yield f'{indent:s}    max: {self.max_value}'
         yield from super().describe(indent)
 
@@ -155,6 +155,6 @@ class MinValueOperation(SupportsDateTimeAction):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Min value:'
+        yield f'{indent:s}- Min Value:'
         yield f'{indent:s}    min: {self.min_value}'
         yield from super().describe(indent)

@@ -17,3 +17,5 @@ LowerStr = Annotated[
 Number: TypeAlias = StrictInt | StrictFloat
 
 TimeInSeconds: TypeAlias = int | float
+
+PercentStr = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+\.?\d*\s*%$')]

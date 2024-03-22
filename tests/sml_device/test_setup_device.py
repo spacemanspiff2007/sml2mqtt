@@ -18,7 +18,7 @@ def test_warnings(no_mqtt, caplog, sml_frame_1_values):
     device_cfg = SmlDeviceConfig(
         skip={'0100000009ff'},
         values=[
-            SmlValueConfig(obis='0100000009ff', operations=[{'change filter': 'asdf'}])
+            SmlValueConfig(obis='0100000009ff', operations=[{'type': 'change filter'}])
         ]
     )
     general_cfg = GeneralSettings()

@@ -88,7 +88,7 @@ class LimitValueOperation(ValueOperationBase):
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Limit value:'
+        yield f'{indent:s}- Limit Value:'
         if self.min is not None:
             yield f'{indent:s}    min: {self.min}'
         if self.max is not None:

@@ -20,7 +20,7 @@ def test_skip():
 
     check_description(
         SkipZeroMeterOperation(),
-        '- ZeroMeterFilter'
+        '- Zero Meter Filter'
     )
 
 
@@ -46,7 +46,7 @@ def test_heartbeat(monotonic):
 
     check_description(
         HeartbeatFilterOperation(30),
-        '- Heartbeat Filter: 30s'
+        '- Heartbeat Filter: 30 seconds'
     )
 
 
@@ -99,5 +99,5 @@ def test_on_change():
 
     check_description(
         OnChangeFilterOperation(),
-        '- On change Filter'
+        '- On Change Filter'
     )

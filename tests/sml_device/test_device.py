@@ -51,71 +51,71 @@ Skipped: 0100000009ff, 0100600100ff
   obis : 0100000009ff
   topic: /00000000000000000000/0100000009ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100010800ff
   topic: /00000000000000000000/0100010800ff
   operations:
     - Factor: 0.001
-    - ZeroMeterFilter
-    - On change Filter
-    - RefreshAction: 120s
+    - Zero Meter Filter
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100010801ff
   topic: /00000000000000000000/0100010801ff
   operations:
     - Factor: 0.001
-    - ZeroMeterFilter
-    - On change Filter
-    - RefreshAction: 120s
+    - Zero Meter Filter
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100010802ff
   topic: /00000000000000000000/0100010802ff
   operations:
     - Factor: 0.001
-    - ZeroMeterFilter
-    - On change Filter
-    - RefreshAction: 120s
+    - Zero Meter Filter
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100020800ff
   topic: /00000000000000000000/0100020800ff
   operations:
     - Factor: 0.001
-    - ZeroMeterFilter
-    - On change Filter
-    - RefreshAction: 120s
+    - Zero Meter Filter
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100100700ff
   topic: /00000000000000000000/0100100700ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100240700ff
   topic: /00000000000000000000/0100240700ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100380700ff
   topic: /00000000000000000000/0100380700ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 01004c0700ff
   topic: /00000000000000000000/01004c0700ff
   operations:
-    - On change Filter
-    - RefreshAction: 120s
+    - On Change Filter
+    - Refresh Action: 2 minutes
 
 '''

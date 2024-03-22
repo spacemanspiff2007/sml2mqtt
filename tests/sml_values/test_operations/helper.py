@@ -30,6 +30,18 @@ def check_description(obj: ValueOperationBase, value: str | Iterable[str]):
     if 'filter' in desc_text.lower():
         assert 'Filter' in desc_text, desc_text
 
+    # Object names should be title case
+    for line in desc:
+        if ' - ' in line or line.startswith('- '):
+            if '- 2001' in line:
+                continue
+
+            if 'On Change Filter' not in line and 'Zero Meter Filter' not in line:
+                assert ':' in line, line
+            if ':' in line:
+                line = line[:line.index(':')]
+            assert line == line.title()
+
     value = [value] if isinstance(value, str) else list(value)
     diffs = [
         ''.join('^' if a != b else ' ' for a, b in zip_longest(entry_d, entry_v))
