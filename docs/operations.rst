@@ -367,7 +367,7 @@ Examples
 These are some examples for sml value configurations
 
 Energy consumption today
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 
 This will report the power consumption of today
 

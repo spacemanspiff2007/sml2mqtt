@@ -93,14 +93,10 @@ Example
           # If one operation blocks nothing will be reported for this frame
           operations:
           - negative on energy meter status: true   # Make value negative based on an energy meter status. Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
-          - factor: 3   # Factor with which the value gets multiplied
-          - offset: 100   # Offset that gets added on the value
-          - round: 2   # Round to the specified digits
-          # A sequence of operations that will be evaluated one after another.
-          # The first value that gets returned by an operation will be used.
-          - or:
-            - type: change filter   # Filter which passes only changes
-            - heartbeat filter: 120   # Filter which lets a value pass periodically every specified interval.
+          - factor: 3               # Factor with which the value gets multiplied
+          - offset: 100             # Offset that gets added on the value
+          - round: 2                # Round to the specified digits
+          - refresh action: 300     # Republish value every 300s
 
 
 Configuration Reference
