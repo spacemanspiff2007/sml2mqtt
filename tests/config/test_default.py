@@ -12,7 +12,7 @@ def test_default():
     assert '\n' + yaml == '''
 logging:
   level: INFO         # Log level
-  file: sml2mqtt.log  # Log file path (absolute or relative to config file) or stdout
+  file: sml2mqtt.log  # Log file path (absolute or relative to config file) or "stdout"
 mqtt:
   connection:
     identifier: sml2mqtt-A1b2
@@ -56,7 +56,6 @@ devices:   # Device configuration by ID or url
       - factor: 3   # Factor with which the value gets multiplied
       - offset: 100   # Offset that gets added on the value
       - round: 2   # Round to the specified digits
-      - or:
-        - type: change filter   # Filter which passes only changes
-        - heartbeat filter: 120.0   # Interval
+      - type: change filter   # Filter which passes only changes
+      - refresh action: 600.0   # Interval
 '''

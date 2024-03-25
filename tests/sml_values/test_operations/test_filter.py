@@ -54,6 +54,9 @@ def test_diff_percent():
     f = PercDeltaFilterOperation(5)
     check_operation_repr(f, '5%')
 
+    assert f.process_value(0, None) == 0
+    assert f.process_value(0.049, None) == 0.049
+
     assert f.process_value(100, None) == 100
     assert f.process_value(104.999, None) is None
     assert f.process_value(95.001, None) is None

@@ -58,7 +58,8 @@ def default_config() -> Settings:
                         operations=[
                             {'negative on energy meter status': True},
                             {'factor': 3}, {'offset': 100}, {'round': 2},
-                            {'or': [{'type': 'change filter'}, {'heartbeat filter': 120}]}
+                            {'type': 'change filter'},
+                            {'refresh action': 600}
                         ]
                     )
                 ]

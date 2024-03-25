@@ -64,9 +64,11 @@ class PercDeltaFilterOperation(DeltaFilterBase):
         if value is None:
             return None
 
-        perc = abs(1 - value / self.last_value) * 100
-        if perc < self.delta:
-            return None
+        # If the last value == 0 we always let it pass
+        if self.last_value:
+            perc = abs(1 - value / self.last_value) * 100
+            if perc < self.delta:
+                return None
 
         self.last_value = value
         return value
