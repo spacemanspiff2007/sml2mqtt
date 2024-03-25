@@ -1,3 +1,4 @@
+import pytest
 from aiohttp import ClientTimeout
 from aioresponses import aioresponses
 from tests.helper import wait_for_call
@@ -5,9 +6,12 @@ from tests.helper import wait_for_call
 from sml2mqtt.sml_source.http import HttpSource, close_session
 
 
-async def test_200(sml_data_1, device_mock):
+@pytest.fixture()
+def source(device_mock):
+    return HttpSource(device_mock, 'http://localhost:39999', interval=0, auth=None, timeout=ClientTimeout(0.5))
 
-    source = HttpSource(device_mock, 'http:localhost:99999', interval=0, auth=None, timeout=ClientTimeout(0.5))
+
+async def test_200(sml_data_1, device_mock, source):
 
     with aioresponses() as m:
         m.get(source.url, body=sml_data_1)
@@ -25,8 +29,7 @@ async def test_200(sml_data_1, device_mock):
     await close_session()
 
 
-async def test_400(device_mock):
-    source = HttpSource(device_mock, 'http://localhost:39999', interval=0, auth=None, timeout=ClientTimeout(0.5))
+async def test_400(device_mock, source):
 
     with aioresponses() as m:
         m.get(source.url, status=404)

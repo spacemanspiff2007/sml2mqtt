@@ -41,13 +41,8 @@ async def a_main():
     except Exception:
         await do_shutdown_async()
 
-    # Shutdown everything
-    try:
-        await asyncio.wait_for(wait_for_tasks(), timeout=8.0)
-    except TimeoutError:
-        msg = 'Timeout while waiting for shutdown!'
-        print(msg)
-        log.error(msg)
+    # Keep tasks running
+    await wait_for_tasks()
 
 
 def main() -> int | str:
