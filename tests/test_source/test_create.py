@@ -1,6 +1,6 @@
 from aiohttp import BasicAuth
 
-from sml2mqtt.config.source import HttpSourceSettings
+from sml2mqtt.config.inputs import HttpSourceSettings
 from sml2mqtt.sml_source import create_source
 from sml2mqtt.sml_source.http import HttpSource
 

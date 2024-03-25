@@ -39,3 +39,7 @@ class OperationContainerBase:
     def add_operation(self, operation: ValueOperationBase):
         self.operations = (*self.operations, operation)
         return self
+
+    def insert_operation(self, operation: ValueOperationBase):
+        self.operations = (operation, *self.operations)
+        return self

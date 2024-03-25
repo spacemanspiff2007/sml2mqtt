@@ -58,8 +58,8 @@ Skipped: 0100000009ff, 0100600100ff
   obis : 0100010800ff
   topic: /00000000000000000000/0100010800ff
   operations:
-    - Factor: 0.001
     - Zero Meter Filter
+    - Factor: 0.001
     - On Change Filter
     - Refresh Action: 2 minutes
 
@@ -67,8 +67,8 @@ Skipped: 0100000009ff, 0100600100ff
   obis : 0100010801ff
   topic: /00000000000000000000/0100010801ff
   operations:
-    - Factor: 0.001
     - Zero Meter Filter
+    - Factor: 0.001
     - On Change Filter
     - Refresh Action: 2 minutes
 
@@ -76,8 +76,8 @@ Skipped: 0100000009ff, 0100600100ff
   obis : 0100010802ff
   topic: /00000000000000000000/0100010802ff
   operations:
-    - Factor: 0.001
     - Zero Meter Filter
+    - Factor: 0.001
     - On Change Filter
     - Refresh Action: 2 minutes
 
@@ -85,8 +85,8 @@ Skipped: 0100000009ff, 0100600100ff
   obis : 0100020800ff
   topic: /00000000000000000000/0100020800ff
   operations:
-    - Factor: 0.001
     - Zero Meter Filter
+    - Factor: 0.001
     - On Change Filter
     - Refresh Action: 2 minutes
 

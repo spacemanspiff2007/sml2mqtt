@@ -65,8 +65,8 @@ Skipped: 0100600100ff
   obis : 0100010800ff
   topic: /0a0149534b0005020de2/0100010800ff
   operations:
-    - Factor: 0.001
     - Zero Meter Filter
+    - Factor: 0.001
     - On Change Filter
     - Refresh Action: 2 minutes
 
@@ -74,8 +74,8 @@ Skipped: 0100600100ff
   obis : 0100020800ff
   topic: /0a0149534b0005020de2/0100020800ff
   operations:
-    - Factor: 0.001
     - Zero Meter Filter
+    - Factor: 0.001
     - On Change Filter
     - Refresh Action: 2 minutes
 
@@ -115,25 +115,17 @@ async def test_frame_with_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_
     assert msg.removeprefix(sml_frame_1_analyze) == '''
 Found obis id 0100600100ff in the sml frame
 Device found for 0a0149534b0005020de2
-No filters found for 0100600100ff, creating default filters
 No filters found for 0100010800ff, creating default filters
 No filters found for 0100020800ff, creating default filters
 No filters found for 0100100700ff, creating default filters
-Skipped: 010060320101, 0a0149534b0005020de2
-
-<SmlValue>
-  obis : 0100600100ff
-  topic: /0a0149534b0005020de2/0100600100ff
-  operations:
-    - On Change Filter
-    - Refresh Action: 2 minutes
+Skipped: 0100600100ff, 010060320101
 
 <SmlValue>
   obis : 0100010800ff
   topic: /0a0149534b0005020de2/0100010800ff
   operations:
-    - Factor: 0.001
     - Zero Meter Filter
+    - Factor: 0.001
     - On Change Filter
     - Refresh Action: 2 minutes
 
@@ -141,8 +133,8 @@ Skipped: 010060320101, 0a0149534b0005020de2
   obis : 0100020800ff
   topic: /0a0149534b0005020de2/0100020800ff
   operations:
-    - Factor: 0.001
     - Zero Meter Filter
+    - Factor: 0.001
     - On Change Filter
     - Refresh Action: 2 minutes
 
@@ -153,7 +145,6 @@ Skipped: 010060320101, 0a0149534b0005020de2
     - On Change Filter
     - Refresh Action: 2 minutes
 
-/0a0149534b0005020de2/0100600100ff: 0a0149534b0005020de2 (QOS: 0, retain: False)
 /0a0149534b0005020de2/0100010800ff: 253.91770000000002 (QOS: 0, retain: False)
 /0a0149534b0005020de2/0100100700ff: 272 (QOS: 0, retain: False)
 OK

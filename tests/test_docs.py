@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 import sml2mqtt
 from sml2mqtt.config.operations import HasDateTimeFields, HasIntervalFields
-from sml2mqtt.config.source import SmlSourceSettingsBase
+from sml2mqtt.config.inputs import SmlSourceSettingsBase
 from sml2mqtt.sml_value.setup_operations import MAPPING, setup_operations
 
 

@@ -10,7 +10,7 @@ from sml2mqtt.sml_value.operations import (
     OnChangeFilterOperation,
     RefreshActionOperation,
     RoundOperation,
-    SkipZeroMeterOperation,
+    SkipZeroMeterOperation, VirtualMeterOperation,
 )
 from sml2mqtt.sml_value.setup_operations import setup_operations
 
@@ -27,10 +27,14 @@ if TYPE_CHECKING:
 def _create_default_transformations(sml_value: SmlValue, frame: SmlFrameValues, general_cfg: GeneralSettings):
     if (entry := frame.get_value(sml_value.obis)) is not None and entry.unit == 30:
         if general_cfg.wh_in_kwh:
-            sml_value.add_operation(FactorOperation(1 / 1000))
+            sml_value.insert_operation(FactorOperation(1 / 1000))
 
         if not general_cfg.report_blank_energy_meters:
-            sml_value.add_operation(SkipZeroMeterOperation())
+            for op in sml_value.operations:
+                if isinstance(op, VirtualMeterOperation):
+                    break
+            else:
+                sml_value.insert_operation(SkipZeroMeterOperation())
 
 
 def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cfg: GeneralSettings):
@@ -59,7 +63,7 @@ def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig 
 
         skipped_obis = set(cfg.skip)
         if not general_cfg.report_device_id and device.device_id is not None:
-            skipped_obis.add(device.device_id)
+            skipped_obis.update(general_cfg.device_id_obis)
 
         device.sml_values.set_skipped(*skipped_obis)
         skip_default_setup.update(skipped_obis)
@@ -79,8 +83,8 @@ def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig 
             )
             device.sml_values.add_value(sml_value)
 
-            _create_default_transformations(sml_value, frame, general_cfg)
             setup_operations(sml_value, value_cfg)
+            _create_default_transformations(sml_value, frame, general_cfg)
             _create_default_filters(device.log, sml_value, general_cfg)
     else:
         # No config found -> ignore defaults

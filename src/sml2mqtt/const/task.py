@@ -59,7 +59,7 @@ class Task:
 
     def start(self):
         if not self.is_running:
-            self._task = create_task(self._coro(), name=self._name)
+            self._task = create_task(self._wrapper(), name=self._name)
 
     def cancel(self) -> asyncio_Task | None:
         if (task := self._task) is None:
@@ -104,4 +104,4 @@ class DeviceTask(Task):
 
     def process_exception(self, e: Exception):
         super().process_exception(e)
-        self._device.on_source_failed(f'Task crashed: {e}')
+        self._device.on_source_failed(f'Task crashed: {e.__class__.__name__}')

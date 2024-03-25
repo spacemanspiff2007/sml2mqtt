@@ -6,7 +6,7 @@ from pydantic import Field
 from .device import SmlDeviceConfig, SmlValueConfig
 from .logging import LoggingSettings
 from .mqtt import MqttConfig, OptionalMqttPublishConfig
-from .source import HttpSourceSettings, SerialSourceSettings
+from .inputs import HttpSourceSettings, SerialSourceSettings
 from .types import LowerStr, ObisHex
 
 

@@ -12,7 +12,7 @@ from sml2mqtt.runtime import on_shutdown
 
 
 if TYPE_CHECKING:
-    from sml2mqtt.config.source import HttpSourceSettings
+    from sml2mqtt.config.inputs import HttpSourceSettings
     from sml2mqtt.const import DeviceProto
 
 

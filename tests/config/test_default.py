@@ -51,7 +51,7 @@ devices:   # Device configuration by ID or url
       mqtt:                    # Mqtt config for this value (optional)
         topic: OBIS   # Topic fragment for building this topic with the parent topic
       operations:              # A sequence of operations that will be evaluated one after another.
-                               # As soon as one operation blocks a value the whole sequence will be aborted and nothing will be published for this frame.
+                               # If one operation blocks this will return nothing.
       - negative on energy meter status: true   # Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
       - factor: 3   # Factor with which the value gets multiplied
       - offset: 100   # Offset that gets added on the value

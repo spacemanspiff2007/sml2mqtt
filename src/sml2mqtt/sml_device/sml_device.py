@@ -123,7 +123,8 @@ class SmlDevice:
         return None
 
     def on_source_failed(self, reason: str):
-        pass
+        self.log.error(f'Source failed: {reason}')
+        self.set_status(DeviceStatus.SOURCE_FAILED)
 
     def on_timeout(self):
         self.set_status(DeviceStatus.MSG_TIMEOUT)

@@ -1,5 +1,5 @@
 
-from sml2mqtt.config.source import HttpSourceSettings, SerialSourceSettings
+from sml2mqtt.config.inputs import HttpSourceSettings, SerialSourceSettings
 from sml2mqtt.const import DeviceProto, SourceProto
 
 

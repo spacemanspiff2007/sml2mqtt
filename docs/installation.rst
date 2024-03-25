@@ -47,7 +47,7 @@ Go into folder of virtual environment::
 
     python3 -m pip install --upgrade pip setuptools
 
-Install sml2mqtt
+Install sml2mqtt::
 
     python3 -m pip install sml2mqtt
 
@@ -106,7 +106,7 @@ If your installation is not done in "/opt/sml2mqtt/venv/bin" replace accordingly
     User=openhab
     Group=openhab
     Restart=on-failure
-    RestartSec=2min
+    RestartSec=10min
     ExecStart=/opt/sml2mqtt/venv/bin/sml2mqtt -c PATH_TO_CONFIGURATION_FILE
 
     [Install]

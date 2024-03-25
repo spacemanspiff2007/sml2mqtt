@@ -7,13 +7,13 @@ First install ``sml2mqtt`` e.g in a :ref:`virtual environment <INSTALLATION_VENV
 Run ``sml2mqtt`` with a path to a configuration file.
 A new default configuration file will be created.
 
-Edit the configuration file and add the serial ports.
+Edit the configuration file and add the appropriate serial ports.
 
 Now run ``sml2mqtt`` with the path to the configuration file and the ``analyze`` option.
 (see :ref:`command line interface <COMMAND_LINE_INTERFACE>`).
 This will process one sml frame from the meter and report the output.
 It's a convenient way to check what values will be reported.
-It will also show how the configuration changes the sml values (e.g. if you add a transformation or a workaround).
+It will also show how the configuration changes the sml values when you add an operation.
 
 Example output for the meter data:
 
@@ -118,7 +118,7 @@ Example output for the meter data:
 
 Check if the meter reports the serial number unter obis ``0100000009ff``.
 If not it's possible to configure another number (of even multiple ones) for configuration matching.
-If yes replace ``SERIAL_ID_HEX`` in the dummy configuration with the reported
+If yes replace ``device_id_hex`` in the dummy configuration with the reported
 serial number (here ``11111111111111111111``).
 Modify the device configuration to your liking (see configuration documentation).
 Run the analyze command again and see how the output changes and observe the reported values.

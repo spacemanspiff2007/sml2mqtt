@@ -12,7 +12,7 @@ from sml2mqtt.const import DeviceTask
 
 
 if TYPE_CHECKING:
-    from sml2mqtt.config.source import SerialSourceSettings
+    from sml2mqtt.config.inputs import SerialSourceSettings
     from sml2mqtt.const import DeviceProto
 
 
@@ -56,7 +56,6 @@ class SerialSource(Protocol):
         self.transport._max_read_size = 10_240
 
     def connection_lost(self, exc: Exception | None) -> None:
-        self.stop()
 
         lvl = logging.INFO
         ex_str = ''
