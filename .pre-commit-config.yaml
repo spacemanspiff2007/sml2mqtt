@@ -13,10 +13,10 @@ repos:
       - id: trailing-whitespace
 
 
-#  - repo: https://github.com/astral-sh/ruff-pre-commit
-#    rev: v0.3.0
-#    hooks:
-#      - id: ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.4
+    hooks:
+      - id: ruff
 
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0

@@ -26,8 +26,8 @@ def patch_analyze():
 class MqttCfg:
     topic_full: str | None = None
     topic_fragment: str | None = None
-    qos: str | None = None
-    retain: str | None = None
+    qos: int | None = None
+    retain: bool | None = None
 
     def set_config(self, config: OptionalMqttPublishConfig | None):
         self.topic_full = config.full_topic
@@ -90,7 +90,7 @@ class MqttObj:
             self.retain = self.parent.retain
         return self
 
-    def set_topic(self, topic: str) -> 'MqttObj':
+    def set_topic(self, topic: str | None) -> 'MqttObj':
         self.cfg.topic_fragment = topic
         self.update()
         return self

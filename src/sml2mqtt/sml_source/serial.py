@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from asyncio import Protocol
+from time import monotonic
 from typing import TYPE_CHECKING, Final
 
 from serial_asyncio import SerialTransport, create_serial_connection
@@ -42,6 +43,8 @@ class SerialSource(Protocol):
 
         self._task: Final = DeviceTask(device, self._chunk_task, name=f'Serial Task {self.device.name:s}')
 
+        self.last_read: float | None = 0.0
+
     def start(self):
         self._task.start()
 
@@ -68,6 +71,8 @@ class SerialSource(Protocol):
 
     def data_received(self, data: bytes):
         self.transport.pause_reading()
+
+        self.last_read = monotonic()
         self.device.on_source_data(data)
 
     async def _chunk_task(self):
@@ -75,6 +80,12 @@ class SerialSource(Protocol):
 
         while True:
             await asyncio.sleep(interval)
+
+            if self.last_read is not None:
+                diff_to_interval = interval - (monotonic() - self.last_read)
+                self.last_read = None
+                if diff_to_interval >= 0.001:
+                    await asyncio.sleep(diff_to_interval)
 
             # safe to be called multiple times in a row
             self.transport.resume_reading()

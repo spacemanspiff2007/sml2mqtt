@@ -26,7 +26,7 @@ class ShutdownObj:
         try:
             log.debug(self.msg)
             await self.coro()
-            log.debug('-> done!')
+            log.debug(f'{self.msg:s} done!')
         except Exception as e:
             log.error(str(e))
             tb = traceback.format_exc().splitlines()

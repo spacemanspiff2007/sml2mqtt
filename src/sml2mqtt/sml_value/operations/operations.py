@@ -8,7 +8,7 @@ from sml2mqtt.sml_value.base import OperationContainerBase, SmlValueInfo, ValueO
 class OrOperation(ValueOperationBase, OperationContainerBase):
 
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
         ret: float | None = None
         for op in self.operations:
             if (call := op.process_value(value, info)) is not None and ret is None:
@@ -28,7 +28,7 @@ class OrOperation(ValueOperationBase, OperationContainerBase):
 
 class SequenceOperation(ValueOperationBase, OperationContainerBase):
     @override
-    def process_value(self, value: float, info: SmlValueInfo) -> float | None:
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
         for op in self.operations:
             value = op.process_value(value, info)
         return value

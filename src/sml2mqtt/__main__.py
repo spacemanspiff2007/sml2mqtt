@@ -1,5 +1,5 @@
 import asyncio
-import platform
+import os
 import sys
 import traceback
 
@@ -53,7 +53,7 @@ async def a_main():
 def main() -> int | str:
     # This is needed to make async-mqtt work
     # see https://github.com/sbtinstruments/asyncio-mqtt
-    if platform.system() == 'Windows':
+    if sys.platform.lower() == "win32" or os.name.lower() == "nt":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     # Load config

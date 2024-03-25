@@ -1,12 +1,10 @@
-from typing import Union
-
 from easyconfig import AppBaseModel, BaseModel, create_app_config
 from pydantic import Field
 
 from .device import SmlDeviceConfig, SmlValueConfig
+from .inputs import HttpSourceSettings, SerialSourceSettings
 from .logging import LoggingSettings
 from .mqtt import MqttConfig, OptionalMqttPublishConfig
-from .inputs import HttpSourceSettings, SerialSourceSettings
 from .types import LowerStr, ObisHex
 
 

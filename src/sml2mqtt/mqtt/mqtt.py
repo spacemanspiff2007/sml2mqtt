@@ -1,3 +1,4 @@
+import asyncio
 import traceback
 from asyncio import CancelledError, Event, Queue, TimeoutError, wait_for
 from typing import Final
@@ -15,32 +16,20 @@ from sml2mqtt.runtime import on_shutdown
 log = _parent_logger.getChild('mqtt')
 
 
+TASK: Task | None = None
 IS_CONNECTED: Event | None = None
 
 
 async def start():
-    global IS_CONNECTED
+    global IS_CONNECTED, TASK
 
-    assert not TASK.is_running
+    assert TASK is None
 
     IS_CONNECTED = Event()
+    TASK = Task(_mqtt_task, name='MQTT Task')
+
+    on_shutdown(TASK.cancel_and_wait, 'Shutdown mqtt')
     TASK.start()
-
-    on_shutdown(_shutdown, 'Shutdown mqtt')
-
-
-async def _shutdown():
-    await TASK.cancel_and_wait()
-
-
-async def mqtt_task():
-    try:
-        await _mqtt_task()
-    finally:
-        log.debug('Task finished')
-
-
-TASK: Final = Task(mqtt_task, name='MQTT Task')
 
 
 async def wait_for_connect(timeout: float):
@@ -113,6 +102,7 @@ async def _mqtt_task():
                     # Since we disconnect gracefully we have to manually sent the offline status
                     await client.publish(will_topic.topic, payload_offline, will_topic.qos, will_topic.retain)
                     shutdown = True
+                    log.info('Disconnecting')
 
         except MqttError as e:
             delay.increase()

@@ -1,5 +1,6 @@
 from typing import Annotated, TypeAlias
 
+from annotated_types import Interval
 from pydantic import StrictFloat, StrictInt, StringConstraints
 
 
@@ -17,3 +18,8 @@ LowerStr = Annotated[
 Number: TypeAlias = StrictInt | StrictFloat
 
 PercentStr = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+\.?\d*\s*%$')]
+
+StrippedStr = Annotated[str, StringConstraints(strip_whitespace=True)]
+
+MqttTopicStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+MqttQosInt = Annotated[int, Interval(ge=0, le=2)]

@@ -357,3 +357,31 @@ Example
     sequence:
       - factor: 0.1
       - offset: -50
+
+
+
+Examples
+======================================
+.. py:currentmodule:: sml2mqtt.config.device
+
+Energy consumption today
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This will report the power consumption of today
+
+..
+    YamlModel: SmlValueConfig
+
+.. code-block:: yaml
+
+    obis: '0100010800ff'    # Obis code for the energy meter
+    mqtt:
+      topic: energy_today   # MQTT topic for the meter
+    operations:
+    - type: meter
+      start now: true       # Start immediately
+      reset times:          # Reset at midnight
+        - 00:00
+    - round: 1
+    - type: change filter      # Only report on changes
+    - refresh action: 01:00    # ... but refresh every hour

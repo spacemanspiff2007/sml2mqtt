@@ -9,14 +9,14 @@ from typing import TYPE_CHECKING, Final
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
+    from collections.abc import Awaitable, Callable, Coroutine
 
     from sml2mqtt.const.protocols import DeviceProto
 
 
 TASKS: Final[set[asyncio_Task]] = set()
 
-log = logging.getLogger('Tasks')
+log = logging.getLogger('sml.tasks')
 
 
 def create_task(coro: Coroutine, *, name: str | None = None):
@@ -29,23 +29,25 @@ def create_task(coro: Coroutine, *, name: str | None = None):
 
 async def wait_for_tasks():
     while True:
-        for task in TASKS:
+        for task in TASKS.copy():
             if not task.done():
                 # these are the raw tasks
-                # Exceptions are handled either in Task or DeviceTask so we ignore those here
+                # Exceptions are handled either in Task or DeviceTask, so we ignore those here
                 try:
                     await task
                 except CancelledError:
                     pass
                 except Exception:
-                    pass
+                    log.exception('Uncaught error in Task!')
                 break
         else:
             break
 
+    log.debug('All tasks done')
+
 
 class Task:
-    def __init__(self, coro: Callable[[], Coroutine], *, name: str):
+    def __init__(self, coro: Callable[[], Awaitable], *, name: str):
         self._coro: Final = coro
         self._name: Final = name
 
@@ -90,6 +92,8 @@ class Task:
         finally:
             if task is self._task:
                 self._task = None
+
+            log.debug(f'{self._name:s} finished!')
 
     def process_exception(self, e: Exception):
         log.error(f'Error in {self._name:s}')
