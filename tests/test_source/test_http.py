@@ -26,7 +26,7 @@ async def test_200(sml_data_1, device_mock):
 
 
 async def test_400(device_mock):
-    source = HttpSource(device_mock, 'http:localhost:99999', interval=0, auth=None, timeout=ClientTimeout(0.5))
+    source = HttpSource(device_mock, 'http://localhost:39999', interval=0, auth=None, timeout=ClientTimeout(0.5))
 
     with aioresponses() as m:
         m.get(source.url, status=404)
