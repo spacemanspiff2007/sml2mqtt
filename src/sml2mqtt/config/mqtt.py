@@ -8,8 +8,8 @@ from .types import MqttQosInt, MqttTopicStr, StrippedStr
 
 
 class MqttDefaultPublishConfig(BaseModel):
-    MqttQosInt: MqttQosInt = Field(
-        0, description='Default value for MqttQosInt if no other MqttQosInt value in the config entry is set')
+    qos: MqttQosInt = Field(
+        0, description='Default value for QoS if no other QoS value in the config entry is set')
     retain: StrictBool = Field(
         False, description='Default value for retain if no other retain value in the config entry is set')
 
@@ -19,8 +19,8 @@ class OptionalMqttPublishConfig(BaseModel):
         None, description='Topic fragment for building this topic with the parent topic')
     full_topic: MqttTopicStr | None = Field(
         None, alias='full topic', description='Full topic - will ignore the parent topic parts')
-    MqttQosInt: MqttQosInt | None = Field(
-        None, description='MqttQosInt for publishing this value (if set - otherwise use parent)')
+    qos: MqttQosInt | None = Field(
+        None, description='QoS for publishing this value (if set - otherwise use parent)')
     retain: StrictBool | None = Field(
         None, description='Retain for publishing this value (if set - otherwise use parent)')
 
