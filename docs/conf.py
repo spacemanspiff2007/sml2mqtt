@@ -88,7 +88,8 @@ if RTD_BUILD:
 # Don't show warnings for missing python references since these are created via intersphinx during the RTD build
 if not RTD_BUILD:
     nitpick_ignore_regex = [
-        (re.compile(r'^py:class'), re.compile(r'pathlib\..+')),
         (re.compile(r'^py:data'), re.compile(r'typing\..+')),
-        (re.compile(r'^py:class'), re.compile(r'pydantic\..+|pydantic_core\..+|.+Constrained(?:Str|Int|Float)Value')),
+        (re.compile(r'^py:class'), re.compile(r'pydantic_core\..+')),
+        # WARNING: py:class reference target not found: sml2mqtt.config.operations.Annotated
+        (re.compile(r'^py:class'), re.compile(r'.+\.Annotated')),
     ]
