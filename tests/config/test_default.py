@@ -24,7 +24,7 @@ mqtt:
     tls insecure: false
   topic prefix: sml2mqtt
   defaults:
-    qos: 0         # Default value for QOS if no other QOS value in the config entry is set
+    qos: 0         # Default value for QoS if no other QoS value in the config entry is set
     retain: false  # Default value for retain if no other retain value in the config entry is set
   last will:
     topic: status   # Topic fragment for building this topic with the parent topic
