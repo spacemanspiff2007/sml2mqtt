@@ -39,7 +39,7 @@ async def test_frame_no_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_an
 
     assert msg.removeprefix(sml_frame_1_analyze) == '''
 Found obis id 0100600100ff in the sml frame
-No configuration found for 0a0149534b0005020de2
+No device found for 0a0149534b0005020de2
 No filters found for 010060320101, creating default filters
 No filters found for 0100600100ff, creating default filters
 No filters found for 0100010800ff, creating default filters
@@ -114,7 +114,7 @@ async def test_frame_with_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_
 
     assert msg.removeprefix(sml_frame_1_analyze) == '''
 Found obis id 0100600100ff in the sml frame
-Configuration found for 0a0149534b0005020de2
+Device found for 0a0149534b0005020de2
 No filters found for 0100600100ff, creating default filters
 No filters found for 0100010800ff, creating default filters
 No filters found for 0100020800ff, creating default filters

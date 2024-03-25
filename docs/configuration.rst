@@ -62,13 +62,15 @@ Example
       republish after: 120  # Republish automatically after this time (if no other filter configured)
 
     inputs:
-    - url: COM1   # Device path
+    - type: serial
+      url: COM1   # Device path
       timeout: 3  # Seconds after which a timeout will be detected (default=3)
-    - url: /dev/ttyS0   # Device path
+    - type: serial
+      url: /dev/ttyS0   # Device path
       timeout: 3        # Seconds after which a timeout will be detected (default=3)
 
     devices:
-      # Device configuration by repored id
+      # Device configuration by reported id
       device_id_hex:
 
         mqtt:                           # Optional MQTT configuration for this meter.

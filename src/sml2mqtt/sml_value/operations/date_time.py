@@ -1,11 +1,16 @@
-from collections.abc import Generator
-from datetime import datetime
-from typing import Final
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Final
 
 from typing_extensions import override
 
 from sml2mqtt.const import DateTimeFinder, get_now
 from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
+
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from datetime import datetime
 
 
 class SupportsDateTimeAction(ValueOperationBase):
@@ -65,7 +70,7 @@ class SupportsDateTimeAction(ValueOperationBase):
 
 
 class VirtualMeterOperation(SupportsDateTimeAction):
-    def __init__(self, dt_finder: DateTimeFinder, start_now: bool = True):
+    def __init__(self, dt_finder: DateTimeFinder, start_now: bool):
         super().__init__(dt_finder, start_now)
         self.last_value: float | None = None
         self.offset: float | None = None
@@ -101,7 +106,7 @@ class VirtualMeterOperation(SupportsDateTimeAction):
 
 
 class MaxValueOperation(SupportsDateTimeAction):
-    def __init__(self, dt_finder: DateTimeFinder, start_now: bool = True):
+    def __init__(self, dt_finder: DateTimeFinder, start_now: bool):
         super().__init__(dt_finder, start_now)
         self.max_value: float | None = None
 
@@ -131,7 +136,7 @@ class MaxValueOperation(SupportsDateTimeAction):
 
 
 class MinValueOperation(SupportsDateTimeAction):
-    def __init__(self, dt_finder: DateTimeFinder, start_now: bool = True):
+    def __init__(self, dt_finder: DateTimeFinder, start_now: bool):
         super().__init__(dt_finder, start_now)
         self.min_value: float | None = None
 

@@ -1,4 +1,5 @@
 from .actions import RefreshActionOperation
+from .date_time import DateTimeFinder, MaxValueOperation, MinValueOperation, VirtualMeterOperation
 from .filter import (
     AbsDeltaFilterOperation,
     DeltaFilterBase,
@@ -9,6 +10,5 @@ from .filter import (
 )
 from .math import FactorOperation, LimitValueOperation, OffsetOperation, RoundOperation
 from .operations import OrOperation, SequenceOperation
-from .date_time import DateTimeFinder, VirtualMeterOperation, MaxValueOperation, MinValueOperation
+from .time_series import MaxOfIntervalOperation, MeanOfIntervalOperation, MinOfIntervalOperation
 from .workarounds import NegativeOnEnergyMeterWorkaroundOperation
-from .time_series import MaxOfIntervalOperation, MinOfIntervalOperation, MeanOfIntervalOperation

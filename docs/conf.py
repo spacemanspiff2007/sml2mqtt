@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+from pathlib import Path
 
 
 RTD_BUILD = os.environ.get('READTHEDOCS') == 'True'
@@ -51,7 +52,7 @@ autodoc_member_order = 'bysource'
 autoclass_content = 'class'
 
 # so autodoc does find the source
-sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
+sys.path.insert(0, str(Path(__file__).parent.with_name('src')))
 
 
 # -- Options for autodoc pydantic -------------------------------------------------

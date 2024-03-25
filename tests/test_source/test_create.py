@@ -6,7 +6,7 @@ from sml2mqtt.sml_source.http import HttpSource
 
 
 async def test_create_http_no_auth(device_mock):
-    cfg = HttpSourceSettings(url='http://localhost/a', interval=3, timeout=6)
+    cfg = HttpSourceSettings(type='http', url='http://localhost/a', interval=3, timeout=6)
     obj = await create_source(device_mock, cfg)
 
     assert isinstance(obj, HttpSource)
@@ -20,7 +20,7 @@ async def test_create_http_no_auth(device_mock):
 
 
 async def test_create_http_auth(device_mock):
-    cfg = HttpSourceSettings(url='http://localhost/a', interval=3, timeout=6, user='u', password='p')
+    cfg = HttpSourceSettings(type='http', url='http://localhost/a', interval=3, timeout=6, user='u', password='p')
     obj = await create_source(device_mock, cfg)
 
     assert isinstance(obj, HttpSource)

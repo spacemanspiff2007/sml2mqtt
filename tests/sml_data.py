@@ -1,17 +1,10 @@
-import logging
-import traceback
 from binascii import a2b_hex
 
 import pytest
-from smllib.reader import SmlFrame, SmlStreamReader
+from smllib.reader import SmlStreamReader
 
-import sml2mqtt.const.task as task_module
-import sml2mqtt.mqtt.mqtt_obj
-from helper import PatchedSmlStreamReader
-from sml2mqtt import CMD_ARGS
-from sml2mqtt.const import SmlFrameValues, EnhancedSmlFrame
-from sml2mqtt.runtime import shutdown as shutdown_module
-from sml2mqtt.sml_device import sml_device as sml_device_module
+from sml2mqtt.const import EnhancedSmlFrame, SmlFrameValues
+
 
 @pytest.fixture()
 def sml_data_1():

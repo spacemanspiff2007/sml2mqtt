@@ -1,10 +1,8 @@
 from aiohttp import ClientTimeout
 from aioresponses import aioresponses
-from helper import wait_for_call
-from sml2mqtt.runtime import do_shutdown_async
+from tests.helper import wait_for_call
 
-from sml2mqtt.sml_source.http import HttpSource
-from sml2mqtt.sml_source.http import close_session
+from sml2mqtt.sml_source.http import HttpSource, close_session
 
 
 async def test_200(sml_data_1, device_mock):

@@ -4,8 +4,10 @@ from typing import TYPE_CHECKING, Final
 
 from typing_extensions import override
 
+
 if TYPE_CHECKING:
     from logging import Logger
+
     from smllib.sml import SmlListEntry
 
 

@@ -9,9 +9,9 @@ from smllib import SmlFrame
 
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterable
     from logging import Logger
-    from collections.abc import Iterable
+
     from smllib.sml import SmlListEntry
 
 

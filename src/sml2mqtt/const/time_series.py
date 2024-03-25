@@ -1,19 +1,26 @@
 from collections import deque
 from collections.abc import Sequence
 from datetime import timedelta
-from typing import Final
+from typing import Final, TypeAlias
+
+
+DurationType: TypeAlias = timedelta | float
+
+
+def get_duration(obj: DurationType) -> int | float:
+    if isinstance(obj, timedelta):
+        return int(obj.total_seconds()) if not obj.microseconds else obj.total_seconds()
+    if not isinstance(obj, (int, float)):
+        raise TypeError()
+    return obj
 
 
 class TimeSeries:
     __slots__ = ('period', 'times', 'values', 'is_full', 'wait_for_data')
 
-    def __init__(self, period: float | timedelta, wait_for_data: bool = False):
-
-        if isinstance(period, timedelta):
-            period = int(period.total_seconds()) if not period.microseconds else period.total_seconds()
-
+    def __init__(self, period: DurationType, wait_for_data: bool = False):
         self.wait_for_data: Final = wait_for_data
-        self.period: Final = period
+        self.period: Final = get_duration(period)
         self.times: Final[deque[float]] = deque()
         self.values: Final[deque[float]] = deque()
 

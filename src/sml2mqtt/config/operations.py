@@ -2,23 +2,16 @@ from __future__ import annotations
 
 from datetime import date, time, timedelta
 from enum import Enum
-from typing import Any, TypeAlias, Annotated, Union, Final, Literal, TypedDict, final
+from typing import Annotated, Any, Final, Literal, TypeAlias, TypedDict, Union, final
 from typing import get_args as _get_args
-from typing_extensions import override
 
 from annotated_types import Len
 from easyconfig import BaseModel
-from pydantic import (
-    Field,
-    StrictBool,
-    conlist,
-    model_validator,
-    BeforeValidator, Discriminator, Tag, constr, field_validator, Strict, StringConstraints, StrictInt, StrictFloat
-)
-from pydantic_core import PydanticCustomError
+from pydantic import Discriminator, Field, StrictBool, StrictFloat, StrictInt, Tag
 
-from .types import Number, ObisHex, TimeInSeconds, PercentStr  # noqa: TCH001
-from ..const import DateTimeFinder, TimeSeries
+from sml2mqtt.const import DateTimeFinder, DurationType, TimeSeries
+
+from .types import Number, ObisHex, PercentStr  # noqa: TCH001
 
 
 class EmptyKwargs(TypedDict):
@@ -29,7 +22,7 @@ class EmptyKwargs(TypedDict):
 # Filters
 # -------------------------------------------------------------------------------------------------
 class OnChangeFilter(BaseModel):
-    """A simple filter which lets the value only pass when it's different from the value from before"""
+    """A filter which lets the value only pass when it's different from the value that was passed the last time"""
     type: Literal['change filter'] = Field(description='Filter which passes only changes')
 
     @final
@@ -43,10 +36,13 @@ class DeltaFilterKwargs(TypedDict):
 
 
 class DeltaFilter(BaseModel):
+    """A filter which lets the value only pass if the incoming value is different enough from value that was passed the
+    last time. The delta can be specified as an absolute value or as a percentage.
+    """
+
     delta: StrictInt | StrictFloat | PercentStr = Field(
         alias='delta filter',
-        description='Filter which passes only when the incoming value is different enough from the previously passed '
-                    'value. Can be an absolute value or a percentage'
+        description='Absolute value or a percentage'
     )
 
     @final
@@ -71,9 +67,11 @@ class DeltaFilter(BaseModel):
 
 
 class HeartbeatFilter(BaseModel):
-    every: TimeInSeconds = Field(
+    """A filter which lets a value pass periodically every specified interval."""
+
+    every: DurationType = Field(
         alias='heartbeat filter',
-        description='Filter which lets a value pass periodically every specified interval.'
+        description='Interval'
     )
 
 
@@ -81,11 +79,10 @@ class HeartbeatFilter(BaseModel):
 # Actions
 # -------------------------------------------------------------------------------------------------
 class RefreshAction(BaseModel):
-    every: TimeInSeconds = Field(
-        alias='refresh action',
-        description='Action which lets every value pass. When no value is received '
-                    '(e.g. because an earlier filter blocks) this filter will produce the last value every interval.'
-    )
+    """Action which lets every value pass. When no value is received (e.g. because an earlier filter blocks)
+    this action will produce the last received value every interval.
+    """
+    every: DurationType = Field(alias='refresh action', description='Interval')
 
 
 # -------------------------------------------------------------------------------------------------
@@ -104,11 +101,14 @@ class Round(BaseModel):
 
 
 class LimitValue(BaseModel):
+    """Limits the value to always be in a certain range
+
+    """
     type: Literal['limit value']
     min: float | None = Field(None, description='minimum value')
     max: float | None = Field(None, description='maximum value')
     ignore: bool = Field(
-        False, alias='ignore out of range', description='Instead of limiting the value if it is out of range ignore it'
+        False, alias='ignore out of range', description='Instead of limiting the value it will be ignored'
     )
 
     @final
@@ -130,10 +130,11 @@ class LimitValueKwargs(TypedDict):
 # Workarounds
 # -------------------------------------------------------------------------------------------------
 class NegativeOnEnergyMeterWorkaround(BaseModel):
+    """Make value negative based on an energy meter status."""
+
     enabled_or_obis: StrictBool | ObisHex = Field(
         alias='negative on energy meter status',
-        description='Make value negative based on an energy meter status. '
-                    'Set to "true" to enable or to "false" to disable workaround. '
+        description='Set to "true" to enable or to "false" to disable workaround. '
                     'If the default obis code for the energy meter is wrong set '
                     'to the appropriate meter obis code instead'
     )
@@ -143,19 +144,17 @@ class NegativeOnEnergyMeterWorkaround(BaseModel):
 # Operations
 # -------------------------------------------------------------------------------------------------
 class Or(BaseModel):
-    operations: OperationsListType = Field(
-        alias='or', description='A sequence of operations that will be evaluated one after another.\n'
-                                'As soon as one operation returns a value the sequence will be aborted and '
-                                'the returned value will be used.'
-    )
+    """A sequence of operations that will be evaluated one after another. The first value that gets returned by an
+    operation will be used.
+    """
+    operations: OperationsListType = Field(alias='or')
 
 
 class Sequence(BaseModel):
-    operations: OperationsListType = Field(
-        alias='sequence', description='A sequence of operations that will be evaluated one after another.\n'
-                                      'As soon as one operation blocks a value the whole sequence will be aborted and '
-                                      'will return nothing.'
-    )
+    """A sequence of operations that will be evaluated one after another.
+    If one operation blocks this will return nothing.
+    """
+    operations: OperationsListType = Field(alias='sequence')
 
 
 def generate_day_names() -> dict[str, int]:
@@ -179,10 +178,10 @@ DayOfMonth = Annotated[int, Field(ge=1, le=31, strict=True)]
 class HasDateTimeFields(BaseModel):
 
     start_now: bool = Field(
-        alias='start now', description='Immediately start the virtual meter instead of after the next reset'
+        alias='start now', description='Immediately start instead of starting after the next reset'
     )
     reset_times: list[time] = Field(
-        default=[], alias='reset times', description='Time(s) of day when the meter will reset',
+        default=[], alias='reset times', description='Time(s) of day when a reset will occur',
     )
     reset_days: list[DayOfMonth | DayOfWeekStr] = Field(
         default=[], alias='reset days', description='Days of month or weekdays where the time(s) will be checked'
@@ -215,14 +214,17 @@ class DateTimeBoundKwargs(TypedDict):
 
 
 class VirtualMeter(HasDateTimeFields):
+    """A virtual meter. It will output the difference from the last reset"""
     type: Literal['meter']
 
 
 class MaxValue(HasDateTimeFields):
+    """Maximum value since last reset"""
     type: Literal['max value']
 
 
 class MinValue(HasDateTimeFields):
+    """Minimum value since last reset"""
     type: Literal['min value']
 
 
@@ -257,14 +259,17 @@ class HasIntervalFields(BaseModel):
 
 
 class MaxOfInterval(HasIntervalFields):
+    """Maximum value in a sliding interval"""
     type: Literal['max interval']
 
 
 class MinOfInterval(HasIntervalFields):
+    """Minimum value in a sliding interval"""
     type: Literal['min interval']
 
 
 class MeanOfInterval(HasIntervalFields):
+    """Weighted mean in a sliding interval"""
     type: Literal['mean interval']
 
 

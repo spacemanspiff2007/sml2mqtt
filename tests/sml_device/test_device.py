@@ -35,7 +35,7 @@ async def test_device_analyze(no_mqtt, caplog, sml_data_1, arg_analyze, sml_data
 
     assert msg.removeprefix(sml_data_1_analyze) == '''
 Found obis id 0100000009ff in the sml frame
-No configuration found for 00000000000000000000
+No device found for 00000000000000000000
 No filters found for 0100000009ff, creating default filters
 No filters found for 0100010800ff, creating default filters
 No filters found for 0100010801ff, creating default filters

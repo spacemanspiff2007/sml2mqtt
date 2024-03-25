@@ -89,7 +89,7 @@ Example
 
 .. code-block:: yaml
 
-    refresh action: 3600
+    refresh action: 01:30:00
 
 Math
 ======================================

@@ -11,8 +11,8 @@ from sml2mqtt.__log__ import get_logger
 from sml2mqtt.const import EnhancedSmlFrame
 from sml2mqtt.errors import ObisIdForConfigurationMappingNotFoundError, Sml2MqttExceptionWithLog
 from sml2mqtt.mqtt import BASE_TOPIC
-from sml2mqtt.sml_value import SmlValues
 from sml2mqtt.sml_device.sml_devices import ALL_DEVICES
+from sml2mqtt.sml_value import SmlValues
 
 from .. import CONFIG
 from .device_status import DeviceStatus
@@ -22,6 +22,7 @@ from .watchdog import Watchdog
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
     from sml2mqtt.const import SourceProto
 
 # -------------------------------------------------------------------------------------------------
@@ -153,9 +154,9 @@ class SmlDevice:
         # Search configuration to see if we have a special config for the device
         device_cfg = CONFIG.devices.get(self.device_id)
         if device_cfg is None:
-            self.log.warning(f'No configuration found for {self.device_id:s}')
+            self.log.warning(f'No device found for {self.device_id:s}')
         else:
-            self.log.debug(f'Configuration found for {self.device_id:s}')
+            self.log.debug(f'Device found for {self.device_id:s}')
         setup_device(self, frame_values, device_cfg, CONFIG.general)
 
         self.frame_handler = self.process_frame

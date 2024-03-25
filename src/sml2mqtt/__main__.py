@@ -20,7 +20,7 @@ async def a_main():
     on_shutdown(ALL_DEVICES.cancel_and_wait, 'Stop devices')
 
     try:
-        if CMD_ARGS.analyze:
+        if analyze := CMD_ARGS.analyze:
             mqtt.patch_analyze()
         else:
             # initial mqtt connect
@@ -32,6 +32,8 @@ async def a_main():
             device = ALL_DEVICES.add_device(SmlDevice(input_cfg.get_device_name()))
             device.set_source(await create_source(device, settings=input_cfg))
             device.watchdog.set_timeout(input_cfg.timeout)
+            if analyze:
+                device.frame_handler = device.analyze_frame
 
         # Start all devices
         await ALL_DEVICES.start()
@@ -74,7 +76,7 @@ def main() -> int | str:
             print(e)
         return str(e)
 
-    return 1
+    return 0
 
 
 if __name__ == "__main__":

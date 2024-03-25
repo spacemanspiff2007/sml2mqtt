@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from sml2mqtt.errors import RequiredObisValueNotInFrameError, UnprocessedObisValuesReceivedError
 
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from sml2mqtt.const import SmlFrameValues
     from sml2mqtt.sml_value.sml_value import SmlValue
 

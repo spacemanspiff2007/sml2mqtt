@@ -1,8 +1,8 @@
 from asyncio import sleep
 from collections.abc import Callable
-from typing import Optional
 from unittest.mock import Mock
-from smllib import SmlStreamReader, SmlFrame
+
+from smllib import SmlStreamReader
 from smllib.builder import CTX_HINT
 from smllib.errors import CrcError
 from typing_extensions import override

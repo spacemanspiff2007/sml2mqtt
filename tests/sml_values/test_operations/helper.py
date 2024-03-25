@@ -36,11 +36,12 @@ def check_description(obj: ValueOperationBase, value: str | Iterable[str]):
             if '- 2001' in line:
                 continue
 
-            if 'On Change Filter' not in line and 'Zero Meter Filter' not in line:
+            if 'On Change Filter' not in line and 'Zero Meter Filter' not in line and 'Negative On Status' not in line:
                 assert ':' in line, line
             if ':' in line:
                 line = line[:line.index(':')]
-            assert line == line.title()
+            line = line.removesuffix('0100010800ff')
+            assert line == line.title(), f'\n{line}\n{line.title()}'
 
     value = [value] if isinstance(value, str) else list(value)
     diffs = [

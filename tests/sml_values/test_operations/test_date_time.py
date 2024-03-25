@@ -1,16 +1,11 @@
+from datetime import datetime, time
+
 import pytest
+from tests.sml_values.test_operations.helper import check_description
 
-from sml2mqtt.sml_value.operations import (
-    FactorOperation,
-    OffsetOperation,
-    RoundOperation, LimitValueOperation, VirtualMeterOperation, DateTimeFinder, MaxValueOperation, MinValueOperation
-
-)
-from tests.sml_values.test_operations.helper import check_operation_repr, check_description
-from datetime import datetime
-from datetime import time
-from sml2mqtt.sml_value.operations import date_time as virtual_meter_module
 from sml2mqtt.const import date_time_finder as date_time_finder_module
+from sml2mqtt.sml_value.operations import DateTimeFinder, MaxValueOperation, MinValueOperation, VirtualMeterOperation
+from sml2mqtt.sml_value.operations import date_time as virtual_meter_module
 
 
 class PatchedNow:
@@ -41,10 +36,9 @@ class DateTimeFactory:
         pos = 0
         for name, value in self.kwargs.items():
             value = kwargs.get(name, value)
-            if value is None:
-                if pos < len(args):
-                    value = args[pos]
-                    pos += 1
+            if value is None and pos < len(args):
+                value = args[pos]
+                pos += 1
 
             call[name] = value
 

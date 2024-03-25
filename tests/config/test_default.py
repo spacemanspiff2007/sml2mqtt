@@ -32,9 +32,11 @@ general:
   Wh in kWh: true       # Automatically convert Wh to kWh
   republish after: 120  # Republish automatically after this time (if no other filter configured)
 inputs:
-- url: COM1   # Device path
+- type: serial
+  url: COM1   # Device path
   timeout: 3  # Seconds after which a timeout will be detected (default=3)
-- url: /dev/ttyS0   # Device path
+- type: serial
+  url: /dev/ttyS0   # Device path
   timeout: 3        # Seconds after which a timeout will be detected (default=3)
 devices:   # Device configuration by ID or url
   device_id_hex:
@@ -50,12 +52,11 @@ devices:   # Device configuration by ID or url
         topic: OBIS   # Topic fragment for building this topic with the parent topic
       operations:              # A sequence of operations that will be evaluated one after another.
                                # As soon as one operation blocks a value the whole sequence will be aborted and nothing will be published for this frame.
-      - negative on energy meter status: true   # Make value negative based on an energy meter status. Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
+      - negative on energy meter status: true   # Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
       - factor: 3   # Factor with which the value gets multiplied
       - offset: 100   # Offset that gets added on the value
       - round: 2   # Round to the specified digits
-      - or:   # A sequence of operations that will be evaluated one after another.
-              # As soon as one operation returns a value the sequence will be aborted and the returned value will be used.
+      - or:
         - type: change filter   # Filter which passes only changes
-        - heartbeat filter: 120   # Filter which lets a value pass periodically every specified interval.
+        - heartbeat filter: 120.0   # Interval
 '''

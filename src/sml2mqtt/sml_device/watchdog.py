@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Final
 
 from ..const import DeviceTask
 
+
 if TYPE_CHECKING:
     from .sml_device import SmlDevice
 

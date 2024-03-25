@@ -22,7 +22,8 @@ class OptionalMqttPublishConfig(BaseModel):
     full_topic: TOPIC_STR | None = Field(
         None, alias='full topic', description='Full topic - will ignore the parent topic parts')
     qos: QOS | None = Field(None, description='QoS for publishing this value (if set - otherwise use parent)')
-    retain: StrictBool | None = Field(None, description='Retain for publishing this value (if set - otherwise use parent)')
+    retain: StrictBool | None = Field(
+        None, description='Retain for publishing this value (if set - otherwise use parent)')
 
     @field_validator('topic', 'full_topic')
     def validate_topic(cls, value):

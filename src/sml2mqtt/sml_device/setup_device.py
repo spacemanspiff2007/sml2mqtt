@@ -5,20 +5,22 @@ from typing import TYPE_CHECKING
 from sml2mqtt.sml_value import SmlValue
 from sml2mqtt.sml_value.operations import (
     FactorOperation,
+    LimitValueOperation,
+    OffsetOperation,
     OnChangeFilterOperation,
-    OrOperation,
     RefreshActionOperation,
-    SequenceOperation,
-    SkipZeroMeterOperation, OffsetOperation, RoundOperation, LimitValueOperation,
+    RoundOperation,
+    SkipZeroMeterOperation,
 )
 from sml2mqtt.sml_value.setup_operations import setup_operations
 
 
 if TYPE_CHECKING:
+    import logging
+
     from sml2mqtt.config.config import GeneralSettings
     from sml2mqtt.config.device import SmlDeviceConfig
     from sml2mqtt.const import SmlFrameValues
-    import logging
     from sml2mqtt.sml_device import SmlDevice
 
 
@@ -33,7 +35,8 @@ def _create_default_transformations(sml_value: SmlValue, frame: SmlFrameValues, 
 
 def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cfg: GeneralSettings):
     for op in sml_value.operations:
-        if not isinstance(op, (FactorOperation, OffsetOperation, RoundOperation, LimitValueOperation, SkipZeroMeterOperation)):
+        if not isinstance(op, (
+                FactorOperation, OffsetOperation, RoundOperation, LimitValueOperation, SkipZeroMeterOperation)):
             log.debug(f'Found {op.__class__.__name__:s} - skip creating of default filters')
             return None
 
@@ -84,7 +87,7 @@ def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig 
         device.sml_values.set_skipped(*general_cfg.device_id_obis)
 
     # Create default for not
-    for obis, entry in frame.items(skip=skip_default_setup):
+    for obis, _ in frame.items(skip=skip_default_setup):    # noqa: PERF102
         sml_value = SmlValue(obis, mqtt_device.create_child(topic_fragment=obis))
         device.sml_values.add_value(sml_value)
 

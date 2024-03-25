@@ -1,15 +1,16 @@
 import traceback
-from asyncio import CancelledError, create_task, Event, Queue, Task, TimeoutError, wait_for
-from typing import Final, Optional, Union
+from asyncio import CancelledError, Event, Queue, TimeoutError, wait_for
+from typing import Final
 
 from aiomqtt import Client, MqttError, Will
 
 import sml2mqtt
 from sml2mqtt.__log__ import log as _parent_logger
+from sml2mqtt.const import Task
 from sml2mqtt.errors import InitialMqttConnectionFailedError
 from sml2mqtt.mqtt import DynDelay
-from sml2mqtt.const import Task
 from sml2mqtt.runtime import on_shutdown
+
 
 log = _parent_logger.getChild('mqtt')
 

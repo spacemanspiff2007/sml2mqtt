@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Final
 
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+
     from smllib.sml import SmlListEntry
+
     from sml2mqtt.const import SmlFrameValues
 
 

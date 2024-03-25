@@ -7,6 +7,7 @@ from sml2mqtt.config.operations import (
     DeltaFilter,
     Factor,
     HeartbeatFilter,
+    LimitValue,
     MaxOfInterval,
     MaxValue,
     MeanOfInterval,
@@ -20,13 +21,14 @@ from sml2mqtt.config.operations import (
     RefreshAction,
     Round,
     Sequence,
-    VirtualMeter, LimitValue,
+    VirtualMeter,
 )
 from sml2mqtt.sml_value.base import OperationContainerBase, ValueOperationBase
 from sml2mqtt.sml_value.operations import (
     AbsDeltaFilterOperation,
     FactorOperation,
     HeartbeatFilterOperation,
+    LimitValueOperation,
     MaxOfIntervalOperation,
     MaxValueOperation,
     MeanOfIntervalOperation,
@@ -40,7 +42,7 @@ from sml2mqtt.sml_value.operations import (
     RefreshActionOperation,
     RoundOperation,
     SequenceOperation,
-    VirtualMeterOperation, LimitValueOperation,
+    VirtualMeterOperation,
 )
 
 

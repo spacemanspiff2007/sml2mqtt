@@ -9,8 +9,9 @@ from typing import TYPE_CHECKING, Final
 
 
 if TYPE_CHECKING:
-    from .protocols import DeviceProto
     from collections.abc import Callable, Coroutine
+
+    from sml2mqtt.const.protocols import DeviceProto
 
 
 TASKS: Final[set[asyncio_Task]] = set()
@@ -30,7 +31,14 @@ async def wait_for_tasks():
     while True:
         for task in TASKS:
             if not task.done():
-                await task
+                # these are the raw tasks
+                # Exceptions are handled either in Task or DeviceTask so we ignore those here
+                try:
+                    await task
+                except CancelledError:
+                    pass
+                except Exception:
+                    pass
                 break
         else:
             break

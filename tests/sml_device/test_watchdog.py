@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-from binascii import a2b_hex
 from unittest.mock import Mock
 
-from sml2mqtt.sml_device import SmlDevice, DeviceStatus
+from sml2mqtt.sml_device import DeviceStatus, SmlDevice
 from sml2mqtt.sml_device.watchdog import Watchdog
 
 

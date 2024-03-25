@@ -1,4 +1,4 @@
-from typing_extensions import override
+from typing import Literal
 
 import serial
 from easyconfig import BaseModel
@@ -12,6 +12,7 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+from typing_extensions import override
 
 
 class SmlSourceSettingsBase(BaseModel):
@@ -20,6 +21,8 @@ class SmlSourceSettingsBase(BaseModel):
 
 
 class SerialSourceSettings(SmlSourceSettingsBase):
+    type: Literal['serial']
+
     url: constr(strip_whitespace=True, min_length=1, strict=True) = Field(..., description='Device path')
     timeout: StrictInt | StrictFloat = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')
@@ -69,6 +72,8 @@ class SerialSourceSettings(SmlSourceSettingsBase):
 
 
 class HttpSourceSettings(SmlSourceSettingsBase):
+    type: Literal['http']
+
     url: AnyHttpUrl = Field(..., description='Url')
     timeout: StrictInt | StrictFloat = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')

@@ -62,6 +62,12 @@ builtins-ignorelist = ["id", "input"]
 [lint.per-file-ignores]
 "docs/conf.py" = ["INP001", "A001"]
 "setup.py" = ["PTH123"]
+"tests/*" = [
+    "ISC002",   # Implicitly concatenated string literals over multiple lines
+    "E501",     # Line too long
+    "INP001",    # File `FILE_NAME` is part of an implicit namespace package. Add an `__init__.py`
+]
+
 
 
 [lint.isort]

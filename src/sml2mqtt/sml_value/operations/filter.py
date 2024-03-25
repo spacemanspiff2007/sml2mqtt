@@ -4,6 +4,7 @@ from typing import Final
 
 from typing_extensions import override
 
+from sml2mqtt.const import DurationType, get_duration
 from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
 from sml2mqtt.sml_value.operations._helper import format_period
 
@@ -95,8 +96,8 @@ class SkipZeroMeterOperation(ValueOperationBase):
 
 
 class HeartbeatFilterOperation(ValueOperationBase):
-    def __init__(self, every: int | float):
-        self.every: Final = every
+    def __init__(self, every: DurationType):
+        self.every: Final = get_duration(every)
         self.last_time: float = -1_000_000_000
         self.last_value: float | None = None
 

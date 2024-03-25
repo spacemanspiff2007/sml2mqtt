@@ -6,10 +6,10 @@ from typing import Annotated, Union, get_args, get_origin
 import pytest
 from pydantic import BaseModel
 
-from sml2mqtt.config.operations import Sequence, Offset, OperationsModels
 import sml2mqtt.config.operations as operations_module
-from sml2mqtt.sml_value.operations import SequenceOperation, OffsetOperation, VirtualMeterOperation
-from sml2mqtt.sml_value.setup_operations import MAPPING, setup_operations, get_kwargs_names
+from sml2mqtt.config.operations import Offset, OperationsModels, Sequence
+from sml2mqtt.sml_value.operations import OffsetOperation, SequenceOperation, VirtualMeterOperation
+from sml2mqtt.sml_value.setup_operations import MAPPING, get_kwargs_names, setup_operations
 
 
 def assert_origins_equal(a, b):
@@ -76,10 +76,12 @@ def test_field_to_init(config_model: type[BaseModel], operation: callable):
             assert args_cfg == args_op
 
         else:
-            assert type_hint == param.annotation
+            param_hint = param.annotation
+            assert type_hint == param_hint or type_hint.__name__ == param_hint
 
     if missing := set(params) - set(config_provides):
-        raise ValueError(f'The following arguments are missing for {operation.__name__}: {", ".join(missing)}')
+        msg = f'The following arguments are missing for {operation.__name__}: {", ".join(missing)}'
+        raise ValueError(msg)
 
 
 def test_all_models_in_mapping():
