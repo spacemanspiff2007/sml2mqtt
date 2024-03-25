@@ -101,8 +101,8 @@ async def _mqtt_task():
                     # The last will testament only gets sent on abnormal disconnect
                     # Since we disconnect gracefully we have to manually sent the offline status
                     await client.publish(will_topic.topic, payload_offline, will_topic.qos, will_topic.retain)
-                    shutdown = True
                     log.info('Disconnecting')
+                    shutdown = True
 
         except MqttError as e:
             delay.increase()

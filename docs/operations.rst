@@ -364,6 +364,8 @@ Examples
 ======================================
 .. py:currentmodule:: sml2mqtt.config.device
 
+These are some examples for sml value configurations
+
 Energy consumption today
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
