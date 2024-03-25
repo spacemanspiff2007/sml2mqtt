@@ -6,7 +6,7 @@ from pydantic import Extra, Field, field_validator
 
 class LoggingSettings(BaseModel):
     level: str = Field('INFO', description='Log level')
-    file: str = Field('sml2mqtt.log', description='Log file path (absolute or relative to config file) or stdout')
+    file: str = Field('sml2mqtt.log', description='Log file path (absolute or relative to config file) or "stdout"')
 
     @field_validator('level')
     def validate_logging(cls, value):
