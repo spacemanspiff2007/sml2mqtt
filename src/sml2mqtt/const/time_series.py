@@ -4,7 +4,7 @@ from datetime import timedelta
 from typing import Final, TypeAlias
 
 
-DurationType: TypeAlias = timedelta | float
+DurationType: TypeAlias = timedelta | float | int
 
 
 def get_duration(obj: DurationType) -> int | float:

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 import traceback
-from asyncio import CancelledError, current_task
+from asyncio import CancelledError, Event, current_task
 from asyncio import Task as asyncio_Task
 from asyncio import create_task as asyncio_create_task
 from typing import TYPE_CHECKING, Final
@@ -29,18 +28,20 @@ def create_task(coro: Coroutine, *, name: str | None = None):
 
 
 async def wait_for_tasks():
+
     while True:
         for task in TASKS.copy():
-            if not task.done():
-                # these are the raw tasks
-                # Exceptions are handled either in Task or DeviceTask, so we ignore those here
-                try:
-                    await task
-                except CancelledError:
-                    pass
-                except Exception:
-                    log.exception('Uncaught error in Task!')
-                break
+            if task.done():
+                continue
+
+            # these are the asyncio tasks. Exceptions are handled either in Task or DeviceTask,
+            # so we can not await the tasks here because that would raise the Exception.
+            # That's why we use an event to signal that the task is done
+            event = Event()
+            task.add_done_callback(lambda x: event.set())
+            await event.wait()
+            break
+
         else:
             break
 

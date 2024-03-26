@@ -57,5 +57,5 @@ devices:   # Device configuration by ID or url
       - offset: 100   # Offset that gets added on the value
       - round: 2   # Round to the specified digits
       - type: change filter   # Filter which passes only changes
-      - refresh action: 600.0   # Interval
+      - refresh action: 600   # Refresh interval
 '''

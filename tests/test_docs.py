@@ -63,6 +63,10 @@ def validate_yaml_blocks(file: Path, prefix_model: str = 'yamlmodel: ', func: Ca
                 model = f'{current_module}.{model}'
 
         if obj is not None:
+            # we need one empty line before the yaml starts
+            if not obj.lines and line_low:
+                continue
+
             # find out indentation
             if not indentation and line_low:
                 while line[indentation] == ' ':

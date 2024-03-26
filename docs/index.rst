@@ -8,6 +8,7 @@ Welcome to sml2mqtt's documentation!
 
    installation
    configuration
+   cli
    getting_started
    operations
 

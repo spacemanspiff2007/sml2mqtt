@@ -53,7 +53,7 @@ Install sml2mqtt::
 
 #. Run sml2mqtt::
 
-    sml2mqtt --config PATH_TO_CONFIGURAT_FILE
+    sml2mqtt --config PATH_TO_CONFIGURATION_FILE
 
 
 Upgrading

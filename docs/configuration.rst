@@ -1,33 +1,19 @@
 **************************************
-Configuration & CLI
+Configuration
 **************************************
 
-.. _COMMAND_LINE_INTERFACE:
-
-Command Line Interface
-======================================
-
-.. exec_code::
-    :hide_code:
-
-    import sml2mqtt.__args__
-    sml2mqtt.__args__.get_command_line_args(['-h'])
-
-
-Configuration
-======================================
-
-Configuration is done through ``config.yml`` The parent folder of the file can be specified with ``-c PATH`` or ``--config PATH``.
-If nothing is specified the file ``config.yml`` is searched in the subdirectory ``sml2mqtt`` in
+Configuration of sml2mqtt is done through a yaml file.
+The path to the file can be specified with ``-c PATH`` or ``--config PATH``.
+If nothing is specified a file with the name ``config.yml`` is searched in the subdirectory ``sml2mqtt`` in
 
 * the current working directory
 * the venv directory
 * the user home
 
-If the config is specified and it does not yet exist a default configuration file will be created
+If a config file is specified and it does not yet exist a default configuration file will be created.
 
 Example
---------------------------------------
+======================================
 
 .. py:currentmodule:: sml2mqtt.config.config
 
@@ -88,7 +74,6 @@ Example
         - obis: '00112233445566'        # Obis code for this value
           mqtt:                         # Mqtt config for this value (optional)
             topic: OBIS_VALUE_TOPIC     # Topic fragment for building this topic with the topic prefix
-
           # A sequence of operations that will be evaluated one after another.
           # If one operation blocks nothing will be reported for this frame
           operations:
@@ -112,16 +97,24 @@ logging
 .. autopydantic_model:: sml2mqtt.config.logging.LoggingSettings
    :exclude-members: set_log_level
 
+
+.. _CONFIG_GENERAL:
+
 general
 --------------------------------------
 
 .. autopydantic_model:: sml2mqtt.config.config.GeneralSettings
+
+
+.. _CONFIG_INPUTS:
 
 inputs
 --------------------------------------
 
 .. autopydantic_model:: sml2mqtt.config.inputs.SerialSourceSettings
    :exclude-members: get_device_name
+
+Example:
 
 ..
     YamlModel: sml2mqtt.config.inputs.SerialSourceSettings
@@ -134,6 +127,8 @@ inputs
 
 .. autopydantic_model:: sml2mqtt.config.inputs.HttpSourceSettings
    :exclude-members: get_device_name
+
+Example:
 
 ..
     YamlModel: sml2mqtt.config.inputs.HttpSourceSettings

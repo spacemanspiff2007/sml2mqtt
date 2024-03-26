@@ -82,7 +82,7 @@ class RefreshAction(BaseModel):
     """Action which lets every value pass. When no value is received (e.g. because an earlier filter blocks)
     this action will produce the last received value every interval.
     """
-    every: DurationType = Field(alias='refresh action', description='Interval')
+    every: DurationType = Field(alias='refresh action', description='Refresh interval')
 
 
 # -------------------------------------------------------------------------------------------------

@@ -35,9 +35,14 @@ async def get_session() -> ClientSession:
 async def close_session():
     global SESSION
 
-    if (session := SESSION) is not None:
-        SESSION = None
-        await session.close()
+    if (session := SESSION) is None:
+        return None
+
+    SESSION = None
+    await session.close()
+
+    # https://docs.aiohttp.org/en/stable/client_advanced.html#graceful-shutdown
+    await sleep(0.250)
 
 
 class HttpSource:
