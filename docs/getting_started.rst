@@ -270,7 +270,7 @@ Example output for the meter data:
 
 
 If the meter does not report ``0100000009ff`` it's possible to configure another number (of even multiple ones)
-for configuration matching (see :ref:`command line interface <CONFIG_GENERAL>`).
+for configuration matching (see :ref:`general under config <CONFIG_GENERAL>`).
 
 5. Edit device settings
 ======================================
@@ -371,7 +371,7 @@ Run the analyze command again to see how the reported values change.
            mqtt:
              topic: energy_today
            operations:
-           - type: meter
+           - type: meter           # A virtual meter
              start now: true       # Start immediately
              reset times:          # Reset at midnight
                - 00:00
@@ -391,7 +391,9 @@ Run the analyze command again to see how the reported values change.
            mqtt:
              topic: power
            operations:
-           - delta filter: 5%
+           - type: delta filter
+             min: 10
+             min %: 5
            - refresh action: 01:00
 
 

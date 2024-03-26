@@ -2,8 +2,8 @@ from tests.sml_values.test_operations.helper import check_description, check_ope
 
 from sml2mqtt.sml_value.operations import (
     FactorOperation,
-    LimitValueOperation,
     OffsetOperation,
+    RangeFilterOperation,
     RoundOperation,
 )
 
@@ -48,64 +48,6 @@ def test_round():
     assert o.process_value(-3.65, None) == -3.6
 
 
-def test_limit_value():
-
-    # ---------------------------------------------------------------------------------------------
-    # Min
-    o = LimitValueOperation(1, None, False)
-    check_operation_repr(o, 'min=1 max=None ignore=False')
-
-    assert o.process_value(None, None) is None
-    assert o.process_value(5, None) == 5
-    assert o.process_value(1, None) == 1
-    assert o.process_value(0.999, None) == 1
-
-    o = LimitValueOperation(1, None, True)
-    check_operation_repr(o, 'min=1 max=None ignore=True')
-
-    assert o.process_value(None, None) is None
-    assert o.process_value(1, None) == 1
-    assert o.process_value(0.999, None) is None
-
-    # ---------------------------------------------------------------------------------------------
-    # Max
-    o = LimitValueOperation(None, 5, False)
-    check_operation_repr(o, 'min=None max=5 ignore=False')
-
-    assert o.process_value(None, None) is None
-    assert o.process_value(5, None) == 5
-    assert o.process_value(4.99, None) == 4.99
-    assert o.process_value(5.01, None) == 5
-
-    o = LimitValueOperation(None, 5, True)
-    check_operation_repr(o, 'min=None max=5 ignore=True')
-
-    assert o.process_value(None, None) is None
-    assert o.process_value(5, None) == 5
-    assert o.process_value(4.99, None) == 4.99
-    assert o.process_value(5.01, None) is None
-
-    # ---------------------------------------------------------------------------------------------
-    # Min Max
-    o = LimitValueOperation(0, 5, False)
-    check_operation_repr(o, 'min=0 max=5 ignore=False')
-
-    assert o.process_value(None, None) is None
-    assert o.process_value(-0.001, None) == 0
-    assert o.process_value(0.001, None) == 0.001
-    assert o.process_value(4.999, None) == 4.999
-    assert o.process_value(5.001, None) == 5
-
-    o = LimitValueOperation(0, 5, True)
-    check_operation_repr(o, 'min=0 max=5 ignore=True')
-
-    assert o.process_value(None, None) is None
-    assert o.process_value(-0.001, None) is None
-    assert o.process_value(0, None) == 0
-    assert o.process_value(5, None) == 5
-    assert o.process_value(5.001, None) is None
-
-
 def test_description():
     check_description(
         FactorOperation(-5),
@@ -135,22 +77,4 @@ def test_description():
     check_description(
         RoundOperation(1),
         '- Round: 1'
-    )
-
-    # LimitValueOperation
-    check_description(
-        LimitValueOperation(1, None),
-        ['- Limit Value:', '    min: 1', '    ignore out of range: False']
-    )
-    check_description(
-        LimitValueOperation(None, 7),
-        ['- Limit Value:', '    max: 7', '    ignore out of range: False']
-    )
-    check_description(
-        LimitValueOperation(1, 7, True), [
-            '- Limit Value:',
-            '    min: 1',
-            '    max: 7',
-            '    ignore out of range: True'
-        ]
     )

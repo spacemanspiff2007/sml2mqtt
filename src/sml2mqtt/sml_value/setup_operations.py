@@ -7,7 +7,6 @@ from sml2mqtt.config.operations import (
     DeltaFilter,
     Factor,
     HeartbeatFilter,
-    LimitValue,
     MaxOfInterval,
     MaxValue,
     MeanOfInterval,
@@ -18,6 +17,7 @@ from sml2mqtt.config.operations import (
     OnChangeFilter,
     OperationsType,
     Or,
+    RangeFilter,
     RefreshAction,
     Round,
     Sequence,
@@ -25,10 +25,9 @@ from sml2mqtt.config.operations import (
 )
 from sml2mqtt.sml_value.base import OperationContainerBase, ValueOperationBase
 from sml2mqtt.sml_value.operations import (
-    AbsDeltaFilterOperation,
+    DeltaFilterOperation,
     FactorOperation,
     HeartbeatFilterOperation,
-    LimitValueOperation,
     MaxOfIntervalOperation,
     MaxValueOperation,
     MeanOfIntervalOperation,
@@ -38,19 +37,12 @@ from sml2mqtt.sml_value.operations import (
     OffsetOperation,
     OnChangeFilterOperation,
     OrOperation,
-    PercDeltaFilterOperation,
+    RangeFilterOperation,
     RefreshActionOperation,
     RoundOperation,
     SequenceOperation,
     VirtualMeterOperation,
 )
-
-
-def create_DeltaFilter(delta: int | float, is_percent: bool): # noqa: 802
-    if is_percent:
-        return PercDeltaFilterOperation(delta=delta)
-
-    return AbsDeltaFilterOperation(delta=delta)
 
 
 def create_workaround_negative_on_energy_meter(enabled_or_obis: bool | str):
@@ -72,14 +64,14 @@ def create_sequence(operations: list[OperationsType]):
 MAPPING = {
     OnChangeFilter: OnChangeFilterOperation,
     HeartbeatFilter: HeartbeatFilterOperation,
-    DeltaFilter: create_DeltaFilter,
+    DeltaFilter: DeltaFilterOperation,
 
     RefreshAction: RefreshActionOperation,
 
     Factor: FactorOperation,
     Offset: OffsetOperation,
     Round: RoundOperation,
-    LimitValue: LimitValueOperation,
+    RangeFilter: RangeFilterOperation,
 
     NegativeOnEnergyMeterWorkaround: create_workaround_negative_on_energy_meter,
 
@@ -119,7 +111,7 @@ def setup_operations(parent: OperationContainerBase, cfg_parent: _HasOperationsP
         if kwarg_names := get_kwargs_names(cfg):
             kwargs = {name: value for kwarg_name in kwarg_names for name, value in getattr(cfg, kwarg_name)().items()}
         else:
-            kwargs = cfg.model_dump()
+            kwargs = cfg.model_dump(exclude={'type'})
 
         if (operation_obj := factory(**kwargs)) is None:
             continue

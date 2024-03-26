@@ -5,7 +5,7 @@ from typing import Final
 from typing_extensions import override
 
 from sml2mqtt.const import DurationType, get_duration
-from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
+from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase, ValueOperationWithStartupBase
 from sml2mqtt.sml_value.operations._helper import format_period
 
 
@@ -25,60 +25,86 @@ class OnChangeFilterOperation(ValueOperationBase):
         return value
 
     def __repr__(self):
-        return f'<OnChange at 0x{id(self):x}>'
+        return f'<OnChangeFilter at 0x{id(self):x}>'
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
         yield f'{indent:s}- On Change Filter'
 
 
-class DeltaFilterBase(ValueOperationBase):
-    def __init__(self, delta: int | float):
-        self.delta: Final = delta
-        self.last_value: int | float = -1_000_000_000   # random value which we are unlikely to hit
+class RangeFilterOperation(ValueOperationBase):
+    # noinspection PyShadowingBuiltins
+    def __init__(self, min_value: float | None, max_value: float | None, limit_values: bool = True):
+        self.min_value: Final = min_value
+        self.max_value: Final = max_value
+        self.limit_values: Final = limit_values
 
-
-class AbsDeltaFilterOperation(DeltaFilterBase):
     @override
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
         if value is None:
             return None
 
-        if abs(value - self.last_value) < self.delta:
-            return None
+        if (min_value := self.min_value) is not None and value < min_value:
+            return min_value if self.limit_values else None
 
-        self.last_value = value
+        if (max_value := self.max_value) is not None and value > max_value:
+            return max_value if self.limit_values else None
+
         return value
 
     def __repr__(self):
-        return f'<AbsDelta: {self.delta} at 0x{id(self):x}>'
+        return (f'<RangeFilter: min={self.min_value} max={self.max_value} '
+                f'limit_values={self.limit_values} at 0x{id(self):x}>')
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Delta Filter: {self.delta}'
+        yield f'{indent:s}- Range Filter:'
+        if self.min_value is not None:
+            yield f'{indent:s}    min: {self.min_value}'
+        if self.max_value is not None:
+            yield f'{indent:s}    max: {self.max_value}'
+        yield f'{indent:s}    limit to min/max: {self.limit_values}'
 
 
-class PercDeltaFilterOperation(DeltaFilterBase):
+class DeltaFilterOperation(ValueOperationBase):
+    def __init__(self, min_value: int | float | None = None, min_percent: int | float | None = None):
+        self.min_value: Final = min_value
+        self.min_percent: Final = min_percent
+
+        self.last_value: int | float = -1_000_000_000
+
     @override
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
         if value is None:
             return None
 
-        # If the last value == 0 we always let it pass
-        if self.last_value:
-            perc = abs(1 - value / self.last_value) * 100
-            if perc < self.delta:
-                return None
+        last_value = self.last_value
+
+        diff = abs(value - last_value)
+
+        if (delta_min := self.min_value) is not None and diff < delta_min:
+            return None
+
+        if (min_percent := self.min_percent) is not None:  # noqa: SIM102
+            # if last value == 0 the percentual change is infinite and we always pass
+            if last_value != 0:
+                percent = abs(diff / last_value) * 100
+                if percent < min_percent:
+                    return None
 
         self.last_value = value
         return value
 
     def __repr__(self):
-        return f'<PercDelta: {self.delta}% at 0x{id(self):x}>'
+        return f'<DeltaFilter: min={self.min_value} min_percent={self.min_percent} at 0x{id(self):x}>'
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Delta Filter: {self.delta}%'
+        yield f'{indent:s}- Delta Filter:'
+        if self.min_value:
+            yield f'{indent:s}    Min  : {self.min_value}'
+        if self.min_percent:
+            yield f'{indent:s}    Min %: {self.min_percent}'
 
 
 class SkipZeroMeterOperation(ValueOperationBase):
@@ -115,7 +141,7 @@ class HeartbeatFilterOperation(ValueOperationBase):
         return self.last_value
 
     def __repr__(self):
-        return f'<Heartbeat: {self.every}s at 0x{id(self):x}>'
+        return f'<HeartbeatFilter: {self.every}s at 0x{id(self):x}>'
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:

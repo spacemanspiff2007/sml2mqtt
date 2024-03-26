@@ -12,7 +12,7 @@ def check_operation_repr(obj: ValueOperationBase, *values):
     repr_str = RE_ID.sub('', repr(obj))
 
     class_name = obj.__class__.__name__
-    for suffix in ('Operation', 'Filter'):
+    for suffix in ('Operation', ):
         class_name = class_name.removesuffix(suffix)
 
     values_str = ' '.join(values)

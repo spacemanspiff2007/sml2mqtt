@@ -64,6 +64,9 @@ def test_field_to_init(config_model: type[BaseModel], operation: callable):
             config_provides[_cfg_name] = _cfg_field.annotation
 
     for name, type_hint in config_provides.items():
+        if name == 'type':
+            continue
+
         assert name in params
         param = params[name]
 

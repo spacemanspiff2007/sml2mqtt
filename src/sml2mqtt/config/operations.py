@@ -7,7 +7,7 @@ from typing import get_args as _get_args
 
 from annotated_types import Len
 from easyconfig import BaseModel
-from pydantic import Discriminator, Field, StrictBool, StrictFloat, StrictInt, Tag
+from pydantic import Discriminator, Field, StrictBool, StrictFloat, StrictInt, Tag, model_validator
 
 from sml2mqtt.const import DateTimeFinder, DurationType, TimeSeries
 
@@ -30,40 +30,35 @@ class OnChangeFilter(BaseModel):
         return {}
 
 
-class DeltaFilterKwargs(TypedDict):
-    delta: int | float
-    is_percent: bool
+class RangeFilter(BaseModel):
+    """Filters or limits to values that are in a certain range
+
+    """
+    type: Literal['range filter']
+    min_value: float | None = Field(None, alias='min', description='minimum value that will pass')
+    max_value: float | None = Field(None, alias='max', description='maximum value that will pass')
+    limit_values: bool = Field(
+        False, alias='limit', description='Instead of ignoring the values they will be limited to min/max'
+    )
+
+    @model_validator(mode='after')
+    def _check_set(self) -> RangeFilter:
+        if self.min_value is None and self.max_value is None:
+            msg = 'Neither min or max are set!'
+            raise ValueError(msg)
+        return self
 
 
 class DeltaFilter(BaseModel):
     """A filter which lets the value only pass if the incoming value is different enough from value that was passed the
-    last time. The delta can be specified as an absolute value or as a percentage.
+    last time. The delta can an absolute value or as a percentage.
+    If multiple deltas are specified they are all checked.
     """
 
-    delta: StrictInt | StrictFloat | PercentStr = Field(
-        alias='delta filter',
-        description='Absolute value or a percentage'
-    )
+    type: Literal['delta filter']
 
-    @final
-    def get_kwargs_delta(self) -> DeltaFilterKwargs:
-
-        is_percent = False
-        if isinstance(self.delta, str):
-            delta = self.delta
-            is_percent = delta.endswith('%')
-            delta = delta.removesuffix('%')
-            try:
-                delta = int(delta)
-            except ValueError:
-                delta = float(delta)
-        else:
-            delta = self.delta
-
-        return {
-            'delta': delta,
-            'is_percent': is_percent
-        }
+    min_value: StrictInt | StrictFloat | None = Field(None, alias='min')
+    min_percent: StrictInt | StrictFloat | None = Field(None, alias='min %')
 
 
 class HeartbeatFilter(BaseModel):
@@ -98,32 +93,6 @@ class Offset(BaseModel):
 
 class Round(BaseModel):
     digits: int = Field(ge=0, le=6, alias='round', description='Round to the specified digits')
-
-
-class LimitValue(BaseModel):
-    """Limits the value to always be in a certain range
-
-    """
-    type: Literal['limit value']
-    min: float | None = Field(None, description='minimum value')
-    max: float | None = Field(None, description='maximum value')
-    ignore: bool = Field(
-        False, alias='ignore out of range', description='Instead of limiting the value it will be ignored'
-    )
-
-    @final
-    def get_kwargs_limit(self) -> LimitValueKwargs:
-        return {
-            'min': self.min,
-            'max': self.max,
-            'ignore': self.ignore
-        }
-
-
-class LimitValueKwargs(TypedDict):
-    min: float | None
-    max: float | None
-    ignore: bool
 
 
 # -------------------------------------------------------------------------------------------------
@@ -276,9 +245,9 @@ class MeanOfInterval(HasIntervalFields):
 # -------------------------------------------------------------------------------------------------
 
 OperationsModels = (
-    OnChangeFilter, DeltaFilter, HeartbeatFilter,
+    OnChangeFilter, DeltaFilter, HeartbeatFilter, RangeFilter,
     RefreshAction,
-    Factor, Offset, Round, LimitValue,
+    Factor, Offset, Round,
     NegativeOnEnergyMeterWorkaround,
     Or, Sequence,
     VirtualMeter, MaxValue, MinValue,

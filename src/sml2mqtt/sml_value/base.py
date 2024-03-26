@@ -43,3 +43,29 @@ class OperationContainerBase:
     def insert_operation(self, operation: ValueOperationBase):
         self.operations = (operation, *self.operations)
         return self
+
+
+class ValueOperationWithStartupBase(ValueOperationBase):
+    _PROCESS_VALUE_BACKUP_ATTR: Final = '_process_value_original'
+
+    def on_first_value(self, value: float, info: SmlValueInfo):
+        raise NotImplementedError()
+
+    def enable_on_first_value(self):
+        name: Final = self._PROCESS_VALUE_BACKUP_ATTR
+        if hasattr(self, name):
+            raise ValueError()
+
+        setattr(self, name, self.process_value)
+        self.process_value = self._process_value_first
+
+    def _process_value_first(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
+
+        # restore original function
+        name: Final = self._PROCESS_VALUE_BACKUP_ATTR
+        self.process_value = getattr(self, name)
+        delattr(self, name)
+
+        return self.on_first_value(value, info)

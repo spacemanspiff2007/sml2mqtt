@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING
 from sml2mqtt.sml_value import SmlValue
 from sml2mqtt.sml_value.operations import (
     FactorOperation,
-    LimitValueOperation,
     OffsetOperation,
     OnChangeFilterOperation,
     OrOperation,
+    RangeFilterOperation,
     RefreshActionOperation,
     RoundOperation,
     SequenceOperation,
@@ -59,7 +59,7 @@ def _create_default_transformations(log: logging.Logger, sml_value: SmlValue, fr
 def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cfg: GeneralSettings):
     if op := has_operation_type(
         sml_value,
-        FactorOperation, OffsetOperation, RoundOperation, LimitValueOperation, SkipZeroMeterOperation,
+        FactorOperation, OffsetOperation, RoundOperation, RangeFilterOperation, SkipZeroMeterOperation,
         is_of=False
     ):
         log.debug(f'Found {op.__class__.__name__:s} - skip creating default filters')

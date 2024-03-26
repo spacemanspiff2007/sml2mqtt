@@ -30,6 +30,24 @@ Example
     type: change filter
 
 
+Range filter
+--------------------------------------
+
+.. autopydantic_model:: RangeFilter
+   :inherited-members: BaseModel
+   :exclude-members: type, get_kwargs_limit
+
+Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..
+    YamlModel: RangeFilter
+
+.. code-block:: yaml
+
+    type: range filter
+    min: 0
+
+
 Delta Filter
 --------------------------------------
 
@@ -44,14 +62,25 @@ Example
 
 .. code-block:: yaml
 
-    delta filter: 5
+    type: delta filter
+    min: 5
+    min %: 10
 
 ..
     YamlModel: DeltaFilter
 
 .. code-block:: yaml
 
-    delta filter: "5 %"
+    type: delta filter
+    min: 5
+
+..
+    YamlModel: DeltaFilter
+
+.. code-block:: yaml
+
+    type: delta filter
+    min %: 10
 
 
 Heartbeat Filter
@@ -142,23 +171,6 @@ Example
 .. code-block:: yaml
 
     round: 2
-
-Limit value
---------------------------------------
-
-.. autopydantic_model:: LimitValue
-   :inherited-members: BaseModel
-   :exclude-members: type, get_kwargs_limit
-
-Example
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-..
-    YamlModel: LimitValue
-
-.. code-block:: yaml
-
-    type: limit value
-    min: 0
 
 
 Workarounds
