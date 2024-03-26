@@ -1,4 +1,3 @@
-import asyncio
 import traceback
 from asyncio import CancelledError, Event, Queue, TimeoutError, wait_for
 from typing import Final
@@ -58,8 +57,8 @@ async def _mqtt_task():
 
     delay = DynDelay(0, 300)
 
-    payload_offline: Final = 'OFFLINE'
     payload_online: Final = 'ONLINE'
+    payload_offline: Final = 'OFFLINE'
 
     shutdown = False
 
@@ -71,12 +70,17 @@ async def _mqtt_task():
             will_topic = BASE_TOPIC.create_child(
                 topic_fragment=config.mqtt.last_will.topic).set_config(config.mqtt.last_will)
 
+            will = Will(
+                topic=will_topic.topic, payload=payload_offline,
+                qos=will_topic.qos, retain=will_topic.retain
+            )
+
             client = Client(
                 hostname=cfg_connection.host, port=cfg_connection.port,
 
                 username=cfg_connection.user if cfg_connection.user else None,
                 password=cfg_connection.password if cfg_connection.password else None,
-                will=Will(will_topic.topic, payload=payload_offline, qos=will_topic.qos, retain=will_topic.retain),
+                will=will,
                 identifier=cfg_connection.identifier
             )
 
@@ -90,27 +94,30 @@ async def _mqtt_task():
 
                 try:
                     # signal that we are online
-                    await client.publish(will_topic.topic, payload_online, will_topic.qos, will_topic.retain)
+                    await client.publish(will.topic, payload_online, will.qos, will.retain)
 
                     # worker to publish things
                     while True:
                         topic, value, qos, retain = await QUEUE.get()
                         await client.publish(topic, value, qos, retain)
                         QUEUE.task_done()
+
                 except CancelledError:
                     # The last will testament only gets sent on abnormal disconnect
                     # Since we disconnect gracefully we have to manually sent the offline status
-                    await client.publish(will_topic.topic, payload_offline, will_topic.qos, will_topic.retain)
-                    log.info('Disconnecting')
+                    await client.publish(will.topic, will.payload, will.qos, will.retain)
                     shutdown = True
+                    log.debug('Disconnecting')
 
         except MqttError as e:
             delay.increase()
             log.error(f'{e} ({e.__class__.__name__})')
+
         except Exception:
             delay.increase()
             for line in traceback.format_exc().splitlines():
                 log.error(line)
+
         finally:
             QUEUE = None
             IS_CONNECTED.clear()
