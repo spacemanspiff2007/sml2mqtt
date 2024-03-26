@@ -164,7 +164,7 @@ Now run ``sml2mqtt`` with the path to the configuration file and the ``--analyze
 (see :ref:`command line interface <COMMAND_LINE_INTERFACE>`).
 This will process one sml frame from the meter and report the output.
 It's a convenient way to check what values will be reported.
-It will also show how the configuration changes the sml values when you add an operation.
+It will also show how the configuration changes the reported values when you add an operation.
 
 Check if the meter reports the serial number unter obis ``0100000009ff``.
 Example output for the meter data:
