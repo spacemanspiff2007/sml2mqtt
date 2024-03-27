@@ -5,6 +5,8 @@ indent-width = 4
 target-version = "py310"
 src = ["src", "test"]
 
+[lint]
+
 # https://docs.astral.sh/ruff/settings/#ignore-init-module-imports
 ignore-init-module-imports = true
 

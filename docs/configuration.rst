@@ -34,8 +34,6 @@ Example
         port: 1883
         user: ''
         password: ''
-        tls: false
-        tls insecure: false
       topic prefix: sml2mqtt
       defaults:
         qos: 0         # Default value for QOS if no other QOS value in the config entry is set
@@ -153,6 +151,10 @@ mqtt
 .. autopydantic_model:: OptionalMqttPublishConfig
 
 .. autopydantic_model:: MqttDefaultPublishConfig
+
+.. autopydantic_model:: sml2mqtt.config.mqtt_tls.MqttTlsOptions
+   :exclude-members: get_client_kwargs
+
 
 devices
 --------------------------------------

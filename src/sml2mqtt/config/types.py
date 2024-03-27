@@ -1,6 +1,5 @@
-from typing import Annotated, TypeAlias
+from typing import Annotated, Literal, TypeAlias
 
-from annotated_types import Interval
 from pydantic import Strict, StrictFloat, StrictInt, StringConstraints
 
 
@@ -22,4 +21,4 @@ PercentStr = Annotated[str, Strict(), StringConstraints(strip_whitespace=True, p
 StrippedStr = Annotated[str, Strict(), StringConstraints(strip_whitespace=True)]
 
 MqttTopicStr = Annotated[str, Strict(), StringConstraints(strip_whitespace=True, min_length=1)]
-MqttQosInt = Annotated[int, Strict(), Interval(ge=0, le=2)]
+MqttQosInt: TypeAlias = Literal[0, 1, 2]

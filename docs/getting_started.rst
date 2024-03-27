@@ -32,8 +32,6 @@ A new default configuration file will be created.
         port: 1883
         user: ''
         password: ''
-        tls: false
-        tls insecure: false
       topic prefix: sml2mqtt
       defaults:
         qos: 0         # Default value for QOS if no other QOS value in the config entry is set
@@ -107,8 +105,6 @@ serial or http (e.g. for tibber) and edit the mqtt settings.
         port: 1883
         user: ''
         password: ''
-        tls: false
-        tls insecure: false
       topic prefix: sml2mqtt
       defaults:
         qos: 0         # Default value for QOS if no other QOS value in the config entry is set

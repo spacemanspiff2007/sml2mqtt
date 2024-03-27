@@ -4,7 +4,8 @@ import string
 from easyconfig import BaseModel
 from pydantic import Field, StrictBool, field_validator, model_validator
 
-from .types import MqttQosInt, MqttTopicStr, StrippedStr
+from sml2mqtt.config.mqtt_tls import MqttTlsOptions
+from sml2mqtt.config.types import MqttQosInt, MqttTopicStr, StrippedStr
 
 
 class MqttDefaultPublishConfig(BaseModel):
@@ -51,8 +52,8 @@ class MqttConnection(BaseModel):
     port: int = Field(1883, ge=0)
     user: StrippedStr = ''
     password: StrippedStr = ''
-    tls: StrictBool = False
-    tls_insecure: StrictBool = Field(False, alias='tls insecure')
+
+    tls: MqttTlsOptions | None = Field(None)
 
 
 class MqttConfig(BaseModel):

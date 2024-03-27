@@ -75,13 +75,17 @@ async def _mqtt_task():
                 qos=will_topic.qos, retain=will_topic.retain
             )
 
+            tls_kwargs = {} if cfg_connection.tls is not None else cfg_connection.tls.get_client_kwargs(log)
+
             client = Client(
                 hostname=cfg_connection.host, port=cfg_connection.port,
 
                 username=cfg_connection.user if cfg_connection.user else None,
                 password=cfg_connection.password if cfg_connection.password else None,
                 will=will,
-                identifier=cfg_connection.identifier
+                identifier=cfg_connection.identifier,
+
+                **tls_kwargs
             )
 
             log.debug(f'Connecting to {cfg_connection.host}:{cfg_connection.port}')

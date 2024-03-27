@@ -20,8 +20,6 @@ mqtt:
     port: 1883
     user: ''
     password: ''
-    tls: false
-    tls insecure: false
   topic prefix: sml2mqtt
   defaults:
     qos: 0         # Default value for QoS if no other QoS value in the config entry is set
