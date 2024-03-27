@@ -15,6 +15,8 @@ CMD_ARGS: Final = CommandArgs
 
 def get_command_line_args(args=None) -> type[CommandArgs]:
 
+    env_var_name = 'SML2MQTT_ANALYZE'
+
     parser = argparse.ArgumentParser(description='SML to MQTT bridge')
     parser.add_argument(
         '-c',
@@ -25,13 +27,15 @@ def get_command_line_args(args=None) -> type[CommandArgs]:
     parser.add_argument(
         '-a',
         '--analyze',
-        help='Process exactly one sml message, shows the values of the message and what will be reported',
+        help='Process exactly one sml message, shows the values of the message and what will be reported. '
+             f'Can also be set by setting the environment variable "{env_var_name:s}" to an arbitrary value',
         action='store_true',
         default=False
     )
     args = parser.parse_args(args)
     CMD_ARGS.config = find_config_folder(args.config)
-    CMD_ARGS.analyze = args.analyze
+    CMD_ARGS.analyze = args.analyze or bool(os.environ.get(env_var_name, ''))
+
     return CMD_ARGS
 
 

@@ -140,3 +140,6 @@ Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/sml2mqt
 
 The docker image has one volume ``/sml2mqtt`` which has to be mounted.
 There the ``config.yml`` will be used or a new ``config.yml`` will be created
+
+The analyze option can also be set through an environment variable
+(see :ref:`command line interface <COMMAND_LINE_INTERFACE>`).
