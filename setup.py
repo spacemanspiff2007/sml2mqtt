@@ -42,7 +42,8 @@ setuptools.setup(
         'mqtt',
         'sml',
         'Smart Message Language',
-        'energy meter'
+        'energy meter',
+        'tibber'
     ],
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -6,11 +6,12 @@
 [![Docker Image Version (latest by date)](https://img.shields.io/docker/v/spacemanspiff2007/sml2mqtt?label=docker)](https://hub.docker.com/r/spacemanspiff2007/sml2mqtt)
 [![Docker Pulls](https://img.shields.io/docker/pulls/spacemanspiff2007/sml2mqtt)](https://hub.docker.com/r/spacemanspiff2007/sml2mqtt)
 
-_A simple yet flexible sml to mqtt bridge_
+_A simple yet extremely flexible sml to mqtt bridge_
 
 
 sml2mqtt is a asyncio application that can read multiple sml (Smart Message Language) streams
 from energy meters and report the values through mqtt.
+The meters can be read through serial ports or through http (e.g. Tibber)
 
 
 # Documentation
@@ -18,6 +19,10 @@ from energy meters and report the values through mqtt.
 
 
 # Changelog
+#### 3.0 (2024-XX-XX)
+- Almost complete rewrite
+- Support for tibber
+
 #### 2.2 (2023-03-31)
 - Small config improvements
 
