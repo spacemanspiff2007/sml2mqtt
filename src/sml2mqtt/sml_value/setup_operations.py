@@ -21,6 +21,7 @@ from sml2mqtt.config.operations import (
     RefreshAction,
     Round,
     Sequence,
+    ThrottleAction,
     VirtualMeter,
 )
 from sml2mqtt.sml_value.base import OperationContainerBase, ValueOperationBase
@@ -41,6 +42,7 @@ from sml2mqtt.sml_value.operations import (
     RefreshActionOperation,
     RoundOperation,
     SequenceOperation,
+    ThrottleActionOperation,
     VirtualMeterOperation,
 )
 
@@ -67,6 +69,7 @@ MAPPING = {
     DeltaFilter: DeltaFilterOperation,
 
     RefreshAction: RefreshActionOperation,
+    ThrottleAction: ThrottleActionOperation,
 
     Factor: FactorOperation,
     Offset: OffsetOperation,

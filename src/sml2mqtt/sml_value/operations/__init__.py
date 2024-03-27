@@ -1,4 +1,4 @@
-from .actions import RefreshActionOperation
+from .actions import RefreshActionOperation, ThrottleActionOperation
 from .date_time import DateTimeFinder, MaxValueOperation, MinValueOperation, VirtualMeterOperation
 from .filter import (
     DeltaFilterOperation,

@@ -87,6 +87,13 @@ class RefreshAction(BaseModel):
     every: DurationType = Field(alias='refresh action', description='Refresh interval')
 
 
+class ThrottleAction(BaseModel):
+    """Action which only lets one value pass in the defined period. If the last passed value is not at least
+    ``period`` old any new value will not be forwarded.
+    """
+    period: DurationType = Field(alias='throttle action', description='Throttle period')
+
+
 # -------------------------------------------------------------------------------------------------
 # Math
 # -------------------------------------------------------------------------------------------------
@@ -253,7 +260,7 @@ class MeanOfInterval(HasIntervalFields):
 
 OperationsModels = (
     OnChangeFilter, DeltaFilter, HeartbeatFilter, RangeFilter,
-    RefreshAction,
+    RefreshAction, ThrottleAction,
     Factor, Offset, Round,
     NegativeOnEnergyMeterWorkaround,
     Or, Sequence,

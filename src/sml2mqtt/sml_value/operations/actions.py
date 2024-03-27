@@ -34,3 +34,28 @@ class RefreshActionOperation(ValueOperationBase):
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
         yield f'{indent:s}- Refresh Action: {format_period(self.every)}'
+
+
+class ThrottleActionOperation(ValueOperationBase):
+    def __init__(self, period: DurationType):
+        self.period: Final = get_duration(period)
+        self.last_time: float = -1_000_000_000
+
+    @override
+    def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
+        if value is None:
+            return None
+
+        now = monotonic()
+        if self.last_time + self.period > now:
+            return None
+
+        self.last_time = now
+        return value
+
+    def __repr__(self):
+        return f'<ThrottleAction: {self.period}s at 0x{id(self):x}>'
+
+    @override
+    def describe(self, indent: str = '') -> Generator[str, None, None]:
+        yield f'{indent:s}- Throttle Action: {format_period(self.period)}'

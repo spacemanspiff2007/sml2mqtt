@@ -120,6 +120,23 @@ Example
 
     refresh action: 01:30:00
 
+
+Throttle Action
+--------------------------------------
+
+.. autopydantic_model:: ThrottleAction
+   :inherited-members: BaseModel
+
+
+Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..
+    YamlModel: ThrottleAction
+
+.. code-block:: yaml
+
+    throttle action: 30
+
 Math
 ======================================
 
