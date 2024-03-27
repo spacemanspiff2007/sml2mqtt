@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Final
 from typing_extensions import override
 
 from sml2mqtt.const import DateTimeFinder, get_now
-from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
+from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationWithStartupBase
 
 
 if TYPE_CHECKING:
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
-class SupportsDateTimeAction(ValueOperationBase):
+class SupportsDateTimeAction(ValueOperationWithStartupBase):
     _START_NOW_FUNC_ATTR = '_process_value_original'
 
     def __init__(self, dt_finder: DateTimeFinder, start_now: bool = True):
@@ -21,12 +21,7 @@ class SupportsDateTimeAction(ValueOperationBase):
         self._next_reset: datetime = dt_finder.get_first_reset(start_now)
 
         if start_now or not self._dt_finder.enabled:
-            assert not hasattr(self, self._START_NOW_FUNC_ATTR)
-            setattr(self, self._START_NOW_FUNC_ATTR, self.process_value)
-            self.process_value = self._process_value_start_now
-
-    def start_now_logic(self, value, info: SmlValueInfo):
-        raise NotImplementedError()
+            self.enable_on_first_value()
 
     def after_next_reset(self, update: bool = True) -> bool:
         if not self._dt_finder.enabled:
@@ -39,11 +34,11 @@ class SupportsDateTimeAction(ValueOperationBase):
 
         return False
 
-    def _process_value_start_now(self, value: float | None, info: SmlValueInfo) -> float | None:
+    def _process_value_first(self, value: float | None, info: SmlValueInfo) -> float | None:
         if value is None:
             return None
 
-        self.start_now_logic(value, info)
+        self.on_first_value(value, info)
 
         # restore original function
         self.process_value = getattr(self, self._START_NOW_FUNC_ATTR)
@@ -75,7 +70,8 @@ class VirtualMeterOperation(SupportsDateTimeAction):
         self.last_value: float | None = None
         self.offset: float | None = None
 
-    def start_now_logic(self, value, info: SmlValueInfo):
+    @override
+    def on_first_value(self, value, info: SmlValueInfo):
         self.last_value = value
         self.offset = value
 
@@ -110,7 +106,8 @@ class MaxValueOperation(SupportsDateTimeAction):
         super().__init__(dt_finder, start_now)
         self.max_value: float | None = None
 
-    def start_now_logic(self, value, info: SmlValueInfo):
+    @override
+    def on_first_value(self, value, info: SmlValueInfo):
         self.max_value = value
 
     @override
@@ -140,7 +137,8 @@ class MinValueOperation(SupportsDateTimeAction):
         super().__init__(dt_finder, start_now)
         self.min_value: float | None = None
 
-    def start_now_logic(self, value, info: SmlValueInfo):
+    @override
+    def on_first_value(self, value, info: SmlValueInfo):
         self.min_value = value
 
     @override

@@ -94,8 +94,8 @@ class MeanOfIntervalOperation(TimeDurationSeriesOperationBase):
 
     @override
     def on_values(self, obj: Sequence[tuple[float, float]]) -> float | None:
-        time = 0
-        mean = 0
+        time = 0.0
+        mean = 0.0
         for value, duration in obj:
             mean += value * duration
             time += duration

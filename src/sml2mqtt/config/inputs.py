@@ -78,7 +78,7 @@ class HttpSourceSettings(SmlSourceSettingsBase):
     timeout: StrictInt | StrictFloat = Field(
         default=3, description='Seconds after which a timeout will be detected (default=3)')
 
-    interval: confloat(ge=0.1) = Field(default=1, description='Delay between requests')
+    interval: StrictInt | StrictFloat = Field(default=1, description='Delay between requests', ge=0.1)
     user: str = Field(default='', description='User (if needed)')
     password: str = Field(default='', description='Password (if needed)')
 

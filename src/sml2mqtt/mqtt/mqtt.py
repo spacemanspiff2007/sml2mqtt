@@ -44,10 +44,10 @@ async def wait_for_connect(timeout: float):
     return None
 
 
-QUEUE: Queue[tuple[str, int | float | str, int, bool]] | None = None
+QUEUE: Queue[tuple[str, int | float | str | bytes, int, bool]] | None = None
 
 
-async def _mqtt_task():
+async def _mqtt_task() -> None:
     global QUEUE
 
     from .mqtt_obj import BASE_TOPIC
@@ -127,6 +127,6 @@ async def _mqtt_task():
             IS_CONNECTED.clear()
 
 
-def publish(topic: str, value: int | float | str, qos: int, retain: bool):
+def publish(topic: str, value: int | float | str | bytes, qos: int, retain: bool):
     if QUEUE is not None:
         QUEUE.put_nowait((topic, value, qos, retain))

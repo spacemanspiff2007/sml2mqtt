@@ -279,7 +279,7 @@ MODEL_FIELD_MAP: Final[dict[str, frozenset[str]]] = {
     for _m in OperationsModels
 }
 
-MODEL_TYPE_MAP: Final[str, str] = {
+MODEL_TYPE_MAP: Final[dict[str, str]] = {
     _get_args(_f.annotation)[0]: _m.__name__
     for _m in OperationsModels for _n, _f in _m.model_fields.items() if _n == 'type'
 }

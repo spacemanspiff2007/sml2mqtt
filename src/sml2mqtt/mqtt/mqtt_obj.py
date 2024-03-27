@@ -29,7 +29,7 @@ class MqttCfg:
     qos: int | None = None
     retain: bool | None = None
 
-    def set_config(self, config: OptionalMqttPublishConfig | None):
+    def set_config(self, config: OptionalMqttPublishConfig):
         self.topic_full = config.full_topic
         self.topic_fragment = config.topic
         self.qos = config.qos
@@ -50,7 +50,7 @@ class MqttObj:
         self.parent: MqttObj | None = None
         self.children: list[MqttObj] = []
 
-    def publish(self, value: str | int | float | bytes):
+    def publish(self, value: str | int | float):
         pub_func(self.topic, value, self.qos, self.retain)
 
     def update(self) -> 'MqttObj':

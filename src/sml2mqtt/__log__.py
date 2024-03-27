@@ -39,11 +39,11 @@ def setup_log():
     log_format = logging.Formatter("[{asctime:s}] [{name:" + str(chars) + "s}] {levelname:8s} | {message:s}", style='{')
 
     # File Handler
-    log_file = sml2mqtt.CONFIG.logging.file
-    if log_file.lower() == 'stdout':
+    file_path = sml2mqtt.CONFIG.logging.file
+    if file_path.lower() == 'stdout':
         handler = logging.StreamHandler(sys.stdout)
     else:
-        log_file = Path(log_file)
+        log_file = Path(file_path)
         if not log_file.is_absolute():
             log_file = sml2mqtt.CMD_ARGS.config.parent / log_file
             log_file.resolve()
