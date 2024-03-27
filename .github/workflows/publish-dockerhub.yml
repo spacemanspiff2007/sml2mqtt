@@ -8,6 +8,7 @@ on:
 jobs:
   buildx:
     runs-on: ubuntu-latest
+    environment: dockerhub
     steps:
       - uses: actions/checkout@v4
         with:
