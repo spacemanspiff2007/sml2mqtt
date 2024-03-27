@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
 
 class SupportsDateTimeAction(ValueOperationWithStartupBase):
-    _START_NOW_FUNC_ATTR = '_process_value_original'
 
     def __init__(self, dt_finder: DateTimeFinder, start_now: bool = True):
         self._dt_finder: Final = dt_finder
@@ -33,18 +32,6 @@ class SupportsDateTimeAction(ValueOperationWithStartupBase):
             return True
 
         return False
-
-    def _process_value_first(self, value: float | None, info: SmlValueInfo) -> float | None:
-        if value is None:
-            return None
-
-        self.on_first_value(value, info)
-
-        # restore original function
-        self.process_value = getattr(self, self._START_NOW_FUNC_ATTR)
-        delattr(self, self._START_NOW_FUNC_ATTR)
-
-        return self.process_value(value, info)
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
@@ -74,6 +61,7 @@ class VirtualMeterOperation(SupportsDateTimeAction):
     def on_first_value(self, value, info: SmlValueInfo):
         self.last_value = value
         self.offset = value
+        return self.process_value(value, info)
 
     @override
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
@@ -109,6 +97,7 @@ class MaxValueOperation(SupportsDateTimeAction):
     @override
     def on_first_value(self, value, info: SmlValueInfo):
         self.max_value = value
+        return self.process_value(value, info)
 
     @override
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
@@ -140,6 +129,7 @@ class MinValueOperation(SupportsDateTimeAction):
     @override
     def on_first_value(self, value, info: SmlValueInfo):
         self.min_value = value
+        return self.process_value(value, info)
 
     @override
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
