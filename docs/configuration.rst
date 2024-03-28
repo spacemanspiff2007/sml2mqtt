@@ -1,3 +1,6 @@
+.. py:currentmodule:: sml2mqtt.config.config
+
+
 **************************************
 Configuration
 **************************************
@@ -15,7 +18,6 @@ If a config file is specified and it does not yet exist a default configuration 
 Example
 ======================================
 
-.. py:currentmodule:: sml2mqtt.config.config
 
 
 ..
@@ -80,6 +82,26 @@ Example
           - offset: 100             # Offset that gets added on the value
           - round: 2                # Round to the specified digits
           - refresh action: 300     # Republish value every 300s
+
+
+Example Tibber
+======================================
+
+These input settings can be used to poll data from a Tibber bridge:
+
+..
+    YamlModel: Settings
+
+
+.. code-block:: yaml
+
+   inputs:
+    - type: http
+      url: http://IP_OR_HOSTNAME_OF_TIBBER_BRIDGE/data.json?node_id=1
+      interval: 3   # Poll interval secs
+      timeout: 10   # After which time the input will change to TIMEOUT
+      user: "admin"
+      password: "printed on bridge socket"
 
 
 Configuration Reference
