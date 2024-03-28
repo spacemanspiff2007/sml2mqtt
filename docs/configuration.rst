@@ -84,7 +84,7 @@ Example
           - refresh action: 300     # Republish value every 300s
 
 
-Example Tibber
+Example input Tibber bridge
 ======================================
 
 These input settings can be used to poll data from a Tibber bridge:
