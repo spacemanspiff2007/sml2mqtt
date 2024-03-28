@@ -153,6 +153,21 @@ serial or http (e.g. for tibber) and edit the mqtt settings.
           - refresh action: 300     # Republish value every 300s
 
 
+Example input for Tibber:
+
+..
+    YamlModel: sml2mqtt.config.inputs.HttpSourceSettings
+
+.. code-block:: yaml
+
+    type: http
+    url: http://IP_OR_HOSTNAME_OF_TIBBER_BRIDGE/data.json?node_id=1
+    interval: 3   # Poll interval secs
+    timeout: 10   # After which time the input will change to TIMEOUT
+    user: "admin"
+    password: "printed on bridge socket"
+
+
 4. Run with analyze
 ======================================
 
