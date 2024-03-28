@@ -34,6 +34,7 @@ class SmlValue(OperationContainerBase):
 
         self.mqtt.publish(value)
         self.last_publish = monotonic()
+        return value
 
     def describe(self) -> Generator[str, None, None]:
         yield f'<SmlValue>'
