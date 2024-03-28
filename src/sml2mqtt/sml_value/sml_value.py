@@ -27,8 +27,7 @@ class SmlValue(OperationContainerBase):
         value = sml_value.get_value()
 
         for op in self.operations:
-            if (value := op.process_value(value, info)) is None:
-                break
+            value = op.process_value(value, info)
 
         if value is None:
             return None
