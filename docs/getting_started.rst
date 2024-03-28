@@ -91,7 +91,7 @@ serial or http (e.g. for tibber) and edit the mqtt settings.
 
 .. code-block:: yaml
    :linenos:
-   :emphasize-lines: 8-11, 26-31
+   :emphasize-lines: 8-11, 24-29
 
 
     logging:
