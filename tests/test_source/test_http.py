@@ -5,12 +5,13 @@ from aiohttp import ClientTimeout
 from aioresponses import aioresponses
 from tests.helper import wait_for_call
 
+from sml2mqtt.errors import HttpStatusError
 from sml2mqtt.sml_source.http import HttpSource, close_session
 
 
 @pytest.fixture()
 def source(device_mock):
-    return HttpSource(device_mock, 'http://localhost:39999', interval=0, auth=None, timeout=ClientTimeout(0.5))
+    return HttpSource(device_mock, 'http://localhost:39999', interval=0.020, auth=None, timeout=ClientTimeout(0.5))
 
 
 @pytest.mark.skipif(sys.platform.lower() != "win32", reason="It's a mystery why this fails in CI")
@@ -37,6 +38,9 @@ async def test_400(device_mock, source):
 
     with aioresponses() as m:
         m.get(source.url, status=404)
+        m.get(source.url, status=404)
+        m.get(source.url, status=404)
+        m.get(source.url, status=404)
 
         source.start()
         try:
@@ -49,3 +53,7 @@ async def test_400(device_mock, source):
     device_mock.on_error.assert_called_once()
 
     await close_session()
+
+
+def test_error_repr():
+    assert str(HttpStatusError(404)) == 'HttpStatusError: 404'

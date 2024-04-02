@@ -3,7 +3,7 @@ from __future__ import annotations
 from asyncio import sleep
 from typing import TYPE_CHECKING, Final
 
-from aiohttp import BasicAuth, ClientSession, ClientTimeout
+from aiohttp import BasicAuth, ClientError, ClientSession, ClientTimeout
 
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.const import DeviceTask
@@ -83,8 +83,12 @@ class HttpSource:
             self.device.on_source_failed(f'Could not create client session: {e}')
             return None
 
+        interval: float = self.interval
+        com_errors: int = 0
+
         while True:
-            await sleep(self.interval)
+            await sleep(interval)
+            interval = self.interval
 
             try:
                 resp = await session.get(self.url, auth=self.auth, timeout=self.timeout)
@@ -92,7 +96,16 @@ class HttpSource:
                     raise HttpStatusError(resp.status)  # noqa: TRY301
 
                 payload = await resp.read()
+                com_errors = 0
             except Exception as e:
+                if isinstance(e, (ClientError, HttpStatusError)):
+                    com_errors += 1
+                    max_ignore: int = 3
+                    if com_errors <= max_ignore:
+                        interval = com_errors * self.interval / max_ignore
+                        log.debug(f'Ignored {com_errors:d}/{max_ignore:d} {e}')
+                        continue
+
                 self.device.on_error(e, show_traceback=False)
                 continue
 

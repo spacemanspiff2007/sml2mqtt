@@ -61,6 +61,9 @@ class HttpStatusError(Sml2MqttExceptionWithLog):
         super().__init__()
         self.status: Final = status
 
+    def __str__(self):
+        return f'{self.__class__.__name__:s}: {self.status:d}'
+
     @override
     def log_msg(self, log: Logger):
         log.error(f'Received http status {self.status}')
@@ -69,6 +72,7 @@ class HttpStatusError(Sml2MqttExceptionWithLog):
         if isinstance(other, HttpStatusError):
             return self.status == other.status
         return NotImplemented
+
 
 # ------------------------------------------------------------------------------------
 # Value Processing Errors
