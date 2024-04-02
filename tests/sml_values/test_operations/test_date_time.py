@@ -280,6 +280,18 @@ def test_max_description(now):
         ]
     )
 
+    now.set(datetime(2001, 1, 1, 2, 0, 1))
+    check_description(
+        o, [
+            '- Max Value:',
+            '    max: None',
+            '    Next resets:',
+            '     - now',
+            '     - 2001-01-02 02:00:00',
+            '     - 2001-01-03 02:00:00',
+        ]
+    )
+
 
 def test_min_start_now(now):
     f = DateTimeFinder()

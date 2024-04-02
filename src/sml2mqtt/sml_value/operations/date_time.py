@@ -40,7 +40,7 @@ class SupportsDateTimeAction(ValueOperationWithStartupBase):
             return None
 
         yield f'{indent:s}    Next resets:'
-        yield f'{indent:s}     - {self._next_reset}'
+        yield f'{indent:s}     - {self._next_reset if self._next_reset >= get_now() else "now"}'
 
         next_dt = self._next_reset
 
