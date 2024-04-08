@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import traceback
+from logging import DEBUG as LVL_DEBUG
+from logging import INFO as LVL_INFO
 from typing import TYPE_CHECKING, Any, Final
 
 import smllib
@@ -72,11 +74,22 @@ class SmlDevice:
         await self.watchdog.cancel_and_wait()
 
     def set_status(self, new_status: DeviceStatus) -> bool:
-        if self.status == new_status or self.status.is_shutdown_status():
+        if (old_status := self.status) == new_status or old_status.is_shutdown_status():
             return False
 
         self.status = new_status
-        self.log_status.info(f'{new_status:s}')
+
+        level = LVL_INFO
+        if new_status is DeviceStatus.CRC_ERROR:
+            level = LVL_DEBUG
+        elif old_status is DeviceStatus.CRC_ERROR:
+            if new_status is DeviceStatus.OK:
+                level = LVL_DEBUG
+            else:
+                # Log old status if new status is not OK
+                self.log_status.log(level, f'Old status: {old_status:s}')
+
+        self.log_status.log(level, f'{new_status:s}')
         self.mqtt_status.publish(new_status.value)
 
         ALL_DEVICES.check_status()
@@ -93,7 +106,7 @@ class SmlDevice:
                 if (frame := self.stream_reader.get_frame()) is None:
                     return None
             except CrcError as e:
-                self.log.error(f'Crc error: {e.crc_calc} != {e.crc_msg}')
+                self.log.debug(f'Crc error: {e.crc_calc} != {e.crc_msg}')
                 self.set_status(DeviceStatus.CRC_ERROR)
                 return None
 
