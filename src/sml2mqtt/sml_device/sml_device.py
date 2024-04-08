@@ -108,6 +108,8 @@ class SmlDevice:
             self.on_error(e)
 
     def on_error(self, e: Exception, *, show_traceback: bool = True):
+        self.log.debug(f'Exception {type(e)}: "{e}"')
+
         # Log exception
         if isinstance(e, Sml2MqttExceptionWithLog):
             e.log_msg(self.log)
@@ -116,7 +118,7 @@ class SmlDevice:
                 for line in traceback.format_exc().splitlines():
                     self.log.error(line)
             else:
-                self.log.error(e)
+                self.log.error(f'{type(e)}: {e}')
 
         # Signal that an error occurred
         self.set_status(DeviceStatus.ERROR)

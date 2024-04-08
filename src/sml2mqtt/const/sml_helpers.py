@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import traceback
 from binascii import b2a_hex
 from time import monotonic
 from typing import TYPE_CHECKING, Any, Final
