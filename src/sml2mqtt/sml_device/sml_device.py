@@ -79,6 +79,7 @@ class SmlDevice:
 
         self.status = new_status
 
+        # Don't log toggeling between CRC_ERROR and OK. Only log if new status is not OK
         level = LVL_INFO
         if new_status is DeviceStatus.CRC_ERROR:
             level = LVL_DEBUG
@@ -87,7 +88,7 @@ class SmlDevice:
                 level = LVL_DEBUG
             else:
                 # Log old status if new status is not OK
-                self.log_status.log(level, f'Old status: {old_status:s}')
+                self.log_status.log(level, f'Old status {old_status:s}')
 
         self.log_status.log(level, f'{new_status:s}')
         self.mqtt_status.publish(new_status.value)
