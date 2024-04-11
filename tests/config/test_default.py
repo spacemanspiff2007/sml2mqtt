@@ -20,7 +20,7 @@ mqtt:
     port: 1883
     user: ''
     password: ''
-  topic prefix: sml2mqtt
+  topic prefix: sml2mqtt   # Prefix for all topics. Set to empty string to disable
   defaults:
     qos: 0         # Default value for QoS if no other QoS value in the config entry is set
     retain: false  # Default value for retain if no other retain value in the config entry is set

@@ -6,7 +6,7 @@ from sml2mqtt.__log__ import get_logger
 from sml2mqtt.config import OptionalMqttPublishConfig
 from sml2mqtt.mqtt import publish
 
-from .errors import MqttConfigValuesMissingError, TopicFragmentExpectedError
+from .errors import MqttConfigValuesMissingError, MqttTopicEmpty, TopicFragmentExpectedError
 
 
 pub_func: Callable[[str, int | float | str, int, bool], Any] = publish
@@ -77,7 +77,17 @@ class MqttObj:
         else:
             if not self.cfg.topic_fragment:
                 raise TopicFragmentExpectedError()
-            self.topic = f'{self.parent.topic}/{self.cfg.topic_fragment}'
+
+            # The topmost topic may be empty
+            parts = []
+            if self.parent.topic:
+                parts.append(self.parent.topic)
+            if self.cfg.topic_fragment:
+                parts.append(self.cfg.topic_fragment)
+            self.topic = '/'.join(parts)
+
+            if not self.topic:
+                raise MqttTopicEmpty()
 
         # effective QOS
         self.qos = self.cfg.qos

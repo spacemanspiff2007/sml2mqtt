@@ -14,6 +14,13 @@ def test_topmost(monkeypatch):
     assert parent.retain is True
 
 
+def test_prefix_empty(monkeypatch):
+    parent = MqttObj('', 2, True).update()
+    child = parent.create_child('child')
+
+    assert (child.topic, child.qos, child.retain) == ('child', 2, True)
+
+
 def test_child_change(monkeypatch):
     parent = MqttObj('base', 2, True).update()
     child = parent.create_child('child')

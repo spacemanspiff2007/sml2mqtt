@@ -57,8 +57,11 @@ class MqttConnection(BaseModel):
 
 
 class MqttConfig(BaseModel):
-    connection: MqttConnection = Field(default_factory=MqttConnection)
-    topic: MqttTopicStr = Field('sml2mqtt', alias='topic prefix')
-    defaults: MqttDefaultPublishConfig = Field(default_factory=MqttDefaultPublishConfig)
+    connection: MqttConnection = Field(
+        default_factory=MqttConnection)
+    topic: StrippedStr = Field(
+        'sml2mqtt', alias='topic prefix', description='Prefix for all topics. Set to empty string to disable')
+    defaults: MqttDefaultPublishConfig = Field(
+        default_factory=MqttDefaultPublishConfig)
     last_will: OptionalMqttPublishConfig = Field(
         default_factory=lambda: OptionalMqttPublishConfig(topic='status'), alias='last will')

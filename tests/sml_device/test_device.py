@@ -19,17 +19,17 @@ async def test_device_analyze(no_mqtt, caplog, sml_data_1, arg_analyze, sml_data
     msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records))
 
     assert '\n' + msg == """
-/00000000000000000000/0100000009ff: 00000000000000000000 (QOS: 0, retain: False)
-/00000000000000000000/0100010800ff: 450.09189911 (QOS: 0, retain: False)
-/00000000000000000000/0100010801ff: 449.07489911 (QOS: 0, retain: False)
-/00000000000000000000/0100010802ff: 1.0170000000000001 (QOS: 0, retain: False)
-/00000000000000000000/0100020800ff: 2.198 (QOS: 0, retain: False)
-/00000000000000000000/0100100700ff: 352.89 (QOS: 0, retain: False)
-/00000000000000000000/0100240700ff: 82.26 (QOS: 0, retain: False)
-/00000000000000000000/0100380700ff: 27.06 (QOS: 0, retain: False)
-/00000000000000000000/01004c0700ff: 243.57 (QOS: 0, retain: False)
-/00000000000000000000/status: OK (QOS: 0, retain: False)
-/00000000000000000000/status: SHUTDOWN (QOS: 0, retain: False)"""
+00000000000000000000/0100000009ff: 00000000000000000000 (QOS: 0, retain: False)
+00000000000000000000/0100010800ff: 450.09189911 (QOS: 0, retain: False)
+00000000000000000000/0100010801ff: 449.07489911 (QOS: 0, retain: False)
+00000000000000000000/0100010802ff: 1.0170000000000001 (QOS: 0, retain: False)
+00000000000000000000/0100020800ff: 2.198 (QOS: 0, retain: False)
+00000000000000000000/0100100700ff: 352.89 (QOS: 0, retain: False)
+00000000000000000000/0100240700ff: 82.26 (QOS: 0, retain: False)
+00000000000000000000/0100380700ff: 27.06 (QOS: 0, retain: False)
+00000000000000000000/01004c0700ff: 243.57 (QOS: 0, retain: False)
+00000000000000000000/status: OK (QOS: 0, retain: False)
+00000000000000000000/status: SHUTDOWN (QOS: 0, retain: False)"""
 
     msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.device_name', caplog.records))
 
@@ -49,14 +49,14 @@ Skipped: 0100000009ff, 0100600100ff
 
 <SmlValue>
   obis : 0100000009ff
-  topic: /00000000000000000000/0100000009ff
+  topic: 00000000000000000000/0100000009ff
   operations:
     - On Change Filter
     - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100010800ff
-  topic: /00000000000000000000/0100010800ff
+  topic: 00000000000000000000/0100010800ff
   operations:
     - Zero Meter Filter
     - Factor: 0.001
@@ -65,7 +65,7 @@ Skipped: 0100000009ff, 0100600100ff
 
 <SmlValue>
   obis : 0100010801ff
-  topic: /00000000000000000000/0100010801ff
+  topic: 00000000000000000000/0100010801ff
   operations:
     - Zero Meter Filter
     - Factor: 0.001
@@ -74,7 +74,7 @@ Skipped: 0100000009ff, 0100600100ff
 
 <SmlValue>
   obis : 0100010802ff
-  topic: /00000000000000000000/0100010802ff
+  topic: 00000000000000000000/0100010802ff
   operations:
     - Zero Meter Filter
     - Factor: 0.001
@@ -83,7 +83,7 @@ Skipped: 0100000009ff, 0100600100ff
 
 <SmlValue>
   obis : 0100020800ff
-  topic: /00000000000000000000/0100020800ff
+  topic: 00000000000000000000/0100020800ff
   operations:
     - Zero Meter Filter
     - Factor: 0.001
@@ -92,28 +92,28 @@ Skipped: 0100000009ff, 0100600100ff
 
 <SmlValue>
   obis : 0100100700ff
-  topic: /00000000000000000000/0100100700ff
+  topic: 00000000000000000000/0100100700ff
   operations:
     - On Change Filter
     - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100240700ff
-  topic: /00000000000000000000/0100240700ff
+  topic: 00000000000000000000/0100240700ff
   operations:
     - On Change Filter
     - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 0100380700ff
-  topic: /00000000000000000000/0100380700ff
+  topic: 00000000000000000000/0100380700ff
   operations:
     - On Change Filter
     - Refresh Action: 2 minutes
 
 <SmlValue>
   obis : 01004c0700ff
-  topic: /00000000000000000000/01004c0700ff
+  topic: 00000000000000000000/01004c0700ff
   operations:
     - On Change Filter
     - Refresh Action: 2 minutes

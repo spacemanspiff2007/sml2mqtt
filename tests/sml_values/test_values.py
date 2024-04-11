@@ -15,7 +15,7 @@ from sml_values.test_operations.helper import check_description
 
 
 def test_values(sml_frame_1_values: SmlFrameValues, no_mqtt):
-    mqtt = MqttObj(qos=0, retain=False)
+    mqtt = MqttObj(topic_fragment='test', qos=0, retain=False).update()
 
     v = SmlValues()
     v.set_skipped('010060320101', '0100600100ff', '0100020800ff')
@@ -30,7 +30,7 @@ def test_values(sml_frame_1_values: SmlFrameValues, no_mqtt):
     # The change filter prevents a republish
     for _ in range(10):
         v.process_frame(sml_frame_1_values)
-        assert no_mqtt == [('/energy', 253917.7, 0, False), ('/power', 272, 0, False)]
+        assert no_mqtt == [('test/energy', 253917.7, 0, False), ('test/power', 272, 0, False)]
 
     # test description
     check_description(v, [
@@ -38,13 +38,13 @@ def test_values(sml_frame_1_values: SmlFrameValues, no_mqtt):
         '',
         '<SmlValue>',
         '  obis : 0100010800ff',
-        '  topic: /energy',
+        '  topic: test/energy',
         '  operations:',
         '    - On Change Filter',
         '',
         '<SmlValue>',
         '  obis : 0100100700ff',
-        '  topic: /power',
+        '  topic: test/power',
         '  operations:',
         '    - On Change Filter',
         '',
