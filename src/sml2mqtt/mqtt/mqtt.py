@@ -67,8 +67,7 @@ async def _mqtt_task() -> None:
 
         try:
             # since we just pass this into the mqtt wrapper we do not link it to the base topic
-            will_topic = BASE_TOPIC.create_child(
-                topic_fragment=config.mqtt.last_will.topic).set_config(config.mqtt.last_will)
+            will_topic = BASE_TOPIC.create_child(topic_fragment='status').set_config(config.mqtt.last_will)
 
             will = Will(
                 topic=will_topic.topic, payload=payload_offline,
