@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class SmlDevices:
-    def __init__(self):
+    def __init__(self) -> None:
         self._devices: tuple[SmlDevice, ...] = ()
 
     def add_device(self, device: SmlDevice) -> SmlDevice:

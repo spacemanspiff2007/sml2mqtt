@@ -33,7 +33,7 @@ class ValueOperationBase:
 
 
 class OperationContainerBase:
-    def __init__(self):
+    def __init__(self) -> None:
         self.operations: tuple[ValueOperationBase, ...] = ()
 
     def add_operation(self, operation: ValueOperationBase):
@@ -51,7 +51,7 @@ class ValueOperationWithStartupBase(ValueOperationBase):
     def on_first_value(self, value: float, info: SmlValueInfo):
         raise NotImplementedError()
 
-    def enable_on_first_value(self):
+    def enable_on_first_value(self) -> None:
         name: Final = self._PROCESS_VALUE_BACKUP_ATTR
         if hasattr(self, name):
             raise ValueError()

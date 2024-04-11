@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class EnhancedSmlFrame(SmlFrame):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.timestamp: Final = monotonic()
@@ -34,13 +34,14 @@ class EnhancedSmlFrame(SmlFrame):
         yield ''
 
     def get_frame_values(self, log: Logger) -> SmlFrameValues:
+
         # try shortcut, if that fails try parsing the whole frame
         try:
-            sml_objs: list[SmlListEntry] = self.get_obis()
+            sml_objs = self.get_obis()  # type: list[SmlListEntry]
         except Exception:
             log.info('get_obis failed - try parsing frame')
 
-            sml_objs: list[SmlListEntry] = []
+            sml_objs = []   # type: list[SmlListEntry]
             for msg in self.parse_frame():
                 for val in getattr(msg.message_body, 'val_list', []):
                     sml_objs.append(val)

@@ -10,7 +10,7 @@ from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class OnChangeFilterOperation(ValueOperationBase):
-    def __init__(self):
+    def __init__(self) -> None:
         self.last_value: int | float | str | None = None
 
     @override

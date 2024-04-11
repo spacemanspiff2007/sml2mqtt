@@ -68,13 +68,13 @@ class HttpSource:
         self.interval = interval
         self._task: Final = DeviceTask(device, self._http_task, name=f'Http Task {self.device.name:s}')
 
-    def start(self):
+    def start(self) -> None:
         self._task.start()
 
-    async def cancel_and_wait(self):
+    async def cancel_and_wait(self) -> bool:
         return await self._task.cancel_and_wait()
 
-    async def _http_task(self):
+    async def _http_task(self) -> None:
         log.debug(f'Requesting data from {self.url}')
 
         try:

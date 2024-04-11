@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class SmlValues:
-    def __init__(self):
+    def __init__(self) -> None:
         self._processed_ids: frozenset[str] = frozenset()
         self._skipped_ids: frozenset[str] = frozenset()
         self._all_ids: frozenset[str] = frozenset()

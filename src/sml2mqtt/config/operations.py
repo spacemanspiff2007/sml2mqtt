@@ -61,7 +61,7 @@ class DeltaFilter(BaseModel):
     min_percent: StrictInt | StrictFloat | None = Field(None, alias='min %')
 
     @model_validator(mode='after')
-    def _check_set(self) -> RangeFilter:
+    def _check_set(self) -> DeltaFilter:
         if self.min_value is None and self.min_percent is None:
             msg = 'Neither min or min % are set!'
             raise ValueError(msg)

@@ -7,7 +7,7 @@ def get_now():
 
 
 class DateTimeFinder:
-    def __init__(self):
+    def __init__(self) -> None:
         self.times: tuple[dt_time, ...] = ()
         self.dows: tuple[int, ...] = ()
         self.days: tuple[int, ...] = ()
