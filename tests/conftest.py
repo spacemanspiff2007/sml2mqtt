@@ -92,6 +92,11 @@ def stream_reader(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _clear_mqtt(monkeypatch):
+    monkeypatch.setattr(sml2mqtt.mqtt.BASE_TOPIC, 'children', [])
+
+
+@pytest.fixture(autouse=True)
 def check_no_logged_error(caplog, request):
     caplog.set_level(logging.DEBUG)
 

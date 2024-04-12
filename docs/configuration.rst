@@ -104,6 +104,26 @@ These input settings can be used to poll data from a Tibber bridge:
       password: "printed on bridge socket"
 
 
+Example mqtt config
+======================================
+
+MQTT topics can be configured either by providing a full topic or a topic fragment.
+With a topic fragment the resulting topic is build with the parent topic.
+The structure is ``topic prefix`` / ``device`` / ``value``.
+Providing a full topic will ignore the fragments.
+The entries for qos and retain are optional.
+
+..
+    YamlModel: OptionalMqttPublishConfig
+
+
+.. code-block:: yaml
+
+   full topic: my/full/topic
+   qos: 1
+
+
+
 Configuration Reference
 ======================================
 All possible configuration options are described here. Not all entries are created by default in the config file

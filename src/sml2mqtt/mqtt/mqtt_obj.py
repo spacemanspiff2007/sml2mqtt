@@ -1,5 +1,5 @@
 import dataclasses
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from typing import Any, Final
 
 from sml2mqtt.__log__ import get_logger
@@ -121,6 +121,11 @@ class MqttObj:
         child.update()
         return child
 
+    def iter_objs(self) -> Generator['MqttObj', Any, None]:
+        yield self
+        for child in self.children:
+            yield from child.iter_objs()
+
 
 BASE_TOPIC: Final = MqttObj()
 
@@ -130,3 +135,13 @@ def setup_base_topic(topic: str, qos: int, retain: bool):
     BASE_TOPIC.cfg.qos = qos
     BASE_TOPIC.cfg.retain = retain
     BASE_TOPIC.update()
+
+
+def check_for_duplicate_topics(obj: MqttObj):
+    log = get_logger('mqtt')
+
+    topics: set[str] = set()
+    for o in obj.iter_objs():
+        if (topic := o.topic) in topics:
+            log.warning(f'Topic "{topic:s}" is already configured!')
+        topics.add(topic)

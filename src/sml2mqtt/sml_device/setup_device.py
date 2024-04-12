@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from sml2mqtt.mqtt import BASE_TOPIC, check_for_duplicate_topics
 from sml2mqtt.sml_value import SmlValue
 from sml2mqtt.sml_value.operations import (
     FactorOperation,
@@ -13,7 +14,6 @@ from sml2mqtt.sml_value.operations import (
     RoundOperation,
     SequenceOperation,
     SkipZeroMeterOperation,
-    VirtualMeterOperation,
 )
 from sml2mqtt.sml_value.setup_operations import setup_operations
 
@@ -118,3 +118,6 @@ def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig 
 
         _create_default_transformations(device.log, sml_value, frame, general_cfg)
         _create_default_filters(device.log, sml_value, general_cfg)
+
+    # Check for duplicate MQTT topics
+    check_for_duplicate_topics(BASE_TOPIC)
