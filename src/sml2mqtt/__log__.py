@@ -23,9 +23,9 @@ class MidnightRotatingFileHandler(RotatingFileHandler):
         self.last_check: date = datetime.now().date()
 
     def shouldRollover(self, record) -> int:
-        if (date := datetime.now().date()) == self.last_check:
+        if (date_now := datetime.now().date()) == self.last_check:
             return 0
-        self.last_check = date
+        self.last_check = date_now
         return super().shouldRollover(record)
 
 
