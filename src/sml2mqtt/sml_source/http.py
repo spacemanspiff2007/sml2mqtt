@@ -102,7 +102,10 @@ class HttpSource:
                     com_errors += 1
                     max_ignore: int = 7
                     if com_errors <= max_ignore:
-                        interval = (((com_errors - 0.5) ** 2) / 4 + 0.5) * self.interval
+                        # errors:   1,   2,   3,   4,   5,   6,    7,    8, ...
+                        # factor: 0.5, 1.1, 2.1, 3.6, 5.5, 8.1, 11.1, 14.5, ...
+                        # With 0.8 x interval we can do the first three retries without going into timeout
+                        interval = (((com_errors - 0.5) ** 2) / 4 + 0.5) * (self.interval * 0.8)
                         log.debug(f'Ignored {com_errors:d}/{max_ignore:d} {e}')
                         continue
 

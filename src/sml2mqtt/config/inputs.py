@@ -96,8 +96,8 @@ class HttpSourceSettings(SmlSourceSettingsBase):
 
         # Timeout is interval, and we automatically retry 3 times before we fail
         if self.interval * 3 > self.timeout:
-            log.warning('The recommendation for timeout should is least 3 * interval '
-                        f'({self.interval * 3:.0f})! Is {self.timeout}')
+            log.warning(f'The recommendation for timeout is at least 3 * interval '
+                        f'({self.interval * 3:.0f})! Currently: {self.timeout}')
 
         return self
 
