@@ -84,6 +84,11 @@ class HttpSourceSettings(SmlSourceSettingsBase):
     user: str = Field(default='', description='User (if needed)')
     password: str = Field(default='', description='Password (if needed)')
 
+    request_timeout: StrictInt | StrictFloat | None = Field(
+        default=None, alias='request timeout', description='Dedicated timeout for the http request',
+        in_file=False
+    )
+
     @override
     def get_device_name(self) -> str:
         return self.url.host
@@ -102,4 +107,8 @@ class HttpSourceSettings(SmlSourceSettingsBase):
         return self
 
     def get_request_timeout(self) -> ClientTimeout:
-        return ClientTimeout(self.interval)
+        value = self.interval if self.request_timeout is None else self.request_timeout
+        if value is None:
+            msg = 'No value for ClientTimeout'
+            raise ValueError(msg)
+        return ClientTimeout(total=value)
