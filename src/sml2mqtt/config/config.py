@@ -44,8 +44,8 @@ class Settings(AppBaseModel):
 def default_config() -> Settings:
     # File defaults
     return Settings(
-        inputs=[SerialSourceSettings(type='serial', url='COM1', timeout=3),
-                SerialSourceSettings(type='serial', url='/dev/ttyS0', timeout=3), ],
+        inputs=[SerialSourceSettings(type='serial', url='COM1', timeout=6),
+                SerialSourceSettings(type='serial', url='/dev/ttyS0', timeout=6), ],
         devices={
             'device_id_hex': SmlDeviceConfig(
                 mqtt=OptionalMqttPublishConfig(topic='DEVICE_BASE_TOPIC'),

@@ -166,7 +166,7 @@ Example:
 
 
 .. autopydantic_model:: sml2mqtt.config.inputs.HttpSourceSettings
-   :exclude-members: get_device_name
+   :exclude-members: get_device_name, get_request_timeout
 
 Example:
 

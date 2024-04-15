@@ -32,10 +32,10 @@ general:
 inputs:
 - type: serial
   url: COM1   # Device path
-  timeout: 3  # Seconds after which a timeout will be detected (default=3)
+  timeout: 6  # Seconds after which a timeout will be detected (default=6)
 - type: serial
   url: /dev/ttyS0   # Device path
-  timeout: 3        # Seconds after which a timeout will be detected (default=3)
+  timeout: 6        # Seconds after which a timeout will be detected (default=6)
 devices:   # Device configuration by ID or url
   device_id_hex:
     mqtt:    # Optional MQTT configuration for this meter.

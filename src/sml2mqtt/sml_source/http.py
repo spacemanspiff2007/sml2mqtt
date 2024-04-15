@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import sleep
+from asyncio import TimeoutError, sleep
 from typing import TYPE_CHECKING, Final
 
 from aiohttp import BasicAuth, ClientError, ClientSession, ClientTimeout
@@ -53,7 +53,7 @@ class HttpSource:
         if settings.user or settings.password:
             auth = BasicAuth(settings.user, settings.password)
 
-        return cls(device, str(settings.url), settings.interval, auth, timeout=ClientTimeout(settings.timeout / 2))
+        return cls(device, str(settings.url), settings.interval, auth, timeout=settings.get_request_timeout())
 
     def __init__(self, device: DeviceProto,
                  url: str, interval: float,
@@ -98,11 +98,11 @@ class HttpSource:
                 payload = await resp.read()
                 com_errors = 0
             except Exception as e:
-                if isinstance(e, (ClientError, HttpStatusError)):
+                if isinstance(e, (ClientError, HttpStatusError, TimeoutError)):
                     com_errors += 1
-                    max_ignore: int = 3
+                    max_ignore: int = 7
                     if com_errors <= max_ignore:
-                        interval = com_errors * self.interval / max_ignore
+                        interval = (((com_errors - 0.5) ** 2) / 4 + 0.5) * self.interval
                         log.debug(f'Ignored {com_errors:d}/{max_ignore:d} {e}')
                         continue
 

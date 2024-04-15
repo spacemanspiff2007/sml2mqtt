@@ -2,6 +2,11 @@ from typing import Annotated, Literal, TypeAlias
 
 from pydantic import Strict, StrictFloat, StrictInt, StringConstraints
 
+from sml2mqtt.__log__ import get_logger
+
+
+log = get_logger('config')
+
 
 ObisHex = Annotated[
     str,

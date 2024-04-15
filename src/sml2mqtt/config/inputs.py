@@ -1,18 +1,20 @@
 from typing import Literal
 
 import serial
+from aiohttp import ClientTimeout
 from easyconfig import BaseModel
 from pydantic import (
     AnyHttpUrl,
     Field,
     StrictFloat,
     StrictInt,
-    confloat,
     constr,
     field_validator,
     model_validator,
 )
 from typing_extensions import override
+
+from sml2mqtt.config.types import log
 
 
 class SmlSourceSettingsBase(BaseModel):
@@ -25,7 +27,7 @@ class SerialSourceSettings(SmlSourceSettingsBase):
 
     url: constr(strip_whitespace=True, min_length=1, strict=True) = Field(..., description='Device path')
     timeout: StrictInt | StrictFloat = Field(
-        default=3, description='Seconds after which a timeout will be detected (default=3)')
+        default=6, description='Seconds after which a timeout will be detected (default=6)')
 
     baudrate: int = Field(9600, in_file=False)
     parity: str = Field('None', in_file=False)
@@ -76,9 +78,9 @@ class HttpSourceSettings(SmlSourceSettingsBase):
 
     url: AnyHttpUrl = Field(..., description='Url')
     timeout: StrictInt | StrictFloat = Field(
-        default=3, description='Seconds after which a timeout will be detected (default=3)')
+        default=6, description='Seconds after which a timeout will be detected (default=6)')
 
-    interval: StrictInt | StrictFloat = Field(default=1, description='Delay between requests', ge=0.1)
+    interval: StrictInt | StrictFloat = Field(default=2, description='Delay between requests', ge=0.1)
     user: str = Field(default='', description='User (if needed)')
     password: str = Field(default='', description='Password (if needed)')
 
@@ -88,8 +90,16 @@ class HttpSourceSettings(SmlSourceSettingsBase):
 
     @model_validator(mode='after')
     def check_timeout_gt_interval(self):
-        if self.timeout <= self.interval:
-            msg = 'Timeout must be greater than interval'
+        if self.interval * 2 > self.timeout:
+            msg = 'Timeout must be greater equal than 2 * interval'
             raise ValueError(msg)
 
+        # Timeout is interval, and we automatically retry 3 times before we fail
+        if self.interval * 3 > self.timeout:
+            log.warning('The recommendation for timeout should is least 3 * interval '
+                        f'({self.interval * 3:.0f})! Is {self.timeout}')
+
         return self
+
+    def get_request_timeout(self) -> ClientTimeout:
+        return ClientTimeout(self.interval)
