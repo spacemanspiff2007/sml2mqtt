@@ -105,7 +105,7 @@ class HttpSource:
                         # errors:   1,   2,   3,   4,   5,   6,    7,    8,    9, ...
                         # factor: 0.4, 0.9, 1.9, 3.4, 5.4, 7.9, 10.9, 14.4, 18.4, ...
                         interval = (((com_errors - 0.5) ** 2) / 4 + 0.3) * self.interval
-                        log.debug(f'Ignored {com_errors:d}/{max_ignore:d} {e}')
+                        log.debug(f'Ignored {com_errors:d}/{max_ignore:d} {e} ({type(e)})')
                         continue
 
                 self.device.on_error(e, show_traceback=False)
