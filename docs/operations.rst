@@ -83,21 +83,21 @@ Example
     min %: 10
 
 
-Heartbeat Filter
+Throttle Filter
 --------------------------------------
 
-.. autopydantic_model:: HeartbeatFilter
+.. autopydantic_model:: ThrottleFilter
    :inherited-members: BaseModel
 
 
 Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ..
-    YamlModel: HeartbeatFilter
+    YamlModel: ThrottleFilter
 
 .. code-block:: yaml
 
-    heartbeat filter: 60
+    throttle filter: 60
 
 
 Actions
@@ -121,21 +121,21 @@ Example
     refresh action: 01:30:00
 
 
-Throttle Action
+Heartbeat Action
 --------------------------------------
 
-.. autopydantic_model:: ThrottleAction
+.. autopydantic_model:: HeartbeatAction
    :inherited-members: BaseModel
 
 
 Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ..
-    YamlModel: ThrottleAction
+    YamlModel: HeartbeatAction
 
 .. code-block:: yaml
 
-    throttle action: 30
+    heartbeat action: 30
 
 Math
 ======================================
@@ -366,7 +366,7 @@ Example
 
     or:
       - type: change filter
-      - heartbeat filter: 60
+      - heartbeat action: 60
 
 
 Sequence
@@ -398,7 +398,8 @@ These are some examples for sml value configurations
 Energy consumption today
 --------------------------------------
 
-This will report the power consumption of today
+This will report the power consumption of today.
+The first reported value every day will be 0 and then it will increase for every day.
 
 ..
     YamlModel: SmlValueConfig
@@ -413,6 +414,30 @@ This will report the power consumption of today
       start now: true       # Start immediately
       reset times:          # Reset at midnight
         - 00:00
+    - round: 1
+    - type: change filter      # Only report on changes
+    - refresh action: 01:00    # ... but refresh every hour
+
+
+Downsample current power
+--------------------------------------
+
+This will report a power value every max every 30s.
+The reported value will be the weighted mean value of the last 30s.
+
+..
+    YamlModel: SmlValueConfig
+
+.. code-block:: yaml
+
+    obis: '0100100700ff'    # Obis code for the energy meter
+    mqtt:
+      topic: power   # MQTT topic for the meter
+    operations:
+    - type: mean interval
+      interval: 30
+      wait for data: False
+    - throttle filter: 30     # Let a value pass every 30s
     - round: 1
     - type: change filter      # Only report on changes
     - refresh action: 01:00    # ... but refresh every hour

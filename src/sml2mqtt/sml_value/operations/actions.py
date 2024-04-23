@@ -36,26 +36,26 @@ class RefreshActionOperation(ValueOperationBase):
         yield f'{indent:s}- Refresh Action: {format_period(self.every)}'
 
 
-class ThrottleActionOperation(ValueOperationBase):
-    def __init__(self, period: DurationType):
-        self.period: Final = get_duration(period)
+class HeartbeatActionOperation(ValueOperationBase):
+    def __init__(self, every: DurationType):
+        self.every: Final = get_duration(every)
         self.last_time: float = -1_000_000_000
+        self.last_value: float | None = None
 
     @override
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
-        if value is None:
+        if value is not None:
+            self.last_value = value
+
+        if monotonic() - self.last_time < self.every:
             return None
 
-        now = monotonic()
-        if self.last_time + self.period > now:
-            return None
-
-        self.last_time = now
-        return value
+        self.last_time = monotonic()
+        return self.last_value
 
     def __repr__(self):
-        return f'<ThrottleAction: {self.period}s at 0x{id(self):x}>'
+        return f'<HeartbeatAction: {self.every}s at 0x{id(self):x}>'
 
     @override
     def describe(self, indent: str = '') -> Generator[str, None, None]:
-        yield f'{indent:s}- Throttle Action: {format_period(self.period)}'
+        yield f'{indent:s}- Heartbeat Action: {format_period(self.every)}'

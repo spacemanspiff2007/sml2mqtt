@@ -2,10 +2,10 @@ from tests.sml_values.test_operations.helper import check_description, check_ope
 
 from sml2mqtt.sml_value.operations import (
     DeltaFilterOperation,
-    HeartbeatFilterOperation,
     OnChangeFilterOperation,
     RangeFilterOperation,
     SkipZeroMeterOperation,
+    ThrottleFilterOperation,
 )
 
 
@@ -21,32 +21,6 @@ def test_skip():
     check_description(
         SkipZeroMeterOperation(),
         '- Zero Meter Filter'
-    )
-
-
-def test_heartbeat(monotonic):
-    f = HeartbeatFilterOperation(30)
-    check_operation_repr(f, '30s')
-
-    assert f.process_value(1, None) == 1
-
-    monotonic.add(15)
-    assert f.process_value(2, None) is None
-
-    monotonic.add(14.99)
-    assert f.process_value(3, None) is None
-
-    monotonic.add(0.01)
-    assert f.process_value(None, None) == 3
-    assert f.process_value(2, None) is None
-
-    monotonic.add(30.01)
-    assert f.process_value(5, None) == 5
-    assert f.process_value(5, None) is None
-
-    check_description(
-        HeartbeatFilterOperation(30),
-        '- Heartbeat Filter: 30 seconds'
     )
 
 
@@ -182,3 +156,22 @@ def test_range():
             '    limit to min/max: True'
         ]
     )
+
+
+def test_throttle_filter(monotonic):
+    f = ThrottleFilterOperation(30)
+    check_operation_repr(f, '30s')
+    check_description(f, '- Throttle Filter: 30 seconds')
+
+    assert f.process_value(None, None) is None
+    assert f.process_value(1, None) == 1
+
+    monotonic.set(29.99)
+    assert f.process_value(1, None) is None
+    monotonic.set(30)
+    assert f.process_value(1, None) == 1
+
+    monotonic.set(59.99)
+    assert f.process_value(1, None) is None
+    monotonic.set(60)
+    assert f.process_value(1, None) == 1

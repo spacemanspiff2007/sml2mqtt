@@ -29,7 +29,7 @@ def test_error_message():
             'operations': [
                 {'negative on energy meter status': True},
                 {'factor': 3}, {'offset': 100}, {'round': 2},
-                {'or': [{'change filvter': True}, {'heartbeat filter': 120}]}
+                {'or': [{'change filvter': True}, {'heartbeat action': 120}]}
             ]
         })
 

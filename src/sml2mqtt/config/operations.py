@@ -68,13 +68,11 @@ class DeltaFilter(BaseModel):
         return self
 
 
-class HeartbeatFilter(BaseModel):
-    """A filter which lets a value pass periodically every specified interval."""
-
-    every: DurationType = Field(
-        alias='heartbeat filter',
-        description='Interval'
-    )
+class ThrottleFilter(BaseModel):
+    """Filter which only lets one value pass in the defined period. If the last passed value is not at least
+    ``period`` old any new value will not be forwarded.
+    """
+    period: DurationType = Field(alias='throttle filter', description='Throttle period')
 
 
 # -------------------------------------------------------------------------------------------------
@@ -87,12 +85,16 @@ class RefreshAction(BaseModel):
     every: DurationType = Field(alias='refresh action', description='Refresh interval')
 
 
-class ThrottleAction(BaseModel):
-    """Action which only lets one value pass in the defined period. If the last passed value is not at least
-    ``period`` old any new value will not be forwarded.
+class HeartbeatAction(BaseModel):
+    """Action which lets a value pass periodically every specified interval.
+    When no value is received (e.g. because an earlier filter blocks)
+    this action will produce the last received value every interval.
     """
-    period: DurationType = Field(alias='throttle action', description='Throttle period')
 
+    every: DurationType = Field(
+        alias='heartbeat action',
+        description='Interval'
+    )
 
 # -------------------------------------------------------------------------------------------------
 # Math
@@ -259,8 +261,8 @@ class MeanOfInterval(HasIntervalFields):
 # -------------------------------------------------------------------------------------------------
 
 OperationsModels = (
-    OnChangeFilter, DeltaFilter, HeartbeatFilter, RangeFilter,
-    RefreshAction, ThrottleAction,
+    OnChangeFilter, DeltaFilter, HeartbeatAction, RangeFilter,
+    RefreshAction, ThrottleFilter,
     Factor, Offset, Round,
     NegativeOnEnergyMeterWorkaround,
     Or, Sequence,

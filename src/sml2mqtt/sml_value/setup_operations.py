@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sml2mqtt.config.operations import (
     DeltaFilter,
     Factor,
-    HeartbeatFilter,
+    HeartbeatAction,
     MaxOfInterval,
     MaxValue,
     MeanOfInterval,
@@ -21,14 +21,14 @@ from sml2mqtt.config.operations import (
     RefreshAction,
     Round,
     Sequence,
-    ThrottleAction,
+    ThrottleFilter,
     VirtualMeter,
 )
 from sml2mqtt.sml_value.base import OperationContainerBase, ValueOperationBase
 from sml2mqtt.sml_value.operations import (
     DeltaFilterOperation,
     FactorOperation,
-    HeartbeatFilterOperation,
+    HeartbeatActionOperation,
     MaxOfIntervalOperation,
     MaxValueOperation,
     MeanOfIntervalOperation,
@@ -42,7 +42,7 @@ from sml2mqtt.sml_value.operations import (
     RefreshActionOperation,
     RoundOperation,
     SequenceOperation,
-    ThrottleActionOperation,
+    ThrottleFilterOperation,
     VirtualMeterOperation,
 )
 
@@ -65,11 +65,11 @@ def create_sequence(operations: list[OperationsType]):
 
 MAPPING = {
     OnChangeFilter: OnChangeFilterOperation,
-    HeartbeatFilter: HeartbeatFilterOperation,
+    HeartbeatAction: HeartbeatActionOperation,
     DeltaFilter: DeltaFilterOperation,
 
     RefreshAction: RefreshActionOperation,
-    ThrottleAction: ThrottleActionOperation,
+    ThrottleFilter: ThrottleFilterOperation,
 
     Factor: FactorOperation,
     Offset: OffsetOperation,
