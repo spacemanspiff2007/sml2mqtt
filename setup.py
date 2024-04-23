@@ -37,7 +37,8 @@ setuptools.setup(
     version=__version__,
     author="spaceman_spiff",
     # author_email="",
-    description="A sml (Smart Message Language) to MQTT bridge",
+    description="A sml (Smart Message Language) energy meter to MQTT bridge. "
+                "Can read from serial ports or http (e.g. Tibber Pulse).",
     keywords=[
         'mqtt',
         'sml',
