@@ -438,6 +438,8 @@ The reported value will be the weighted mean value of the last 30s.
       interval: 30
       wait for data: False
     - throttle filter: 30     # Let a value pass every 30s
-    - round: 1
-    - type: change filter      # Only report on changes
-    - refresh action: 01:00    # ... but refresh every hour
+    - round: 0                # Round the mean value to the full number
+    - type: delta filter      # Only report when the value changes at least 10W or 5%
+      min: 10
+      min %: 5
+    - refresh action: 01:00   # ... but refresh every hour
