@@ -11,7 +11,7 @@ _A simple yet extremely flexible sml to mqtt bridge_
 
 sml2mqtt is a asyncio application that can read multiple sml (Smart Message Language) streams
 from energy meters and report the values through mqtt.
-The meters can be read through serial ports or through http (e.g. Tibber)
+The meters can be read through serial ports or through http(s) (e.g. Tibber devices)
 
 
 # Documentation
@@ -19,10 +19,14 @@ The meters can be read through serial ports or through http (e.g. Tibber)
 
 
 # Changelog
+
 #### 3.0 (2024-XX-XX)
+
+**BREAKING CHANGE!**
+
 - Almost complete rewrite
-- Extensive value processing which can easily configured
-- Support for tibber
+- Extensive value processing which can be configured
+- Support for tibber out of the box
 
 #### 2.2 (2023-03-31)
 - Small config improvements
