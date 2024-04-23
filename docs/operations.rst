@@ -434,7 +434,7 @@ The reported value will be the weighted mean value of the last 30s.
     mqtt:
       topic: power   # MQTT topic for the meter
     operations:
-    - type: mean interval
+    - type: mean interval     # Calculate weighted mean over 30s
       interval: 30
       wait for data: False
     - throttle filter: 30     # Let a value pass every 30s

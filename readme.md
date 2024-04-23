@@ -21,6 +21,7 @@ The meters can be read through serial ports or through http (e.g. Tibber)
 # Changelog
 #### 3.0 (2024-XX-XX)
 - Almost complete rewrite
+- Extensive value processing which can easily configured
 - Support for tibber
 
 #### 2.2 (2023-03-31)
