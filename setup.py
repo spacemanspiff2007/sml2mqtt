@@ -1,4 +1,5 @@
-import typing
+from __future__ import annotations
+
 from pathlib import Path
 
 import setuptools  # type: ignore
@@ -6,14 +7,14 @@ import setuptools  # type: ignore
 
 # Load version number without importing HABApp
 def load_version() -> str:
-    version: typing.Dict[str, str] = {}
+    version: dict[str, str] = {}
     with open("src/sml2mqtt/__version__.py") as fp:
         exec(fp.read(), version)
     assert version['__version__'], version
     return version['__version__']
 
 
-def load_req() -> typing.List[str]:
+def load_req() -> list[str]:
     req_file = Path(__file__).with_name('requirements_setup.txt')
     with req_file.open() as f:
         return f.readlines()
@@ -36,12 +37,14 @@ setuptools.setup(
     version=__version__,
     author="spaceman_spiff",
     # author_email="",
-    description="A sml (Smart Message Language) to MQTT bridge",
+    description="A sml (Smart Message Language) energy meter to MQTT bridge. "
+                "Can read from serial ports or http (e.g. Tibber Pulse).",
     keywords=[
         'mqtt',
         'sml',
         'Smart Message Language',
-        'energy meter'
+        'energy meter',
+        'tibber'
     ],
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -51,16 +54,16 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(where='src', exclude=['tests*']),
     package_dir={'': 'src'},
-    python_requires='>=3.8',
+    python_requires='>=3.10',
     install_requires=load_req(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: AsyncIO",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Home Automation"
     ],

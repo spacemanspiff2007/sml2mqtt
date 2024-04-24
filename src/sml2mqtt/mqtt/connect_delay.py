@@ -1,13 +1,14 @@
 from asyncio import sleep
-from typing import Optional
 
 
 class DynDelay:
-    def __init__(self, min_delay: float, max_delay: float, start_delay: Optional[float] = None):
+    def __init__(self, min_delay: float, max_delay: float, start_delay: float | None = None):
         if min_delay < 0:
-            raise ValueError(f'min_delay must be >= 0: {min_delay}')
+            msg = f'min_delay must be >= 0: {min_delay}'
+            raise ValueError(msg)
         if max_delay <= min_delay:
-            raise ValueError(f'max_delay must be >= min_delay: {max_delay}')
+            msg = f'max_delay must be >= min_delay: {max_delay}'
+            raise ValueError(msg)
 
         self.min = min_delay
         self.max = max_delay

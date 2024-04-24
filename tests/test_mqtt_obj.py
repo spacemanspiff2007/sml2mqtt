@@ -1,4 +1,6 @@
-from sml2mqtt.mqtt import MqttObj
+import pytest
+
+from sml2mqtt.mqtt import MqttObj, check_for_duplicate_topics
 
 
 def test_topmost(monkeypatch):
@@ -12,6 +14,13 @@ def test_topmost(monkeypatch):
     assert parent.topic == 'base_new'
     assert parent.qos == 2
     assert parent.retain is True
+
+
+def test_prefix_empty(monkeypatch):
+    parent = MqttObj('', 2, True).update()
+    child = parent.create_child('child')
+
+    assert (child.topic, child.qos, child.retain) == ('child', 2, True)
 
 
 def test_child_change(monkeypatch):
@@ -41,3 +50,16 @@ def test_child_change(monkeypatch):
     parent.cfg.retain = False
     parent.update()
     assert (child.topic, child.qos, child.retain) == ('base/child', 0, False)
+
+
+@pytest.mark.ignore_log_warnings()
+def test_check_for_duplicate_messages(caplog):
+    parent = MqttObj('base', 2, True).update()
+    parent.create_child('child')
+    parent.create_child('child')
+
+    check_for_duplicate_topics(parent)
+
+    msg = "\n".join(x.msg for x in caplog.records)
+
+    assert msg == 'Topic "base/child" is already configured!'

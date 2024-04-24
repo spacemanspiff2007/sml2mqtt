@@ -1,6 +1,8 @@
 import os
 import re
 import sys
+from pathlib import Path
+
 
 RTD_BUILD = os.environ.get('READTHEDOCS') == 'True'
 
@@ -50,7 +52,7 @@ autodoc_member_order = 'bysource'
 autoclass_content = 'class'
 
 # so autodoc does find the source
-sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
+sys.path.insert(0, str(Path(__file__).parent.with_name('src')))
 
 
 # -- Options for autodoc pydantic -------------------------------------------------
@@ -86,7 +88,8 @@ if RTD_BUILD:
 # Don't show warnings for missing python references since these are created via intersphinx during the RTD build
 if not RTD_BUILD:
     nitpick_ignore_regex = [
-        (re.compile(r'^py:class'), re.compile(r'pathlib\..+')),
         (re.compile(r'^py:data'), re.compile(r'typing\..+')),
-        (re.compile(r'^py:class'), re.compile(r'pydantic\..+|.+Constrained(?:Str|Int)Value')),
+        (re.compile(r'^py:class'), re.compile(r'pydantic_core\..+')),
+        # WARNING: py:class reference target not found: sml2mqtt.config.operations.Annotated
+        (re.compile(r'^py:class'), re.compile(r'.+\.Annotated')),
     ]

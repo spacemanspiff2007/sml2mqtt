@@ -2,18 +2,20 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from typing import Final, Optional, Type
+from typing import Final
 
 
 class CommandArgs:
-    config: Optional[Path] = None
+    config: Path | None = None
     analyze: bool = False
 
 
 CMD_ARGS: Final = CommandArgs
 
 
-def get_command_line_args(args=None) -> Type[CommandArgs]:
+def get_command_line_args(args=None) -> type[CommandArgs]:
+
+    env_var_name = 'SML2MQTT_ANALYZE'
 
     parser = argparse.ArgumentParser(description='SML to MQTT bridge')
     parser.add_argument(
@@ -25,23 +27,25 @@ def get_command_line_args(args=None) -> Type[CommandArgs]:
     parser.add_argument(
         '-a',
         '--analyze',
-        help='Process exactly one sml message, shows the values of the message and what will be reported',
+        help='Process exactly one sml message, shows the values of the message and what will be reported. '
+             f'Can also be set by setting the environment variable "{env_var_name:s}" to an arbitrary value',
         action='store_true',
         default=False
     )
     args = parser.parse_args(args)
     CMD_ARGS.config = find_config_folder(args.config)
-    CMD_ARGS.analyze = args.analyze
+    CMD_ARGS.analyze = args.analyze or bool(os.environ.get(env_var_name, ''))
+
     return CMD_ARGS
 
 
-def find_config_folder(config_file_str: Optional[str]) -> Path:
+def find_config_folder(config_file_str: str | None) -> Path:
     check_path = []
 
     if config_file_str is None:
         # Nothing is specified, we try to find the config automatically
         try:
-            working_dir = Path(os.getcwd())
+            working_dir = Path.cwd()
             check_path.append(working_dir / 'sml2mqtt')
             check_path.append(working_dir.with_name('sml2mqtt'))
             check_path.append(working_dir.parent.with_name('sml2mqtt'))

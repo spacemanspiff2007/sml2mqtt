@@ -1,168 +1,127 @@
+.. py:currentmodule:: sml2mqtt.config.config
+
+
 **************************************
-Configuration & CLI
-**************************************
-
-.. _COMMAND_LINE_INTERFACE:
-
-Command Line Interface
-======================================
-
-.. exec_code::
-    :hide_code:
-
-    import sml2mqtt.__args__
-    sml2mqtt.__args__.get_command_line_args(['-h'])
-
-
 Configuration
-======================================
+**************************************
 
-Configuration is done through ``config.yml`` The parent folder of the file can be specified with ``-c PATH`` or ``--config PATH``.
-If nothing is specified the file ``config.yml`` is searched in the subdirectory ``sml2mqtt`` in
+Configuration of sml2mqtt is done through a yaml file.
+The path to the file can be specified with ``-c PATH`` or ``--config PATH``.
+If nothing is specified a file with the name ``config.yml`` is searched in the subdirectory ``sml2mqtt`` in
 
 * the current working directory
 * the venv directory
 * the user home
 
-If the config is specified and it does not yet exist a default configuration file will be created
+If a config file is specified and it does not yet exist a default configuration file will be created.
 
 Example
---------------------------------------
+======================================
+
+
+
+..
+    YamlModel: Settings
 
 .. code-block:: yaml
 
     logging:
-      level: INFO                    # Log level
-      file: sml2mqtt.log             # Log file path (absolute or relative to config file)
+      level: INFO         # Log level
+      file: sml2mqtt.log  # Log file path (absolute or relative to config file) or stdout
 
     mqtt:
       connection:
-        client id: sml2mqtt
+        identifier: sml2mqtt-ZqlFvhSBdDGvJ
         host: localhost
         port: 1883
         user: ''
         password: ''
-        tls: false
-        tls insecure: false
-
-      # MQTT default configuration
-      # All other topics use these values if no other values for qos/retain are set
-      # It's possible to override
-      #  - topic        (fragment that is used to build the full mqtt topic)
-      #  - full_topic   (will not build the topic from the fragments but rather use the configured value)
-      #  - qos
-      #  - retain
-      # for each (!) mqtt-topic entry
-      defaults:
-        qos: 0
-        retain: false
       topic prefix: sml2mqtt
-
+      defaults:
+        qos: 0         # Default value for QOS if no other QOS value in the config entry is set
+        retain: false  # Default value for retain if no other retain value in the config entry is set
       last will:
-        topic: status
+        topic: status   # Topic fragment for building this topic with the parent topic
 
     general:
-      Wh in kWh: true                  # Automatically convert Wh to kWh
-      republish after: 120             # Republish automatically after this time (if no other every filter is configured)
+      Wh in kWh: true       # Automatically convert Wh to kWh
+      republish after: 120  # Republish automatically after this time (if no other filter configured)
 
-    # Serial port configurations for the sml readers
-    ports:
-    - url: COM1
-      timeout: 3
-    - url: /dev/ttyS0
-      timeout: 3
-
+    inputs:
+    - type: serial
+      url: COM1   # Device path
+      timeout: 3  # Seconds after which a timeout will be detected (default=3)
+    - type: serial
+      url: /dev/ttyS0   # Device path
+      timeout: 3        # Seconds after which a timeout will be detected (default=3)
 
     devices:
-      # Device configuration by OBIS value 0100000009ff or by url if the device does not report OBIS 0100000009ff
-      11111111111111111111:
-        mqtt:
-          topic: DEVICE_TOPIC
+      # Device configuration by reported id
+      device_id_hex:
 
-        # OBIS IDs that will not be processed (optional)
-        skip:
-        - OBIS
-        - values
-        - to skip
+        mqtt:                           # Optional MQTT configuration for this meter.
+          topic: DEVICE_BASE_TOPIC      # Topic fragment for building this topic with the parent topic
 
-        # Configuration how each OBIS value is reported. Create as many OBIS IDs (e.g. 0100010800ff as you like).
-        # Each sub entry (mqtt, workarounds, transformations, filters) is optional and can be omitted
+        status:                         # Optional MQTT status topic configuration for this meter
+          topic: status                 # Topic fragment for building this topic with the parent topic
+
+        skip:                           # OBIS codes (HEX) of values that will not be published (optional)
+        - '00112233445566'
+
+        # Configurations for each of the values (optional)
         values:
 
-          OBIS:
-            # Sub topic how this value is reported.
-            mqtt:
-              topic: OBIS
-
-            # Workarounds allow the enabling workarounds (e.g. if the device has strange behaviour)
-            # These are the available workarounds
-            workarounds:
-            - negative on energy meter status: true   # activate this workaround
-
-            # Transformations allow mathematical calculations on the obis value
-            # They are applied in order how they are defined
-            transformations:
-            - factor: 3     # multiply with factor
-            - offset: 100   # add offset
-            - round: 2      # round on two digits
-
-            # Filters control how often a value is published over mqtt.
-            # If one filter is true the value will be published
-            filters:
-            - diff: 10      # report if value difference is >= 10
-            - perc: 10      # report if percentage change is >= 10%
-            - every: 120    # report at least every 120 secs (overrides the value from general)
+        - obis: '00112233445566'        # Obis code for this value
+          mqtt:                         # Mqtt config for this value (optional)
+            topic: OBIS_VALUE_TOPIC     # Topic fragment for building this topic with the topic prefix
+          # A sequence of operations that will be evaluated one after another.
+          # If one operation blocks nothing will be reported for this frame
+          operations:
+          - negative on energy meter status: true   # Make value negative based on an energy meter status. Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
+          - factor: 3               # Factor with which the value gets multiplied
+          - offset: 100             # Offset that gets added on the value
+          - round: 2                # Round to the specified digits
+          - refresh action: 300     # Republish value every 300s
 
 
+Example input Tibber bridge
+======================================
 
-Example devices
---------------------------------------
-One energy meter is connected to the serial port. The serial meter reports OBIS ``0100000009ff``
-as ``11111111111111111111``.
+These input settings can be used to poll data from a Tibber bridge:
 
-For this device
-
-* the mqtt topic fragment is set to ``light``
-* the value ``0100010801ff`` will not be published
-* The following values of the device are specially configured:
-
-  * Energy value (OBIS ``0100010800ff``)
-
-    * Will be rounded to one digit
-    * Will be published on change **or** at least every hour
-    * The mqtt topic used is ``sml2mqtt/light/energy``.
-      (Built through ``topic prefix`` + ``device mqtt`` + ``value mqtt``)
-
-
-  * Power value (OBIS ``0100100700ff``)
-
-    * Will be rounded to one digit
-    * Will be published if at least a 5% power change occurred **or** at least every 2 mins
-      (default from ``general`` -> ``republish after``)
-    * The mqtt topic used is ``sml2mqtt/light/power``
+..
+    YamlModel: Settings
 
 
 .. code-block:: yaml
 
-    devices:
-      11111111111111111111:
-        mqtt:
-          topic: light
-        skip:
-        - 0100010801ff
-        values:
-          0100010800ff:
-            mqtt:
-              topic: energy
-            transformations:
-            - round: 1
-            filters:
-            - every: 3600
-          0100100700ff:
-            mqtt:
-              topic: power
-            filters:
-            - perc: 5
+   inputs:
+    - type: http
+      url: http://IP_OR_HOSTNAME_OF_TIBBER_BRIDGE/data.json?node_id=1
+      interval: 3   # Poll interval secs
+      timeout: 10   # After which time the input will change to TIMEOUT
+      user: "admin"
+      password: "printed on bridge socket"
+
+
+Example mqtt config
+======================================
+
+MQTT topics can be configured either by providing a full topic or a topic fragment.
+With a topic fragment the resulting topic is build with the parent topic.
+The structure is ``topic prefix`` / ``device`` / ``value``.
+Providing a full topic will ignore the fragments.
+The entries for qos and retain are optional.
+
+..
+    YamlModel: OptionalMqttPublishConfig
+
+
+.. code-block:: yaml
+
+   full topic: my/full/topic
+   qos: 1
+
 
 
 Configuration Reference
@@ -176,16 +135,51 @@ logging
 --------------------------------------
 
 .. autopydantic_model:: sml2mqtt.config.logging.LoggingSettings
+   :exclude-members: set_log_level
+
+
+.. _CONFIG_GENERAL:
 
 general
 --------------------------------------
 
 .. autopydantic_model:: sml2mqtt.config.config.GeneralSettings
 
-ports
+
+.. _CONFIG_INPUTS:
+
+inputs
 --------------------------------------
 
-.. autopydantic_model:: sml2mqtt.config.config.PortSettings
+.. autopydantic_model:: sml2mqtt.config.inputs.SerialSourceSettings
+   :exclude-members: get_device_name
+
+Example:
+
+..
+    YamlModel: sml2mqtt.config.inputs.SerialSourceSettings
+
+.. code-block:: yaml
+
+    type: serial
+    url: COM3
+
+
+.. autopydantic_model:: sml2mqtt.config.inputs.HttpSourceSettings
+   :exclude-members: get_device_name, get_request_timeout
+
+Example:
+
+..
+    YamlModel: sml2mqtt.config.inputs.HttpSourceSettings
+
+.. code-block:: yaml
+
+    type: http
+    url: http://localhost:8080/sml
+    interval: 3
+    timeout: 10
+
 
 mqtt
 --------------------------------------
@@ -200,6 +194,10 @@ mqtt
 
 .. autopydantic_model:: MqttDefaultPublishConfig
 
+.. autopydantic_model:: sml2mqtt.config.mqtt_tls.MqttTlsOptions
+   :exclude-members: get_client_kwargs
+
+
 devices
 --------------------------------------
 
@@ -208,12 +206,3 @@ devices
 .. autopydantic_model:: SmlDeviceConfig
 
 .. autopydantic_model:: SmlValueConfig
-
-.. autoclass:: WorkaroundOptionEnum
-   :members:
-
-.. autoclass:: TransformOptionEnum
-   :members:
-
-.. autoclass:: FilterOptionEnum
-   :members:

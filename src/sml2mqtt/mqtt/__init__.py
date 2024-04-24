@@ -1,6 +1,7 @@
 from .connect_delay import DynDelay
-from .mqtt import cancel, publish, start, wait_for_connect, wait_for_disconnect
+from .mqtt import publish, start, wait_for_connect
+
 
 # isort: split
 
-from .mqtt_obj import BASE_TOPIC, MqttObj, patch_analyze, setup_base_topic
+from .mqtt_obj import BASE_TOPIC, MqttObj, check_for_duplicate_topics, patch_analyze, setup_base_topic

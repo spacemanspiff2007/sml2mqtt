@@ -1,60 +1,20 @@
-from typing import Dict, List, Union
-
-import serial
 from easyconfig import AppBaseModel, BaseModel, create_app_config
-from pydantic import constr, Field, StrictFloat, StrictInt, StrictStr, validator
+from pydantic import Field
 
-from .device import REPUBLISH_ALIAS, SmlDeviceConfig, SmlValueConfig
+from .device import SmlDeviceConfig, SmlValueConfig
+from .inputs import HttpSourceSettings, SerialSourceSettings
 from .logging import LoggingSettings
 from .mqtt import MqttConfig, OptionalMqttPublishConfig
-
-
-class PortSettings(BaseModel):
-    url: constr(strip_whitespace=True, min_length=1, strict=True) = Field(..., description='Device path')
-    timeout: Union[int, float] = Field(
-        default=3, description='Seconds after which a timeout will be detected (default=3)')
-
-    baudrate: int = Field(9600, in_file=False)
-    parity: str = Field('None', in_file=False)
-    stopbits: Union[StrictInt, StrictFloat] = Field(serial.STOPBITS_ONE, in_file=False, alias='stop bits')
-    bytesize: int = Field(serial.EIGHTBITS, in_file=False, alias='byte size')
-
-    @validator('baudrate')
-    def _val_baudrate(cls, v):
-        if v not in serial.Serial.BAUDRATES:
-            raise ValueError(f'must be one of {list(serial.Serial.BAUDRATES)}')
-        return v
-
-    @validator('parity')
-    def _val_parity(cls, v):
-        # Short name
-        if v in serial.PARITY_NAMES:
-            return v
-
-        # Name -> Short name
-        parity_values = {_n: _v for _v, _n in serial.PARITY_NAMES.items()}
-        if v not in parity_values:
-            raise ValueError(f'must be one of {list(parity_values)}')
-        return parity_values[v]
-
-    @validator('stopbits')
-    def _val_stopbits(cls, v):
-        if v not in serial.Serial.STOPBITS:
-            raise ValueError(f'must be one of {list(serial.Serial.STOPBITS)}')
-        return v
-
-    @validator('bytesize')
-    def _val_bytesize(cls, v):
-        if v not in serial.Serial.BYTESIZES:
-            raise ValueError(f'must be one of {list(serial.Serial.BYTESIZES)}')
-        return v
+from .types import LowerStr, ObisHex
 
 
 class GeneralSettings(BaseModel):
-    wh_in_kwh: bool = Field(True, description='Automatically convert Wh to kWh', alias='Wh in kWh')
+    wh_in_kwh: bool = Field(
+        True, description='Automatically convert Wh to kWh', alias='Wh in kWh'
+    )
     republish_after: int = Field(
         120, description='Republish automatically after this time (if no other filter configured)',
-        alias=REPUBLISH_ALIAS,
+        alias='republish after',
     )
     report_blank_energy_meters: bool = Field(
         False, description='Report blank energy meters (where the value is 0kwh)',
@@ -64,7 +24,7 @@ class GeneralSettings(BaseModel):
         False, description='Report the device id even though it does never change',
         alias='report device id', in_file=False
     )
-    device_id_obis: List[StrictStr] = Field(
+    device_id_obis: list[ObisHex] = Field(
         # 0100000009ff (1-0:0.0.9*255) : Geräteeinzelidentifikation
         # 0100600100ff (1-0:96.1.0*255): Produktionsnummer
         ['0100000009ff', '0100600100ff'],
@@ -77,31 +37,35 @@ class Settings(AppBaseModel):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     mqtt: MqttConfig = Field(default_factory=MqttConfig)
     general: GeneralSettings = Field(default_factory=GeneralSettings)
-    ports: List[PortSettings] = []
-    devices: Dict[str, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
+    inputs: list[HttpSourceSettings | SerialSourceSettings] = Field([], discriminator='type')
+    devices: dict[LowerStr, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
 
 
 def default_config() -> Settings:
     # File defaults
-    s = Settings(
-        ports=[PortSettings(url='COM1', timeout=3), PortSettings(url='/dev/ttyS0', timeout=3), ],
+    return Settings(
+        inputs=[SerialSourceSettings(type='serial', url='COM1', timeout=6),
+                SerialSourceSettings(type='serial', url='/dev/ttyS0', timeout=6), ],
         devices={
-            'DEVICE_ID_HEX': SmlDeviceConfig(
+            'device_id_hex': SmlDeviceConfig(
                 mqtt=OptionalMqttPublishConfig(topic='DEVICE_BASE_TOPIC'),
                 status=OptionalMqttPublishConfig(topic='status'),
-                skip=['OBIS'],
-                values={
-                    'OBIS': SmlValueConfig(
+                skip={'00112233445566'},
+                values=[
+                    SmlValueConfig(
+                        obis='00112233445566',
                         mqtt=OptionalMqttPublishConfig(topic='OBIS'),
-                        workarounds=[{'negative on energy meter status': True}],
-                        transformations=[{'factor': 3}, {'offset': 100}, {'round': 2}],
-                        filters=[{'diff': 10}, {'perc': 10}, {'every': 120}],
+                        operations=[
+                            {'negative on energy meter status': True},
+                            {'factor': 3}, {'offset': 100}, {'round': 2},
+                            {'type': 'change filter'},
+                            {'refresh action': 600}
+                        ]
                     )
-                }
+                ]
             )
         }
     )
-    return s
 
 
 CONFIG: Settings = create_app_config(Settings(), default_config)

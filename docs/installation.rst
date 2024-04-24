@@ -47,13 +47,13 @@ Go into folder of virtual environment::
 
     python3 -m pip install --upgrade pip setuptools
 
-Install sml2mqtt
+Install sml2mqtt::
 
     python3 -m pip install sml2mqtt
 
 #. Run sml2mqtt::
 
-    sml2mqtt --config PATH_TO_CONFIGURAT_FILE
+    sml2mqtt --config PATH_TO_CONFIGURATION_FILE
 
 
 Upgrading
@@ -106,7 +106,7 @@ If your installation is not done in "/opt/sml2mqtt/venv/bin" replace accordingly
     User=openhab
     Group=openhab
     Restart=on-failure
-    RestartSec=2min
+    RestartSec=10min
     ExecStart=/opt/sml2mqtt/venv/bin/sml2mqtt -c PATH_TO_CONFIGURATION_FILE
 
     [Install]
@@ -140,3 +140,6 @@ Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/sml2mqt
 
 The docker image has one volume ``/sml2mqtt`` which has to be mounted.
 There the ``config.yml`` will be used or a new ``config.yml`` will be created
+
+The analyze option can also be set through an environment variable
+(see :ref:`command line interface <COMMAND_LINE_INTERFACE>`).

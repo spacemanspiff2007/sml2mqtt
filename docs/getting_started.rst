@@ -2,22 +2,171 @@
 Getting started
 **************************************
 
+1. Installation
+======================================
+
 First install ``sml2mqtt`` e.g in a :ref:`virtual environment <INSTALLATION_VENV>`.
+
+2. Create default configuration
+======================================
 
 Run ``sml2mqtt`` with a path to a configuration file.
 A new default configuration file will be created.
 
-Edit the configuration file and add the serial ports.
+.. py:currentmodule:: sml2mqtt.config.config
 
-Now run ``sml2mqtt`` with the path to the configuration file and the ``analyze`` option.
+
+..
+    YamlModel: Settings
+
+.. code-block:: yaml
+
+    logging:
+      level: INFO         # Log level
+      file: sml2mqtt.log  # Log file path (absolute or relative to config file) or stdout
+
+    mqtt:
+      connection:
+        identifier: sml2mqtt-ZqlFvhSBdDGvJ
+        host: localhost
+        port: 1883
+        user: ''
+        password: ''
+      topic prefix: sml2mqtt
+      defaults:
+        qos: 0         # Default value for QOS if no other QOS value in the config entry is set
+        retain: false  # Default value for retain if no other retain value in the config entry is set
+      last will:
+        topic: status   # Topic fragment for building this topic with the parent topic
+
+    general:
+      Wh in kWh: true       # Automatically convert Wh to kWh
+      republish after: 120  # Republish automatically after this time (if no other filter configured)
+
+    inputs:
+    - type: serial
+      url: COM1   # Device path
+      timeout: 3  # Seconds after which a timeout will be detected (default=3)
+    - type: serial
+      url: /dev/ttyS0   # Device path
+      timeout: 3        # Seconds after which a timeout will be detected (default=3)
+
+    devices:
+      # Device configuration by reported id
+      device_id_hex:
+
+        mqtt:                           # Optional MQTT configuration for this meter.
+          topic: DEVICE_BASE_TOPIC      # Topic fragment for building this topic with the parent topic
+
+        status:                         # Optional MQTT status topic configuration for this meter
+          topic: status                 # Topic fragment for building this topic with the parent topic
+
+        skip:                           # OBIS codes (HEX) of values that will not be published (optional)
+        - '00112233445566'
+
+        # Configurations for each of the values (optional)
+        values:
+
+        - obis: '00112233445566'        # Obis code for this value
+          mqtt:                         # Mqtt config for this value (optional)
+            topic: OBIS_VALUE_TOPIC     # Topic fragment for building this topic with the topic prefix
+          # A sequence of operations that will be evaluated one after another.
+          # If one operation blocks nothing will be reported for this frame
+          operations:
+          - negative on energy meter status: true   # Make value negative based on an energy meter status. Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
+          - factor: 3               # Factor with which the value gets multiplied
+          - offset: 100             # Offset that gets added on the value
+          - round: 2                # Round to the specified digits
+          - refresh action: 300     # Republish value every 300s
+
+3. Edit inputs and mqtt
+======================================
+
+Edit the configuration file and configure the appropriate :ref:`inputs <CONFIG_INPUTS>` for
+serial or http (e.g. for tibber) and edit the mqtt settings.
+
+
+..
+    YamlModel: Settings
+
+.. code-block:: yaml
+   :linenos:
+   :emphasize-lines: 8-11, 24-29
+
+
+    logging:
+      level: INFO         # Log level
+      file: sml2mqtt.log  # Log file path (absolute or relative to config file) or stdout
+
+    mqtt:
+      connection:
+        identifier: sml2mqtt-ZqlFvhSBdDGvJ
+        host: localhost
+        port: 1883
+        user: ''
+        password: ''
+      topic prefix: sml2mqtt
+      defaults:
+        qos: 0         # Default value for QOS if no other QOS value in the config entry is set
+        retain: false  # Default value for retain if no other retain value in the config entry is set
+      last will:
+        topic: status   # Topic fragment for building this topic with the parent topic
+
+    general:
+      Wh in kWh: true       # Automatically convert Wh to kWh
+      republish after: 120  # Republish automatically after this time (if no other filter configured)
+
+    inputs:
+    - type: serial
+      url: COM1   # Device path
+      timeout: 3  # Seconds after which a timeout will be detected (default=3)
+    - type: serial
+      url: /dev/ttyS0   # Device path
+      timeout: 3        # Seconds after which a timeout will be detected (default=3)
+
+    devices:
+      # Device configuration by reported id
+      device_id_hex:
+
+        mqtt:                           # Optional MQTT configuration for this meter.
+          topic: DEVICE_BASE_TOPIC      # Topic fragment for building this topic with the parent topic
+
+        status:                         # Optional MQTT status topic configuration for this meter
+          topic: status                 # Topic fragment for building this topic with the parent topic
+
+        skip:                           # OBIS codes (HEX) of values that will not be published (optional)
+        - '00112233445566'
+
+        # Configurations for each of the values (optional)
+        values:
+
+        - obis: '00112233445566'        # Obis code for this value
+          mqtt:                         # Mqtt config for this value (optional)
+            topic: OBIS_VALUE_TOPIC     # Topic fragment for building this topic with the topic prefix
+          # A sequence of operations that will be evaluated one after another.
+          # If one operation blocks nothing will be reported for this frame
+          operations:
+          - negative on energy meter status: true   # Make value negative based on an energy meter status. Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
+          - factor: 3               # Factor with which the value gets multiplied
+          - offset: 100             # Offset that gets added on the value
+          - round: 2                # Round to the specified digits
+          - refresh action: 300     # Republish value every 300s
+
+
+4. Run with analyze
+======================================
+
+Now run ``sml2mqtt`` with the path to the configuration file and the ``--analyze`` option.
 (see :ref:`command line interface <COMMAND_LINE_INTERFACE>`).
 This will process one sml frame from the meter and report the output.
 It's a convenient way to check what values will be reported.
-It will also show how the configuration changes the sml values (e.g. if you add a transformation or a workaround).
+It will also show how the configuration changes the reported values when you add an operation.
 
+Check if the meter reports the serial number unter obis ``0100000009ff``.
 Example output for the meter data:
 
 .. code-block:: text
+   :emphasize-lines: 33, 38
 
     SmlMessage
         transaction_id: 17c77d6b
@@ -116,9 +265,141 @@ Example output for the meter data:
         crc16         : 56696
 
 
-Check if the meter reports the serial number unter obis ``0100000009ff``.
-If not it's possible to configure another number (of even multiple ones) for configuration matching.
-If yes replace ``SERIAL_ID_HEX`` in the dummy configuration with the reported
-serial number (here ``11111111111111111111``).
-Modify the device configuration to your liking (see configuration documentation).
-Run the analyze command again and see how the output changes and observe the reported values.
+If the meter does not report ``0100000009ff`` it's possible to configure another number (of even multiple ones)
+for configuration matching (see :ref:`general under config <CONFIG_GENERAL>`).
+
+5. Edit device settings
+======================================
+
+Replace ``device_id_hex`` in the dummy configuration with the reported number (here ``11111111111111111111``).
+Edit the mqtt settings or remove them to use the default. Add the obis code of values that should not be reported
+to the skip section. Run the analyze command again to see how the reported values change.
+
+..
+    YamlModel: Settings
+
+.. code-block:: yaml
+   :linenos:
+   :emphasize-lines: 13, 15-16, 18-19, 21-22
+
+    # ...
+
+    inputs:
+    - type: serial
+      url: COM1   # Device path
+      timeout: 3  # Seconds after which a timeout will be detected (default=3)
+    - type: serial
+      url: /dev/ttyS0   # Device path
+      timeout: 3        # Seconds after which a timeout will be detected (default=3)
+
+    devices:
+      # Device configuration by reported id
+      '11111111111111111111':
+
+        mqtt:                           # Optional MQTT configuration for this meter.
+          topic: meter_light            # Topic fragment for building this topic with the parent topic
+
+        status:                         # Optional MQTT status topic configuration for this meter
+          topic: status                 # Topic fragment for building this topic with the parent topic
+
+        skip:                           # OBIS codes (HEX) of values that will not be published (optional)
+        - '8181c78205ff'
+
+        # Configurations for each of the values (optional)
+        values:
+
+        - obis: '00112233445566'        # Obis code for this value
+          mqtt:                         # Mqtt config for this value (optional)
+            topic: OBIS_VALUE_TOPIC     # Topic fragment for building this topic with the topic prefix
+          # A sequence of operations that will be evaluated one after another.
+          # If one operation blocks nothing will be reported for this frame
+          operations:
+          - negative on energy meter status: true   # Make value negative based on an energy meter status. Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
+          - factor: 3               # Factor with which the value gets multiplied
+          - offset: 100             # Offset that gets added on the value
+          - round: 2                # Round to the specified digits
+          - refresh action: 300     # Republish value every 300s
+
+
+6. Edit value settings
+======================================
+
+It's possible to further configure how values will be reported.
+For every value there are multiple operations that can be applied.
+Each sml value can also be processed multiple times.
+
+Run the analyze command again to see how the reported values change.
+
+..
+    YamlModel: Settings
+
+.. code-block:: yaml
+   :linenos:
+   :emphasize-lines: 27-37, 39-45, 47-52
+
+    # ...
+
+    inputs:
+    - type: serial
+      url: COM1   # Device path
+      timeout: 3  # Seconds after which a timeout will be detected (default=3)
+    - type: serial
+      url: /dev/ttyS0   # Device path
+      timeout: 3        # Seconds after which a timeout will be detected (default=3)
+
+    devices:
+      # Device configuration by reported id
+      '11111111111111111111':
+
+        mqtt:                           # Optional MQTT configuration for this meter.
+          topic: meter_light            # Topic fragment for building this topic with the parent topic
+
+        status:                         # Optional MQTT status topic configuration for this meter
+          topic: status                 # Topic fragment for building this topic with the parent topic
+
+        skip:                           # OBIS codes (HEX) of values that will not be published (optional)
+        - '8181c78205ff'
+
+        # Configurations for each of the values (optional)
+        values:
+
+        -  obis: '0100010800ff'    # Obis code for the energy value
+           mqtt:
+             topic: energy_today
+           operations:
+           - type: meter           # A virtual meter
+             start now: true       # Start immediately
+             reset times:          # Reset at midnight
+               - 00:00
+           - round: 1
+           - type: change filter      # Only report on changes
+           - refresh action: 01:00    # ... but refresh every hour
+
+        -  obis: '0100010800ff'  # Obis code for the energy value
+           mqtt:
+             topic: energy_total
+           operations:
+           - round: 1
+           - type: change filter
+           - refresh action: 01:00
+
+        -  obis: '0100100700ff'  # Obis code for the power value
+           mqtt:
+             topic: power
+           operations:
+           - type: delta filter
+             min: 10
+             min %: 5
+           - refresh action: 01:00
+
+
+Output from the analyze command that shows what values will be reported
+
+.. code-block:: text
+
+   ...
+   sml2mqtt/meter_light/energy_today: 0 (QOS: 0, retain: False)
+   sml2mqtt/meter_light/energy_total: 12345.7 (QOS: 0, retain: False)
+   sml2mqtt/meter_light/power: 555 (QOS: 0, retain: False)
+   sml2mqtt/meter_light/status: OK (QOS: 0, retain: False)
+   ...
