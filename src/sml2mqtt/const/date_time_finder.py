@@ -57,7 +57,5 @@ class DateTimeFinder:
 
             while True:
                 next_dt += timedelta(days=1)
-                if (not self.dows and not self.days or
-                        next_dt.isoweekday() in self.dows or
-                        next_dt.day in self.days):
+                if not self.dows and not self.days or next_dt.isoweekday() in self.dows or next_dt.day in self.days:
                     break

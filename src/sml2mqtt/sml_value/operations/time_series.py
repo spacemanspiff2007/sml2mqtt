@@ -100,7 +100,7 @@ class MeanOfIntervalOperation(TimeDurationSeriesOperationBase):
             mean += value * duration
             time += duration
 
-        if time == 0:
+        if time <= 0:
             return None
         return mean / time
 

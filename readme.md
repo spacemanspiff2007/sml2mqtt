@@ -13,6 +13,7 @@ sml2mqtt is a asyncio application that can read multiple sml (Smart Message Lang
 from energy meters and report the values through mqtt.
 The meters can be read through serial ports or through http(s) (e.g. Tibber devices)
 
+To read from the serial port an IR to USB reader for energy meter is required.
 
 # Documentation
 [The documentation can be found at here](https://sml2mqtt.readthedocs.io)
@@ -20,13 +21,14 @@ The meters can be read through serial ports or through http(s) (e.g. Tibber devi
 
 # Changelog
 
-#### 3.0 (2024-XX-XX)
+#### 3.0 (2024-04-24)
 
-**BREAKING CHANGE!**
+**BREAKING CHANGE**
 
-- Almost complete rewrite
-- Extensive value processing which can be configured
-- Support for tibber out of the box
+- Almost complete rewrite, requires at least **Python 3.10**
+- Extensive value processing which can be configured -> **Config file changed**
+- Support for tibber pulse out of the box
+- The ``analyze`` flag can also be set through an environment variable which makes it easier for docker users
 
 #### 2.2 (2023-03-31)
 - Small config improvements
