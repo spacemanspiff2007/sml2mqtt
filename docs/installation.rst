@@ -130,6 +130,8 @@ It is now possible to start, stop, restart and check the status of sml2mqtt with
 Docker
 ======================================
 
+Stable release (currently 2.2)
+------------------------------
 
 Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/sml2mqtt>`_ is available:
 
@@ -143,3 +145,49 @@ There the ``config.yml`` will be used or a new ``config.yml`` will be created
 
 The analyze option can also be set through an environment variable
 (see :ref:`command line interface <COMMAND_LINE_INTERFACE>`).
+
+Easiest way to run a docker with a locally mounted volume:
+
+.. code-block:: bash
+
+    mkdir sml2mqtt
+    docker run  -v $(pwd)/sml2mqtt:/sml2mqtt spacemanspiff2007/sml2mqtt:latest
+    # This will quit after a few seconds (with an error on the logs at sml2mqtt/sml2mqtt.log)
+    vi sml2mqtt/config.yml
+    # Edit the config according to your needs
+    docker run  -v $(pwd)/sml2mqtt:/sml2mqtt spacemanspiff2007/sml2mqtt:latest
+    # This schould now continue running, check with
+    docker ps
+
+Building the docker image from source
+-------------------------------------
+
+First you need to create a fresh docker image, then it is mostly similar to the above.
+
+.. code-block:: bash
+
+    cd ~
+    mkdir GIT
+    cd GIT
+    git clone https://github.com/spacemanspiff2007/sml2mqtt.git
+    cd sml2mqtt
+    docker built -t sml2mqtt .
+    cd ~
+    mkdir -p dockerdata/sml2mqtt
+    cd dockerdata
+    docker run  -v $(pwd)/sml2mqtt:/sml2mqtt sml2mqtt
+
+    # This will quit after a few seconds (with an error on the logs at 
+    # sml2mqtt/sml2mqtt.log)
+    # Now edit the config according to your needs and start again
+    vi sml2mqtt/config.yml    
+    docker run -v $(pwd)/sml2mqtt:/sml2mqtt sml2mqtt
+    
+    # This should now not return an error and if everything runs for a minute 
+    # interrupt it with Ctrl-C and start the container in detached mode
+    docker run -d -v $(pwd)/sml2mqtt:/sml2mqtt sml2mqtt
+
+    # Check if it is running
+    docker ps -a
+
+You can further adjust the config to process the values and restart docker...
