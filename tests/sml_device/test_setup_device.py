@@ -26,11 +26,11 @@ def test_warnings(no_mqtt, caplog, sml_frame_1_values):
     setup_device(device, sml_frame_1_values, device_cfg, general_cfg)
 
     # This is what will be reported
-    msg = "\n".join(
+    msg = '\n'.join(
         x.msg for x in filter(lambda x: x.name == 'sml.test_device' and x.levelno == logging.WARNING, caplog.records)
     )
 
-    assert '\n' + msg + '\n' == """
+    assert '\n' + msg + '\n' == '''
 Config for 0100000009ff found but 0100000009ff is also marked to be skipped
 Config for 0100000009ff found but 0100000009ff was not reported by the frame
-"""
+'''

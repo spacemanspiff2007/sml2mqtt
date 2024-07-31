@@ -16,9 +16,9 @@ async def test_device_analyze(no_mqtt, caplog, sml_data_1, arg_analyze, sml_data
         device.on_source_data(sml_data_1[i: i + chunk_size])
 
     # This is what will be reported
-    msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records))
+    msg = '\n'.join(x.msg for x in filter(lambda x: x.name == 'sml.mqtt.pub', caplog.records))
 
-    assert '\n' + msg == """
+    assert '\n' + msg == '''
 00000000000000000000/0100000009ff: 00000000000000000000 (QOS: 0, retain: False)
 00000000000000000000/0100010800ff: 450.09189911 (QOS: 0, retain: False)
 00000000000000000000/0100010801ff: 449.07489911 (QOS: 0, retain: False)
@@ -29,9 +29,9 @@ async def test_device_analyze(no_mqtt, caplog, sml_data_1, arg_analyze, sml_data
 00000000000000000000/0100380700ff: 27.06 (QOS: 0, retain: False)
 00000000000000000000/01004c0700ff: 243.57 (QOS: 0, retain: False)
 00000000000000000000/status: OK (QOS: 0, retain: False)
-00000000000000000000/status: SHUTDOWN (QOS: 0, retain: False)"""
+00000000000000000000/status: SHUTDOWN (QOS: 0, retain: False)'''
 
-    msg = "\n".join(x.msg for x in filter(lambda x: x.name == 'sml.device_name', caplog.records))
+    msg = '\n'.join(x.msg for x in filter(lambda x: x.name == 'sml.device_name', caplog.records))
 
     assert msg.removeprefix(sml_data_1_analyze) == '''
 Found obis id 0100000009ff in the sml frame

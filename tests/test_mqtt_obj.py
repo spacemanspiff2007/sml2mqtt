@@ -60,6 +60,6 @@ def test_check_for_duplicate_messages(caplog):
 
     check_for_duplicate_topics(parent)
 
-    msg = "\n".join(x.msg for x in caplog.records)
+    msg = '\n'.join(x.msg for x in caplog.records)
 
     assert msg == 'Topic "base/child" is already configured!'

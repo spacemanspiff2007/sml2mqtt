@@ -48,7 +48,7 @@ async def a_main():
 def main() -> int | str:
     # This is needed to make async-mqtt work
     # see https://github.com/sbtinstruments/asyncio-mqtt
-    if sys.platform.lower() == "win32" or os.name.lower() == "nt":
+    if sys.platform.lower() == 'win32' or os.name.lower() == 'nt':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     # Load config
@@ -74,7 +74,7 @@ def main() -> int | str:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ret = main()
     log.info(f'Closed with return code {ret}')
     sys.exit(ret)

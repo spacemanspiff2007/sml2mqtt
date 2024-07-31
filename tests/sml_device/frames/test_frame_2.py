@@ -15,7 +15,7 @@ async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_2,
 
     device.on_source_data(None)
 
-    msg = "\n".join(x.msg for x in caplog.records)
+    msg = '\n'.join(x.msg for x in caplog.records)
 
     assert msg.removeprefix(sml_frame_2_analyze) == '''
 get_obis failed - try parsing frame

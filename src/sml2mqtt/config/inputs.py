@@ -70,7 +70,7 @@ class SerialSourceSettings(SmlSourceSettingsBase):
 
     @override
     def get_device_name(self) -> str:
-        return self.url.split("/")[-1]
+        return self.url.split('/')[-1]
 
 
 class HttpSourceSettings(SmlSourceSettingsBase):

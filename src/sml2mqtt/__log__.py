@@ -37,7 +37,7 @@ def setup_log():
     for device in sml2mqtt.CONFIG.inputs:
         # Name of the longest logger, should be the device status
         chars = max(len(get_logger(device.get_device_name()).getChild('status').name), chars)
-    log_format = logging.Formatter("[{asctime:s}] [{name:" + str(chars) + "s}] {levelname:8s} | {message:s}", style='{')
+    log_format = logging.Formatter('[{asctime:s}] [{name:' + str(chars) + 's}] {levelname:8s} | {message:s}', style='{')
 
     # File Handler
     file_path = sml2mqtt.CONFIG.logging.file
