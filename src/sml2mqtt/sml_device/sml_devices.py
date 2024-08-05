@@ -40,5 +40,8 @@ class SmlDevices:
 
         return None
 
+    def __len__(self) -> int:
+        return len(self._devices)
+
 
 ALL_DEVICES: Final = SmlDevices()
