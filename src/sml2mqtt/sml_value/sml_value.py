@@ -4,7 +4,7 @@ from typing import Final
 
 from sml2mqtt.const import SmlFrameValues
 from sml2mqtt.mqtt import MqttObj
-from sml2mqtt.sml_value.base import OperationContainerBase, SmlValueInfo, ValueOperationBase
+from sml2mqtt.sml_value.base import OperationContainerBase, SmlValueInfo
 
 
 class SmlValue(OperationContainerBase):

@@ -57,7 +57,7 @@ class Task:
 
     @property
     def is_running(self) -> bool:
-        if (task := self._task) is None or task.cancelled():
+        if (task := self._task) is None or task.cancelled():  # noqa: SIM103
             return False
         return True
 

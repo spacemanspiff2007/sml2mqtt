@@ -16,7 +16,7 @@ async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_1,
 
     device.on_source_data(None)
 
-    msg = "\n".join(x.msg for x in caplog.records)
+    msg = '\n'.join(x.msg for x in caplog.records)
 
     assert msg.removeprefix(sml_frame_1_analyze) == '''
 Found none of the following obis ids in the sml frame: 0100000009ff, 01006001ffff
@@ -36,7 +36,7 @@ async def test_frame_no_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_an
 
     device.on_source_data(None)
 
-    msg = "\n".join(x.msg for x in caplog.records)
+    msg = '\n'.join(x.msg for x in caplog.records)
 
     assert msg.removeprefix(sml_frame_1_analyze) == '''
 Found obis id 0100600100ff in the sml frame
@@ -109,7 +109,7 @@ async def test_frame_with_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_
 
     device.on_source_data(None)
 
-    msg = "\n".join(x.msg for x in caplog.records)
+    msg = '\n'.join(x.msg for x in caplog.records)
 
     print(msg)
 

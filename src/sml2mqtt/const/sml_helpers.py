@@ -59,7 +59,7 @@ class SmlFrameValues:
 
     def __init__(self, timestamp: float):
         self.timestamp: Final = timestamp
-        self.values: dict[str, SmlListEntry] = {}
+        self.values: Final[dict[str, SmlListEntry]] = {}
 
     def __getattr__(self, item: str) -> SmlListEntry:
         return self.values[item]

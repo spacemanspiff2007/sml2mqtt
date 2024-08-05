@@ -56,7 +56,7 @@ def test_field_to_init(config_model: type[BaseModel], operation: callable):
             annotations = inspect.get_annotations(typed_dict)
 
             for name, fwd_ref in annotations.items():
-                ref_type = fwd_ref._evaluate(vars(operations_module), {}, frozenset())
+                ref_type = fwd_ref._evaluate(vars(operations_module), {}, recursive_guard=frozenset())
                 assert name not in config_provides, config_provides
                 config_provides[name] = ref_type
     else:

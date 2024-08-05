@@ -36,9 +36,14 @@ async def a_main():
                 device.frame_handler = device.analyze_frame
 
         # Start all devices
+        log.debug(f'Starting {len(ALL_DEVICES):d} device{"" if len(ALL_DEVICES) == 1 else "s":s}')
         await ALL_DEVICES.start()
 
-    except Exception:
+    except Exception as e:
+        log.error(f'{e.__class__.__name__} during startup: {e}')
+        for line in traceback.format_exc().splitlines():
+            log.error(line)
+
         await do_shutdown_async()
 
     # Keep tasks running
@@ -48,7 +53,7 @@ async def a_main():
 def main() -> int | str:
     # This is needed to make async-mqtt work
     # see https://github.com/sbtinstruments/asyncio-mqtt
-    if sys.platform.lower() == "win32" or os.name.lower() == "nt":
+    if sys.platform.lower() == 'win32' or os.name.lower() == 'nt':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     # Load config
@@ -74,7 +79,7 @@ def main() -> int | str:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ret = main()
     log.info(f'Closed with return code {ret}')
     sys.exit(ret)

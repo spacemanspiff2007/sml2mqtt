@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
@@ -14,8 +14,15 @@ repos:
 
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.4
+    rev: v0.5.5
     hooks:
+      - id: ruff
+        #  I001 [*] Import block is un-sorted or un-formatted
+        # UP035 [*] Import from {target} instead: {names}
+        #  Q000 [*] Double quote found but single quotes preferred
+        #  Q001 [*] Double quote multiline found but single quotes preferred
+        args: [ "--select", "I001,UP035,Q000,Q001", "--fix"]
+
       - id: ruff
 
   - repo: https://github.com/pre-commit/pygrep-hooks

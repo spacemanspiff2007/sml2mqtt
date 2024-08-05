@@ -148,8 +148,8 @@ def generate_day_names() -> dict[str, int]:
     day_names.update({date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)})
 
     # abbreviations in German and English
-    day_names.update({"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7})
-    day_names.update({"Mon": 1, "Tue": 2, "Wed": 3, "Thu": 4, "Fri": 5, "Sat": 6, "Sun": 7})
+    day_names.update({'Mo': 1, 'Di': 2, 'Mi': 3, 'Do': 4, 'Fr': 5, 'Sa': 6, 'So': 7})
+    day_names.update({'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6, 'Sun': 7})
     return {k.lower(): v for k, v in day_names.items()}
 
 
