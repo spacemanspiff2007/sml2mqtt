@@ -4,7 +4,7 @@ import pytest
 from sml2mqtt.sml_device import SmlDevice
 
 
-@pytest.mark.ignore_log_warnings()
+@pytest.mark.ignore_log_warnings
 async def test_device_analyze(no_mqtt, caplog, sml_data_1, arg_analyze, sml_data_1_analyze) -> None:
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
@@ -33,6 +33,7 @@ async def test_device_analyze(no_mqtt, caplog, sml_data_1, arg_analyze, sml_data
     msg = '\n'.join(x.msg for x in filter(lambda x: x.name == 'sml.device_name', caplog.records))
 
     assert msg.removeprefix(sml_data_1_analyze) == '''
+Using crc x25
 Found obis id 0100000009ff in the sml frame
 No device found for 00000000000000000000
 No filters found for 0100000009ff, creating default filters

@@ -52,7 +52,7 @@ def test_child_change(monkeypatch) -> None:
     assert (child.topic, child.qos, child.retain) == ('base/child', 0, False)
 
 
-@pytest.mark.ignore_log_warnings()
+@pytest.mark.ignore_log_warnings
 def test_check_for_duplicate_messages(caplog) -> None:
     parent = MqttObj('base', 2, True).update()
     parent.create_child('child')

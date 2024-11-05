@@ -47,7 +47,7 @@ class DateTimeFactory:
         return datetime(**call)
 
 
-@pytest.fixture()
+@pytest.fixture
 def now(monkeypatch):
     p = PatchedNow()
     monkeypatch.setattr(virtual_meter_module, 'get_now', p)

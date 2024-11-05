@@ -1,6 +1,6 @@
-aiomqtt          == 2.2.0
+aiomqtt          == 2.3.0
 pyserial-asyncio == 0.6
 easyconfig       == 0.3.2
 pydantic         == 2.8.2
-smllib           == 1.4
-aiohttp          == 3.10.1
+smllib           == 1.5
+aiohttp          == 3.10.10

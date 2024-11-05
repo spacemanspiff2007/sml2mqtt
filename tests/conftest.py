@@ -19,7 +19,7 @@ import sml2mqtt.mqtt.mqtt_obj
 from helper import PatchedSmlStreamReader
 from sml2mqtt import CMD_ARGS
 from sml2mqtt.runtime import shutdown as shutdown_module
-from sml2mqtt.sml_device import sml_device as sml_device_module
+from sml2mqtt.sml_device import stream_reader_group as reader_group_module
 
 
 if TYPE_CHECKING:
@@ -59,7 +59,7 @@ class PatchedMonotonic:
         self._now = secs
 
 
-@pytest.fixture()
+@pytest.fixture
 def monotonic():
     p = PatchedMonotonic()
 
@@ -72,7 +72,7 @@ def monotonic():
         p.undo()
 
 
-@pytest.fixture()
+@pytest.fixture
 def no_mqtt(monkeypatch):
 
     pub_list = []
@@ -84,10 +84,14 @@ def no_mqtt(monkeypatch):
     return pub_list
 
 
-@pytest.fixture()
+@pytest.fixture
 def stream_reader(monkeypatch):
     r = PatchedSmlStreamReader()
-    monkeypatch.setattr(sml_device_module, 'SmlStreamReader', lambda: r)
+
+    def factory(crc: str):
+        return r
+
+    monkeypatch.setattr(reader_group_module, 'SmlStreamReader', factory)
     return r
 
 
@@ -146,7 +150,7 @@ def _wrap_all_tasks(monkeypatch) -> None:
     monkeypatch.setattr(task_module, 'create_task', create_task)
 
 
-@pytest.fixture()
+@pytest.fixture
 def arg_analyze(monkeypatch):
     monkeypatch.setattr(CMD_ARGS, 'analyze', True)
     sml2mqtt.mqtt.patch_analyze()

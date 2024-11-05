@@ -5,7 +5,7 @@ from sml2mqtt import CONFIG
 from sml2mqtt.sml_device import SmlDevice
 
 
-@pytest.mark.ignore_log_errors()
+@pytest.mark.ignore_log_errors
 async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_2, arg_analyze, sml_frame_2_analyze) -> None:
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
@@ -17,6 +17,7 @@ async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_2,
     msg = '\n'.join(x.msg for x in caplog.records)
 
     assert msg.removeprefix(sml_frame_2_analyze) == '''
+Using crc x25
 get_obis failed - try parsing frame
 Found none of the following obis ids in the sml frame: 0100000009ff, 01006001ffff
 Received Frame

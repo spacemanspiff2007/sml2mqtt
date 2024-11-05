@@ -17,7 +17,7 @@ class DeviceMock(DeviceProto):
         return f'DeviceMock at 0x{id(self):x}'
 
 
-@pytest.fixture()
+@pytest.fixture
 def device_mock() -> DeviceMock:
     m = DeviceMock()
     m.on_source_data.assert_not_called()

@@ -21,6 +21,9 @@ To read from the serial port an IR to USB reader for energy meter is required.
 
 # Changelog
 
+#### 3.2 (2024-11-05)
+- Automatically select CRC e.g. for Holley DTZ541
+
 #### 3.1 (2024-08-05)
 - Updated dependencies
 - Added some small log messages

@@ -6,7 +6,7 @@ from sml2mqtt.config.device import SmlDeviceConfig
 from sml2mqtt.sml_device import SmlDevice
 
 
-@pytest.mark.ignore_log_errors()
+@pytest.mark.ignore_log_errors
 async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_analyze, sml_frame_1_analyze) -> None:
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
@@ -18,6 +18,7 @@ async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_1,
     msg = '\n'.join(x.msg for x in caplog.records)
 
     assert msg.removeprefix(sml_frame_1_analyze) == '''
+Using crc x25
 Found none of the following obis ids in the sml frame: 0100000009ff, 01006001ffff
 Received Frame
  -> b'760500531efa620062007263010176010105001bb4fe0b0a0149534b0005020de272620165001bb32e620163a71400760500531efb620062007263070177010b0a0149534b0005020de2070100620affff72620165001bb32e757707010060320101010101010449534b0177070100600100ff010101010b0a0149534b0005020de20177070100010800ff65001c010401621e52ff650026bea90177070100020800ff0101621e52ff62000177070100100700ff0101621b52005301100101016350ba00760500531efc6200620072630201710163ba1900'
@@ -26,7 +27,7 @@ ERROR
 device_name/status: ERROR (QOS: 0, retain: False)'''
 
 
-@pytest.mark.ignore_log_warnings()
+@pytest.mark.ignore_log_warnings
 async def test_frame_no_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_analyze, sml_frame_1_analyze) -> None:
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
@@ -38,6 +39,7 @@ async def test_frame_no_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_an
     msg = '\n'.join(x.msg for x in caplog.records)
 
     assert msg.removeprefix(sml_frame_1_analyze) == '''
+Using crc x25
 Found obis id 0100600100ff in the sml frame
 No device found for 0a0149534b0005020de2
 No filters found for 010060320101, creating default filters
@@ -113,6 +115,7 @@ async def test_frame_with_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_
     print(msg)
 
     assert msg.removeprefix(sml_frame_1_analyze) == '''
+Using crc x25
 Found obis id 0100600100ff in the sml frame
 Device found for 0a0149534b0005020de2
 No filters found for 0100010800ff, creating default filters

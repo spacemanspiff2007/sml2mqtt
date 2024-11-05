@@ -31,13 +31,18 @@ class GeneralSettings(BaseModel):
         description='Additional OBIS fields for the serial number to configuration matching',
         alias='device id obis', in_file=False
     )
+    crc: list[str] = Field(
+        default=['x25', 'kermit'],
+        description='Which crc algorithms are used to calculate the checksum of the smart meter',
+        alias='crc', in_file=False
+    )
 
 
 class Settings(AppBaseModel):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     mqtt: MqttConfig = Field(default_factory=MqttConfig)
     general: GeneralSettings = Field(default_factory=GeneralSettings)
-    inputs: list[HttpSourceSettings | SerialSourceSettings] = Field([], discriminator='type')
+    inputs: list[HttpSourceSettings | SerialSourceSettings] = Field(default_factory=list, discriminator='type')
     devices: dict[LowerStr, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
 
 

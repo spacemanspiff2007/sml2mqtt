@@ -8,7 +8,7 @@ from sml2mqtt.sml_device import SmlDevice
 from sml2mqtt.sml_device.setup_device import setup_device
 
 
-@pytest.mark.ignore_log_warnings()
+@pytest.mark.ignore_log_warnings
 def test_warnings(no_mqtt, caplog, sml_frame_1_values) -> None:
     device = SmlDevice('test_device')
     device.mqtt_device.cfg.topic_full = 'test_device/device_id'

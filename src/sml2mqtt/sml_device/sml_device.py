@@ -8,7 +8,9 @@ from typing import TYPE_CHECKING, Any, Final
 import smllib
 from smllib import SmlStreamReader
 from smllib.errors import CrcError
+from typing_extensions import Self
 
+from sml2mqtt import CONFIG
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.const import EnhancedSmlFrame
 from sml2mqtt.errors import ObisIdForConfigurationMappingNotFoundError, Sml2MqttExceptionWithLog
@@ -16,9 +18,9 @@ from sml2mqtt.mqtt import BASE_TOPIC
 from sml2mqtt.sml_device.sml_devices import ALL_DEVICES
 from sml2mqtt.sml_value import SmlValues
 
-from .. import CONFIG
 from .device_status import DeviceStatus
 from .setup_device import setup_device
+from .stream_reader_group import StreamReaderGroup, create_stream_reader_group
 from .watchdog import Watchdog
 
 
@@ -41,7 +43,7 @@ class SmlDevice:
         self.status: DeviceStatus = DeviceStatus.STARTUP
 
         self.watchdog: Final = Watchdog(self)
-        self.stream_reader: Final = SmlStreamReader()
+        self.stream_reader: StreamReaderGroup | SmlStreamReader = create_stream_reader_group()
 
         self.log = get_logger(self.name)
         self.log_status = self.log.getChild('status')
@@ -58,7 +60,7 @@ class SmlDevice:
     def name(self) -> str:
         return self._name
 
-    def set_source(self, source: SourceProto):
+    def set_source(self, source: SourceProto) -> Self:
         assert self._source is None, self._source
         self._source = source
         return self
@@ -79,7 +81,7 @@ class SmlDevice:
 
         self.status = new_status
 
-        # Don't log toggeling between CRC_ERROR and OK. Only log if new status is not OK
+        # Don't log toggling between CRC_ERROR and OK. Only log if new status is not OK
         level = LVL_INFO
         if new_status is DeviceStatus.CRC_ERROR:
             level = LVL_DEBUG
@@ -155,6 +157,12 @@ class SmlDevice:
         self.set_status(DeviceStatus.OK)
 
     def setup_values_from_frame(self, frame: EnhancedSmlFrame) -> None:
+        if not isinstance(self.stream_reader, SmlStreamReader):
+            self.stream_reader = self.stream_reader.get_reader()
+            _func_name = self.stream_reader.crc_func.__name__
+            crc_func_name = getattr(self.stream_reader.crc_func, '__module__', _func_name).rsplit('.', 1)[-1]
+            self.log.debug(f'Using crc {crc_func_name:s}')
+
         frame_values = frame.get_frame_values(self.log)
 
         # search frame and see if we get a match
@@ -179,12 +187,14 @@ class SmlDevice:
         self.frame_handler = self.process_frame
 
     def process_first_frame(self, frame: EnhancedSmlFrame) -> None:
+
         try:
             self.setup_values_from_frame(frame)
         except Exception as e:
             self.set_status(DeviceStatus.SHUTDOWN)
             self.on_error(e)
             return None
+
         self.frame_handler(frame)
         return None
 

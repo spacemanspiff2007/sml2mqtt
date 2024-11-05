@@ -10,7 +10,7 @@ from sml2mqtt.errors import HttpStatusError
 from sml2mqtt.sml_source.http import HttpSource, close_session
 
 
-@pytest.fixture()
+@pytest.fixture
 def source(device_mock):
     return HttpSource(device_mock, 'http://localhost:39999', interval=0.020, auth=None, timeout=ClientTimeout(0.5))
 
