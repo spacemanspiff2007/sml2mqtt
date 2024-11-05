@@ -1,7 +1,7 @@
 from sml2mqtt.const import TimeSeries
 
 
-def test_time_series_boundaries():
+def test_time_series_boundaries() -> None:
 
     for wait_for_data in (True, False):
         t = TimeSeries(10, wait_for_data=wait_for_data)
@@ -22,7 +22,7 @@ def test_time_series_boundaries():
         assert t.is_full
 
 
-def test_time_series():
+def test_time_series() -> None:
     t = TimeSeries(10)
 
     t.add_value(1, 3)
@@ -43,7 +43,7 @@ def test_time_series():
     assert t.get_value_duration(20) == [(2, 5), (3, 2), (4, 3), (5, 0)]
 
 
-def test_time_series_start():
+def test_time_series_start() -> None:
     t = TimeSeries(10, wait_for_data=False)
 
     for _ in range(2):
@@ -70,7 +70,7 @@ def test_time_series_start():
         t.clear()
 
 
-def test_time_series_start_wait_for_data():
+def test_time_series_start_wait_for_data() -> None:
     t = TimeSeries(10, wait_for_data=True)
 
     for _ in range(2):

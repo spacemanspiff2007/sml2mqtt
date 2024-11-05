@@ -10,13 +10,13 @@ from sml2mqtt.errors import HttpStatusError
 from sml2mqtt.sml_source.http import HttpSource, close_session
 
 
-@pytest.fixture()
+@pytest.fixture
 def source(device_mock):
     return HttpSource(device_mock, 'http://localhost:39999', interval=0.020, auth=None, timeout=ClientTimeout(0.5))
 
 
 @pytest.mark.skipif(sys.platform.lower() != 'win32', reason="It's a mystery why this fails in CI")
-async def test_200(sml_data_1, device_mock, source):
+async def test_200(sml_data_1, device_mock, source) -> None:
 
     with aioresponses() as m:
         m.get(source.url, body=sml_data_1)
@@ -35,7 +35,7 @@ async def test_200(sml_data_1, device_mock, source):
 
 
 @pytest.mark.skipif(sys.platform.lower() != 'win32', reason="It's a mystery why this fails in CI")
-async def test_400_then_200(sml_data_1, device_mock, source):
+async def test_400_then_200(sml_data_1, device_mock, source) -> None:
 
     with aioresponses() as m:
         m.get(source.url, status=404)
@@ -56,7 +56,7 @@ async def test_400_then_200(sml_data_1, device_mock, source):
 
 
 @pytest.mark.skipif(sys.platform.lower() != 'win32', reason="It's a mystery why this fails in CI")
-async def test_400(device_mock, source):
+async def test_400(device_mock, source) -> None:
 
     with aioresponses() as m:
         for _ in range(10):
@@ -75,12 +75,12 @@ async def test_400(device_mock, source):
     await close_session()
 
 
-def test_error_repr():
+def test_error_repr() -> None:
     assert str(HttpStatusError(404)) == 'HttpStatusError: 404'
 
 
 @pytest.mark.skipif(sys.platform.lower() != 'win32', reason="It's a mystery why this fails in CI")
-async def test_timeout(device_mock, source):
+async def test_timeout(device_mock, source) -> None:
 
     e = TimeoutError()
 

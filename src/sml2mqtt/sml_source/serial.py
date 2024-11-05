@@ -45,13 +45,13 @@ class SerialSource(Protocol):
 
         self.last_read: float | None = 0.0
 
-    def start(self):
+    def start(self) -> None:
         self._task.start()
 
     async def cancel_and_wait(self):
         return await self._task.cancel_and_wait()
 
-    def connection_made(self, transport: SerialTransport):
+    def connection_made(self, transport: SerialTransport) -> None:
         self.transport = transport
         log.debug(f'Port {self.url:s} successfully opened')
 
@@ -69,13 +69,13 @@ class SerialSource(Protocol):
         log.log(lvl, f'Port {self.url:s} was closed{ex_str:s}')
         self.device.on_source_failed(f'Connection to port {self.url:s} lost')
 
-    def data_received(self, data: bytes):
+    def data_received(self, data: bytes) -> None:
         self.transport.pause_reading()
 
         self.last_read = monotonic()
         self.device.on_source_data(data)
 
-    async def _chunk_task(self):
+    async def _chunk_task(self) -> None:
         interval = 0.2
 
         while True:

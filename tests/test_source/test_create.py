@@ -5,7 +5,7 @@ from sml2mqtt.sml_source import create_source
 from sml2mqtt.sml_source.http import HttpSource
 
 
-async def test_create_http_no_auth(device_mock):
+async def test_create_http_no_auth(device_mock) -> None:
     cfg = HttpSourceSettings(type='http', url='http://localhost/a', interval=3, timeout=9)
     obj = await create_source(device_mock, cfg)
 
@@ -19,7 +19,7 @@ async def test_create_http_no_auth(device_mock):
     device_mock.on_error.assert_not_called()
 
 
-async def test_create_http_auth(device_mock):
+async def test_create_http_auth(device_mock) -> None:
     cfg = HttpSourceSettings(type='http', url='http://localhost/a', interval=3, timeout=9, user='u', password='p')
     obj = await create_source(device_mock, cfg)
 

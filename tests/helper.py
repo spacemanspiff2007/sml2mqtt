@@ -1,5 +1,6 @@
 from asyncio import sleep
 from collections.abc import Callable
+from typing import Literal
 from unittest.mock import Mock
 
 from smllib import SmlStreamReader
@@ -30,8 +31,8 @@ class PatchedSmlStreamReader(SmlStreamReader):
     _CRC_ERROR = 'CRC_ERROR'
 
     @override
-    def __init__(self, build_ctx: CTX_HINT | None = None):
-        super().__init__(build_ctx)
+    def __init__(self, build_ctx: CTX_HINT | None = None, crc: Literal['kermit', 'x25'] = 'x25') -> None:
+        super().__init__(build_ctx, crc=crc)
         self.returns = []
 
     def add(self, _bytes: bytes | EnhancedSmlFrame | str):
@@ -48,7 +49,7 @@ class PatchedSmlStreamReader(SmlStreamReader):
         else:
             raise TypeError()
 
-    def clear(self):
+    def clear(self) -> None:
         super().clear()
 
     def get_frame(self) -> EnhancedSmlFrame | None:

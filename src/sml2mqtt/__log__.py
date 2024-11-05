@@ -18,7 +18,7 @@ def get_logger(suffix: str) -> logging.Logger:
 
 class MidnightRotatingFileHandler(RotatingFileHandler):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.last_check: date = datetime.now().date()
 
@@ -29,7 +29,7 @@ class MidnightRotatingFileHandler(RotatingFileHandler):
         return super().shouldRollover(record)
 
 
-def setup_log():
+def setup_log() -> None:
     level = sml2mqtt.CONFIG.logging.set_log_level()
 
     # This is the longest logger name str

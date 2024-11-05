@@ -13,7 +13,7 @@ def info(timestamp: int):
     return SmlValueInfo(None, SmlFrameValues.create(timestamp, []), 0)
 
 
-def test_max():
+def test_max() -> None:
     o = MaxOfIntervalOperation(TimeSeries(5), False)
     check_operation_repr(o, 'interval=5s')
 
@@ -55,7 +55,7 @@ def test_max():
     )
 
 
-def test_min():
+def test_min() -> None:
     o = MinOfIntervalOperation(TimeSeries(5), False)
     check_operation_repr(o, 'interval=5s')
 
@@ -76,7 +76,7 @@ def test_min():
     )
 
 
-def test_mean():
+def test_mean() -> None:
     o = MeanOfIntervalOperation(TimeSeries(10), False)
     check_operation_repr(o, 'interval=10s')
 

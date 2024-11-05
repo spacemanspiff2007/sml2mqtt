@@ -14,7 +14,7 @@ from sml2mqtt.sml_value.operations import OnChangeFilterOperation
 from sml_values.test_operations.helper import check_description
 
 
-def test_values(sml_frame_1_values: SmlFrameValues, no_mqtt):
+def test_values(sml_frame_1_values: SmlFrameValues, no_mqtt) -> None:
     mqtt = MqttObj(topic_fragment='test', qos=0, retain=False).update()
 
     v = SmlValues()
@@ -64,8 +64,8 @@ def get_error_message(e: Sml2MqttExceptionWithLog, caplog) -> list[str]:
     return msgs
 
 
-@pytest.mark.ignore_log_errors()
-def test_too_much(sml_frame_1_values: SmlFrameValues, no_mqtt, caplog):
+@pytest.mark.ignore_log_errors
+def test_too_much(sml_frame_1_values: SmlFrameValues, no_mqtt, caplog) -> None:
     v = SmlValues()
     v.set_skipped('010060320101', '0100600100ff')
 
@@ -93,8 +93,8 @@ def test_too_much(sml_frame_1_values: SmlFrameValues, no_mqtt, caplog):
     ]
 
 
-@pytest.mark.ignore_log_errors()
-def test_missing(sml_frame_1_values: SmlFrameValues, no_mqtt, caplog):
+@pytest.mark.ignore_log_errors
+def test_missing(sml_frame_1_values: SmlFrameValues, no_mqtt, caplog) -> None:
     v = SmlValues()
     v.set_skipped('010060320101', '0100600100ff', '0100020800ff', '0100010800ff', '0100100700ff')
 

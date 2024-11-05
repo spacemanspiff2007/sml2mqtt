@@ -11,17 +11,17 @@ if TYPE_CHECKING:
 
 
 class Watchdog:
-    def __init__(self, device: SmlDevice):
+    def __init__(self, device: SmlDevice) -> None:
         self._timeout: float = -1
         self.device: Final = device
 
         self._event: Final = Event()
         self._task: Final  = DeviceTask(device, self._wd_task, name=f'Watchdog Task {self.device.name:s}')
 
-    def start(self):
+    def start(self) -> None:
         self._task.start()
 
-    def cancel(self):
+    def cancel(self) -> None:
         self._task.cancel()
 
     async def cancel_and_wait(self):
@@ -33,10 +33,10 @@ class Watchdog:
         self._timeout = timeout
         return self
 
-    def feed(self):
+    def feed(self) -> None:
         self._event.set()
 
-    async def _wd_task(self):
+    async def _wd_task(self) -> None:
         make_call = True
         while True:
             self._event.clear()

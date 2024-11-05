@@ -3,7 +3,6 @@ import traceback
 from typing import TYPE_CHECKING
 
 import pytest
-from helper import PatchedSmlStreamReader
 from tests.sml_data import (
     sml_data_1,
     sml_data_1_analyze,
@@ -17,9 +16,10 @@ from tests.sml_data import (
 
 import sml2mqtt.const.task as task_module
 import sml2mqtt.mqtt.mqtt_obj
+from helper import PatchedSmlStreamReader
 from sml2mqtt import CMD_ARGS
 from sml2mqtt.runtime import shutdown as shutdown_module
-from sml2mqtt.sml_device import sml_device as sml_device_module
+from sml2mqtt.sml_device import stream_reader_group as reader_group_module
 
 
 if TYPE_CHECKING:
@@ -36,30 +36,30 @@ if TYPE_CHECKING:
 
 
 class PatchedMonotonic:
-    def __init__(self):
+    def __init__(self) -> None:
         self._now: int | float = 0
         self._mp = pytest.MonkeyPatch()
 
     def _get_monotonic(self):
         return self._now
 
-    def patch_name(self, target: str):
+    def patch_name(self, target: str) -> None:
         self._mp.setattr(target, self._get_monotonic)
 
-    def patch(self, target: str | object, name: str | object):
+    def patch(self, target: str | object, name: str | object) -> None:
         self._mp.setattr(target, name, value=self._get_monotonic)
 
-    def undo(self):
+    def undo(self) -> None:
         self._mp.undo()
 
-    def add(self, secs: float):
+    def add(self, secs: float) -> None:
         self._now += secs
 
-    def set(self, secs: float):
+    def set(self, secs: float) -> None:
         self._now = secs
 
 
-@pytest.fixture()
+@pytest.fixture
 def monotonic():
     p = PatchedMonotonic()
 
@@ -72,27 +72,31 @@ def monotonic():
         p.undo()
 
 
-@pytest.fixture()
+@pytest.fixture
 def no_mqtt(monkeypatch):
 
     pub_list = []
 
-    def pub_func(topic: str, value, qos: int, retain: bool):
+    def pub_func(topic: str, value, qos: int, retain: bool) -> None:
         pub_list.append((topic, value, qos, retain))
 
     monkeypatch.setattr(sml2mqtt.mqtt.mqtt_obj, 'pub_func', pub_func)
     return pub_list
 
 
-@pytest.fixture()
+@pytest.fixture
 def stream_reader(monkeypatch):
     r = PatchedSmlStreamReader()
-    monkeypatch.setattr(sml_device_module, 'SmlStreamReader', lambda: r)
+
+    def factory(crc: str):
+        return r
+
+    monkeypatch.setattr(reader_group_module, 'SmlStreamReader', factory)
     return r
 
 
 @pytest.fixture(autouse=True)
-def _clear_mqtt(monkeypatch):
+def _clear_mqtt(monkeypatch) -> None:
     monkeypatch.setattr(sml2mqtt.mqtt.BASE_TOPIC, 'children', [])
 
 
@@ -128,7 +132,7 @@ def check_no_logged_error(caplog, request):
 
 
 @pytest.fixture(autouse=True)
-def _wrap_all_tasks(monkeypatch):
+def _wrap_all_tasks(monkeypatch) -> None:
 
     async def wrapped_future(coro):
         try:
@@ -146,7 +150,7 @@ def _wrap_all_tasks(monkeypatch):
     monkeypatch.setattr(task_module, 'create_task', create_task)
 
 
-@pytest.fixture()
+@pytest.fixture
 def arg_analyze(monkeypatch):
     monkeypatch.setattr(CMD_ARGS, 'analyze', True)
     sml2mqtt.mqtt.patch_analyze()

@@ -40,7 +40,7 @@ def has_operation_type(obj: OperationContainerBase, *ops: type[ValueOperationBas
 
 
 def _create_default_transformations(log: logging.Logger, sml_value: SmlValue, frame: SmlFrameValues,
-                                    general_cfg: GeneralSettings):
+                                    general_cfg: GeneralSettings) -> None:
 
     op_count = len(sml_value.operations)
 
@@ -71,7 +71,7 @@ def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cf
     sml_value.add_operation(RefreshActionOperation(general_cfg.republish_after))
 
 
-def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig | None, general_cfg: GeneralSettings):
+def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig | None, general_cfg: GeneralSettings) -> None:
     mqtt_device = device.mqtt_device
     skip_default_setup = set()
 

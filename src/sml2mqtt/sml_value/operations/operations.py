@@ -16,7 +16,7 @@ class OrOperation(ValueOperationBase, OperationContainerBase):
 
         return ret
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Or at 0x{id(self):x}>'
 
     @override
@@ -33,7 +33,7 @@ class SequenceOperation(ValueOperationBase, OperationContainerBase):
             value = op.process_value(value, info)
         return value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Sequence at 0x{id(self):x}>'
 
     @override

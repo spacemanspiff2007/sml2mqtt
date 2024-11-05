@@ -107,7 +107,7 @@ class _HasOperationsProto(Protocol):
     operations: list[BaseModel]
 
 
-def setup_operations(parent: OperationContainerBase, cfg_parent: _HasOperationsProto):
+def setup_operations(parent: OperationContainerBase, cfg_parent: _HasOperationsProto) -> None:
     for cfg in cfg_parent.operations:
         factory = get_operation_factory(cfg)
 

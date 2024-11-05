@@ -8,7 +8,7 @@ from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
 
 
 class NegativeOnEnergyMeterWorkaroundOperation(ValueOperationBase):
-    def __init__(self, meter_obis: str | None = None):
+    def __init__(self, meter_obis: str | None = None) -> None:
         self.meter_obis: Final[str] = '0100010800ff' if meter_obis is None else meter_obis
 
     @override
@@ -30,7 +30,7 @@ class NegativeOnEnergyMeterWorkaroundOperation(ValueOperationBase):
 
         return value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<NegativeOnEnergyMeterWorkaround: {self.meter_obis:s} at 0x{id(self):x}>'
 
     @override

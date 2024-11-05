@@ -8,7 +8,9 @@ from typing import TYPE_CHECKING, Any, Final
 import smllib
 from smllib import SmlStreamReader
 from smllib.errors import CrcError
+from typing_extensions import Self
 
+from sml2mqtt import CONFIG
 from sml2mqtt.__log__ import get_logger
 from sml2mqtt.const import EnhancedSmlFrame
 from sml2mqtt.errors import ObisIdForConfigurationMappingNotFoundError, Sml2MqttExceptionWithLog
@@ -16,9 +18,9 @@ from sml2mqtt.mqtt import BASE_TOPIC
 from sml2mqtt.sml_device.sml_devices import ALL_DEVICES
 from sml2mqtt.sml_value import SmlValues
 
-from .. import CONFIG
 from .device_status import DeviceStatus
 from .setup_device import setup_device
+from .stream_reader_group import StreamReaderGroup, create_stream_reader_group
 from .watchdog import Watchdog
 
 
@@ -35,13 +37,13 @@ setattr(smllib.reader, 'SmlFrame', EnhancedSmlFrame)
 
 
 class SmlDevice:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self._name: Final = name
         self._source: SourceProto | None = None
         self.status: DeviceStatus = DeviceStatus.STARTUP
 
         self.watchdog: Final = Watchdog(self)
-        self.stream_reader: Final = SmlStreamReader()
+        self.stream_reader: StreamReaderGroup | SmlStreamReader = create_stream_reader_group()
 
         self.log = get_logger(self.name)
         self.log_status = self.log.getChild('status')
@@ -58,17 +60,17 @@ class SmlDevice:
     def name(self) -> str:
         return self._name
 
-    def set_source(self, source: SourceProto):
+    def set_source(self, source: SourceProto) -> Self:
         assert self._source is None, self._source
         self._source = source
         return self
 
-    async def start(self):
+    async def start(self) -> None:
         if self._source is not None:
             self._source.start()
         self.watchdog.start()
 
-    async def cancel_and_wait(self):
+    async def cancel_and_wait(self) -> None:
         if self._source is not None:
             await self._source.cancel_and_wait()
         await self.watchdog.cancel_and_wait()
@@ -79,7 +81,7 @@ class SmlDevice:
 
         self.status = new_status
 
-        # Don't log toggeling between CRC_ERROR and OK. Only log if new status is not OK
+        # Don't log toggling between CRC_ERROR and OK. Only log if new status is not OK
         level = LVL_INFO
         if new_status is DeviceStatus.CRC_ERROR:
             level = LVL_DEBUG
@@ -96,7 +98,7 @@ class SmlDevice:
         ALL_DEVICES.check_status()
         return True
 
-    def on_source_data(self, data: bytes):
+    def on_source_data(self, data: bytes) -> None:
         frame = None    # type: EnhancedSmlFrame | None
 
         try:
@@ -121,7 +123,7 @@ class SmlDevice:
 
             self.on_error(e)
 
-    def on_error(self, e: Exception, *, show_traceback: bool = True):
+    def on_error(self, e: Exception, *, show_traceback: bool = True) -> None:
         self.log.debug(f'Exception {type(e)}: "{e}"')
 
         # Log exception
@@ -138,14 +140,14 @@ class SmlDevice:
         self.set_status(DeviceStatus.ERROR)
         return None
 
-    def on_source_failed(self, reason: str):
+    def on_source_failed(self, reason: str) -> None:
         self.log.error(f'Source failed: {reason}')
         self.set_status(DeviceStatus.SOURCE_FAILED)
 
-    def on_timeout(self):
+    def on_timeout(self) -> None:
         self.set_status(DeviceStatus.MSG_TIMEOUT)
 
-    def process_frame(self, frame: EnhancedSmlFrame):
+    def process_frame(self, frame: EnhancedSmlFrame) -> None:
 
         frame_values = frame.get_frame_values(self.log)
 
@@ -154,7 +156,13 @@ class SmlDevice:
         # There was no Error -> OK
         self.set_status(DeviceStatus.OK)
 
-    def setup_values_from_frame(self, frame: EnhancedSmlFrame):
+    def setup_values_from_frame(self, frame: EnhancedSmlFrame) -> None:
+        if not isinstance(self.stream_reader, SmlStreamReader):
+            self.stream_reader = self.stream_reader.get_reader()
+            _func_name = self.stream_reader.crc_func.__name__
+            crc_func_name = getattr(self.stream_reader.crc_func, '__module__', _func_name).rsplit('.', 1)[-1]
+            self.log.debug(f'Using crc {crc_func_name:s}')
+
         frame_values = frame.get_frame_values(self.log)
 
         # search frame and see if we get a match
@@ -178,16 +186,19 @@ class SmlDevice:
 
         self.frame_handler = self.process_frame
 
-    def process_first_frame(self, frame: EnhancedSmlFrame):
+    def process_first_frame(self, frame: EnhancedSmlFrame) -> None:
+
         try:
             self.setup_values_from_frame(frame)
         except Exception as e:
             self.set_status(DeviceStatus.SHUTDOWN)
             self.on_error(e)
             return None
-        self.frame_handler(frame)
 
-    def analyze_frame(self, frame: EnhancedSmlFrame):
+        self.frame_handler(frame)
+        return None
+
+    def analyze_frame(self, frame: EnhancedSmlFrame) -> None:
 
         # log Frame and frame description
         for line in frame.get_analyze_str():

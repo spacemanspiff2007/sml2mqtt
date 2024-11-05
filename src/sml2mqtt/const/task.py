@@ -27,7 +27,7 @@ def create_task(coro: Coroutine, *, name: str | None = None):
     return task
 
 
-async def wait_for_tasks():
+async def wait_for_tasks() -> None:
 
     while True:
         for task in TASKS.copy():
@@ -49,7 +49,7 @@ async def wait_for_tasks():
 
 
 class Task:
-    def __init__(self, coro: Callable[[], Awaitable], *, name: str):
+    def __init__(self, coro: Callable[[], Awaitable], *, name: str) -> None:
         self._coro: Final = coro
         self._name: Final = name
 
@@ -61,7 +61,7 @@ class Task:
             return False
         return True
 
-    def start(self):
+    def start(self) -> None:
         if not self.is_running:
             self._task = create_task(self._wrapper(), name=self._name)
 
@@ -82,7 +82,7 @@ class Task:
             pass
         return True
 
-    async def _wrapper(self):
+    async def _wrapper(self) -> None:
         task = current_task()
 
         try:
@@ -97,17 +97,17 @@ class Task:
 
             log.debug(f'{self._name:s} finished!')
 
-    def process_exception(self, e: Exception):
+    def process_exception(self, e: Exception) -> None:
         log.error(f'Error in {self._name:s}')
         for line in traceback.format_exc().splitlines():
             log.error(line)
 
 
 class DeviceTask(Task):
-    def __init__(self, device: DeviceProto, coro: Callable[[], Coroutine], *, name: str):
+    def __init__(self, device: DeviceProto, coro: Callable[[], Coroutine], *, name: str) -> None:
         super().__init__(coro, name=name)
         self._device: Final = device
 
-    def process_exception(self, e: Exception):
+    def process_exception(self, e: Exception) -> None:
         super().process_exception(e)
         self._device.on_source_failed(f'Task crashed: {e.__class__.__name__}')

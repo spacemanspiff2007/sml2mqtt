@@ -3,12 +3,11 @@ from tests.sml_values.test_operations.helper import check_description, check_ope
 from sml2mqtt.sml_value.operations import (
     FactorOperation,
     OffsetOperation,
-    RangeFilterOperation,
     RoundOperation,
 )
 
 
-def test_factor():
+def test_factor() -> None:
     o = FactorOperation(5)
     check_operation_repr(o, '5')
 
@@ -18,7 +17,7 @@ def test_factor():
     assert o.process_value(-3, None) == -15
 
 
-def test_offset():
+def test_offset() -> None:
     o = OffsetOperation(-5)
     check_operation_repr(o, '-5')
 
@@ -28,7 +27,7 @@ def test_offset():
     assert o.process_value(-3, None) == -8
 
 
-def test_round():
+def test_round() -> None:
     o = RoundOperation(0)
     check_operation_repr(o, '0')
 
@@ -48,7 +47,7 @@ def test_round():
     assert o.process_value(-3.65, None) == -3.6
 
 
-def test_description():
+def test_description() -> None:
     check_description(
         FactorOperation(-5),
         '- Factor: -5'

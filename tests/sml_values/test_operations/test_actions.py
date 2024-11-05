@@ -4,7 +4,7 @@ from sml2mqtt.sml_value.operations import HeartbeatActionOperation, RefreshActio
 from sml2mqtt.sml_value.operations._helper import format_period
 
 
-def test_format_period():
+def test_format_period() -> None:
     assert format_period(30.2) == '30.2 seconds'
     assert format_period(30) == '30 seconds'
     assert format_period(60) == '1 minute'
@@ -14,7 +14,7 @@ def test_format_period():
     assert format_period(3722) == '1 hour 2 minutes 2 seconds'
 
 
-def test_refresh_action(monotonic):
+def test_refresh_action(monotonic) -> None:
     f = RefreshActionOperation(30)
     check_operation_repr(f, '30s')
     check_description(f, '- Refresh Action: 30 seconds')
@@ -33,7 +33,7 @@ def test_refresh_action(monotonic):
     assert f.process_value(None, None) == 2
 
 
-def test_heartbeat_action(monotonic):
+def test_heartbeat_action(monotonic) -> None:
     f = HeartbeatActionOperation(30)
     check_operation_repr(f, '30s')
 

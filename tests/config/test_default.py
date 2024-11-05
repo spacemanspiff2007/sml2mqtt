@@ -3,7 +3,7 @@ import re
 from sml2mqtt.config import CONFIG
 
 
-def test_default():
+def test_default() -> None:
     yaml = CONFIG.generate_default_yaml()
 
     # Replace dynamically created identifier

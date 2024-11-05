@@ -24,7 +24,7 @@ class OnChangeFilterOperation(ValueOperationBase):
         self.last_value = value
         return value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<OnChangeFilter at 0x{id(self):x}>'
 
     @override
@@ -34,7 +34,7 @@ class OnChangeFilterOperation(ValueOperationBase):
 
 class RangeFilterOperation(ValueOperationBase):
     # noinspection PyShadowingBuiltins
-    def __init__(self, min_value: float | None, max_value: float | None, limit_values: bool = True):
+    def __init__(self, min_value: float | None, max_value: float | None, limit_values: bool = True) -> None:
         self.min_value: Final = min_value
         self.max_value: Final = max_value
         self.limit_values: Final = limit_values
@@ -52,7 +52,7 @@ class RangeFilterOperation(ValueOperationBase):
 
         return value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (f'<RangeFilter: min={self.min_value} max={self.max_value} '
                 f'limit_values={self.limit_values} at 0x{id(self):x}>')
 
@@ -67,7 +67,7 @@ class RangeFilterOperation(ValueOperationBase):
 
 
 class DeltaFilterOperation(ValueOperationBase):
-    def __init__(self, min_value: int | float | None = None, min_percent: int | float | None = None):
+    def __init__(self, min_value: int | float | None = None, min_percent: int | float | None = None) -> None:
         self.min_value: Final = min_value
         self.min_percent: Final = min_percent
 
@@ -95,7 +95,7 @@ class DeltaFilterOperation(ValueOperationBase):
         self.last_value = value
         return value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<DeltaFilter: min={self.min_value} min_percent={self.min_percent} at 0x{id(self):x}>'
 
     @override
@@ -115,7 +115,7 @@ class SkipZeroMeterOperation(ValueOperationBase):
             return None
         return value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<SkipZeroMeter at 0x{id(self):x}>'
 
     @override
@@ -124,7 +124,7 @@ class SkipZeroMeterOperation(ValueOperationBase):
 
 
 class ThrottleFilterOperation(ValueOperationBase):
-    def __init__(self, period: DurationType):
+    def __init__(self, period: DurationType) -> None:
         self.period: Final = get_duration(period)
         self.last_time: float = -1_000_000_000
 
@@ -140,7 +140,7 @@ class ThrottleFilterOperation(ValueOperationBase):
         self.last_time = now
         return value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<ThrottleFilter: {self.period}s at 0x{id(self):x}>'
 
     @override

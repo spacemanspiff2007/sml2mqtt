@@ -8,19 +8,19 @@ class DeviceProto(Protocol):
     def name(self) -> str:
         ...
 
-    def on_source_data(self, data: bytes):
+    def on_source_data(self, data: bytes) -> None:
         ...
 
-    def on_source_failed(self, reason: str):
+    def on_source_failed(self, reason: str) -> None:
         ...
 
-    def on_error(self, e: Exception, *, show_traceback: bool = True):
+    def on_error(self, e: Exception, *, show_traceback: bool = True) -> None:
         ...
 
 
 class SourceProto(Protocol):
-    def start(self):
+    def start(self) -> None:
         ...
 
-    def cancel_and_wait(self):
+    def cancel_and_wait(self) -> None:
         ...

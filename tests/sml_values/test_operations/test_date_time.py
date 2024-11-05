@@ -9,7 +9,7 @@ from sml2mqtt.sml_value.operations import date_time as virtual_meter_module
 
 
 class PatchedNow:
-    def __init__(self):
+    def __init__(self) -> None:
         self.ret = None
 
     def set(self, dt: datetime):
@@ -24,7 +24,7 @@ class PatchedNow:
 class DateTimeFactory:
     def __init__(self, year: int | None = 2001, month: int | None = 1, day: int | None = None,
                  hour: int | None = None, minute: int | None = None, second: int | None = 0,
-                 microsecond: int | None = 0):
+                 microsecond: int | None = 0) -> None:
         self.kwargs = {
             'year': year, 'month': month, 'day': day,
             'hour': hour, 'minute': minute, 'second': second, 'microsecond': microsecond
@@ -47,7 +47,7 @@ class DateTimeFactory:
         return datetime(**call)
 
 
-@pytest.fixture()
+@pytest.fixture
 def now(monkeypatch):
     p = PatchedNow()
     monkeypatch.setattr(virtual_meter_module, 'get_now', p)
@@ -55,7 +55,7 @@ def now(monkeypatch):
     return p
 
 
-def test_finder_1(now):
+def test_finder_1(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -67,7 +67,7 @@ def test_finder_1(now):
         assert f.calc_next() == dt_next.create(i)
 
 
-def test_finder_dow(now):
+def test_finder_dow(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
     f.add_dow(1)
@@ -80,7 +80,7 @@ def test_finder_dow(now):
         assert f.calc_next() == dt_next.create(i)
 
 
-def test_finder_day(now):
+def test_finder_day(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
     f.add_day(15)
@@ -102,7 +102,7 @@ def test_finder_day(now):
     assert f.calc_next() == dt_next.create(15, month=3)
 
 
-def test_virtual_meter_start_now(now):
+def test_virtual_meter_start_now(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -116,7 +116,7 @@ def test_virtual_meter_start_now(now):
     assert o.process_value(34, None) == 1
 
 
-def test_virtual_meter_start_normal(now):
+def test_virtual_meter_start_normal(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -134,7 +134,7 @@ def test_virtual_meter_start_normal(now):
     assert o.process_value(35, None) == 1
 
 
-def test_virtual_meter_description(now):
+def test_virtual_meter_description(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -158,7 +158,7 @@ def test_virtual_meter_description(now):
     )
 
 
-def test_virtual_meter_start_now_no_times(now):
+def test_virtual_meter_start_now_no_times(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -172,7 +172,7 @@ def test_virtual_meter_start_now_no_times(now):
     assert o.process_value(34, None) == 1
 
 
-def test_virtual_meter_start_normal_no_times(now):
+def test_virtual_meter_start_normal_no_times(now) -> None:
     f = DateTimeFinder()
 
     dt = DateTimeFactory(hour=1, minute=30)
@@ -186,7 +186,7 @@ def test_virtual_meter_start_normal_no_times(now):
     assert o.process_value(34, None) == 1
 
 
-def test_virtual_meter_description_no_times(now):
+def test_virtual_meter_description_no_times(now) -> None:
     f = DateTimeFinder()
 
     dt = DateTimeFactory(hour=1, minute=30)
@@ -206,7 +206,7 @@ def test_virtual_meter_description_no_times(now):
     )
 
 
-def test_max_start_now(now):
+def test_max_start_now(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -223,7 +223,7 @@ def test_max_start_now(now):
     assert o.process_value(50, None) is None
 
 
-def test_max_start_normal(now):
+def test_max_start_normal(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -245,7 +245,7 @@ def test_max_start_normal(now):
     assert o.process_value(50, None) is None
 
 
-def test_max_description(now):
+def test_max_description(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -293,7 +293,7 @@ def test_max_description(now):
     )
 
 
-def test_min_start_now(now):
+def test_min_start_now(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -310,7 +310,7 @@ def test_min_start_now(now):
     assert o.process_value(49, None) is None
 
 
-def test_min_start_normal(now):
+def test_min_start_normal(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 
@@ -332,7 +332,7 @@ def test_min_start_normal(now):
     assert o.process_value(49, None) is None
 
 
-def test_min_description(now):
+def test_min_description(now) -> None:
     f = DateTimeFinder()
     f.add_time(time(2))
 

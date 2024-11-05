@@ -7,7 +7,7 @@ from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
 
 
 class FactorOperation(ValueOperationBase):
-    def __init__(self, factor: int | float):
+    def __init__(self, factor: int | float) -> None:
         self.factor: Final = factor
 
     @override
@@ -16,7 +16,7 @@ class FactorOperation(ValueOperationBase):
             return None
         return value * self.factor
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Factor: {self.factor} at 0x{id(self):x}>'
 
     @override
@@ -25,7 +25,7 @@ class FactorOperation(ValueOperationBase):
 
 
 class OffsetOperation(ValueOperationBase):
-    def __init__(self, offset: int | float):
+    def __init__(self, offset: int | float) -> None:
         self.offset: Final = offset
 
     @override
@@ -34,7 +34,7 @@ class OffsetOperation(ValueOperationBase):
             return None
         return value + self.offset
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Offset: {self.offset} at 0x{id(self):x}>'
 
     @override
@@ -43,7 +43,7 @@ class OffsetOperation(ValueOperationBase):
 
 
 class RoundOperation(ValueOperationBase):
-    def __init__(self, digits: int):
+    def __init__(self, digits: int) -> None:
         self.digits: Final = digits if digits else None
 
     @override
@@ -55,7 +55,7 @@ class RoundOperation(ValueOperationBase):
             return value
         return round(value, self.digits)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Round: {self.digits if self.digits is not None else 0} at 0x{id(self):x}>'
 
     @override

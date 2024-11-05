@@ -5,7 +5,7 @@ from sml2mqtt.config import cleanup_validation_errors
 from sml2mqtt.config.config import SmlValueConfig
 
 
-def test_err_msg():
+def test_err_msg() -> None:
 
     with pytest.raises(ValidationError) as e:
         SmlValueConfig.model_validate({
@@ -20,7 +20,7 @@ def test_err_msg():
         "  Invalid key names [type=invalid_key_names, input_value={'factor': 1, 'offset': 2}, input_type=dict]"
 
 
-def test_error_message():
+def test_error_message() -> None:
 
     with pytest.raises(ValidationError) as e:
         SmlValueConfig.model_validate({

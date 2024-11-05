@@ -9,7 +9,7 @@ from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class TimeSeriesOperationBaseBase(ValueOperationBase):
-    def __init__(self, time_series: TimeSeries, reset_after_value: bool):
+    def __init__(self, time_series: TimeSeries, reset_after_value: bool) -> None:
         self.time_series: Final = time_series
         self.reset_after_value: Final = reset_after_value
 
@@ -66,7 +66,7 @@ class MaxOfIntervalOperation(TimeSeriesOperationBase):
     def on_values(self, obj: Sequence[float]) -> float | None:
         return max(obj)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<MaxOfInterval: interval={self.time_series.period}s at 0x{id(self):x}>'
 
     @override
@@ -81,7 +81,7 @@ class MinOfIntervalOperation(TimeSeriesOperationBase):
     def on_values(self, obj: Sequence[float]) -> float | None:
         return min(obj)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<MinOfInterval: interval={self.time_series.period}s at 0x{id(self):x}>'
 
     @override
@@ -104,7 +104,7 @@ class MeanOfIntervalOperation(TimeDurationSeriesOperationBase):
             return None
         return mean / time
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<MeanOfInterval: interval={self.time_series.period}s at 0x{id(self):x}>'
 
     @override

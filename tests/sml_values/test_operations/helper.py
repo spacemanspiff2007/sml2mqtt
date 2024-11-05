@@ -8,7 +8,7 @@ from sml2mqtt.sml_value.base import ValueOperationBase
 RE_ID = re.compile(r' at 0x[0-f]{6,}>')
 
 
-def check_operation_repr(obj: ValueOperationBase, *values):
+def check_operation_repr(obj: ValueOperationBase, *values) -> None:
     repr_str = RE_ID.sub('', repr(obj))
 
     class_name = obj.__class__.__name__
@@ -24,7 +24,7 @@ def check_operation_repr(obj: ValueOperationBase, *values):
     assert target == repr_str, f'\n{target}\n{repr_str}'
 
 
-def check_description(obj: ValueOperationBase, value: str | Iterable[str]):
+def check_description(obj: ValueOperationBase, value: str | Iterable[str]) -> None:
     desc = list(obj.describe())
     desc_text = '\n'.join(desc)
     if 'filter' in desc_text.lower():

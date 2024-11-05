@@ -6,7 +6,7 @@ from smllib.reader import SmlStreamReader
 from sml2mqtt.const import EnhancedSmlFrame, SmlFrameValues
 
 
-@pytest.fixture()
+@pytest.fixture
 def sml_data_1():
     return a2b_hex(
         b'1B1B1B1B01010101760501188E6162006200726500000101760101070000000000000B000000000000000000000101636877007'
@@ -19,7 +19,7 @@ def sml_data_1():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def sml_frame_1(stream_reader):
     frame = EnhancedSmlFrame(a2b_hex(
         b'760500531efa620062007263010176010105001bb4fe0b0a0149534b0005020de272620165001bb32e620163a71400760500531e'
@@ -33,7 +33,7 @@ def sml_frame_1(stream_reader):
     return frame
 
 
-@pytest.fixture()
+@pytest.fixture
 def sml_frame_2(stream_reader):
     frame = EnhancedSmlFrame(a2b_hex(
         b'7605065850a66200620072630101760107ffffffffffff05021d70370b0a014c475a0003403b4972620165021d7707016326de'
@@ -48,7 +48,7 @@ def sml_frame_2(stream_reader):
     return frame
 
 
-@pytest.fixture()
+@pytest.fixture
 def sml_data_1_analyze(sml_data_1):
     r = SmlStreamReader()
     r.add(sml_data_1)
@@ -56,30 +56,30 @@ def sml_data_1_analyze(sml_data_1):
     return '\n'.join(frame.get_analyze_str())
 
 
-@pytest.fixture()
+@pytest.fixture
 def sml_frame_1_values(sml_frame_1):
     values = sml_frame_1.get_obis()
     return SmlFrameValues.create(0, values)
 
 
-@pytest.fixture()
+@pytest.fixture
 def sml_frame_1_analyze(sml_frame_1):
     return '\n'.join(sml_frame_1.get_analyze_str())
 
 
-@pytest.fixture()
+@pytest.fixture
 def sml_frame_2_values(sml_frame_2):
     values = sml_frame_2.get_obis()
     return SmlFrameValues.create(0, values)
 
 
-@pytest.fixture()
+@pytest.fixture
 def sml_frame_2_analyze(sml_frame_2):
     return '\n'.join(sml_frame_2.get_analyze_str())
 
 
-@pytest.fixture()
-def sml_data_1_analyze():
+@pytest.fixture
+def sml_data_1_analyze() -> str:
     return '''
 Received Frame
  -> b'760501188e6162006200726500000101760101070000000000000b00000000000000000000010163687700760501188e626200620072650000070177010b000000000000000000000172620165002ec3f47a77078181c78203ff010101010445425a0177070100000009ff010101010b000000000000000000000177070100010800ff6401018001621e52fb690000000a7ac1bc170177070100010801ff0101621e52fb690000000a74b1ea770177070100010802ff0101621e52fb6900000000060fd1a00177070100020800ff6401018001621e52fb69000000000d19e1c00177070100100700ff0101621b52fe55000089d90177070100240700ff0101621b52fe55000020220177070100380700ff0101621b52fe5500000a9201770701004c0700ff0101621b52fe5500005f2501010163810200760501188e636200620072650000020171016325fc00'

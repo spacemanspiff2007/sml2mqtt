@@ -10,7 +10,7 @@ from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class RefreshActionOperation(ValueOperationBase):
-    def __init__(self, every: DurationType):
+    def __init__(self, every: DurationType) -> None:
         self.every: Final = get_duration(every)
         self.last_time: float = -1
         self.last_value: float | None = None
@@ -28,7 +28,7 @@ class RefreshActionOperation(ValueOperationBase):
         self.last_time = monotonic()
         return self.last_value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<RefreshAction: {self.every}s at 0x{id(self):x}>'
 
     @override
@@ -37,7 +37,7 @@ class RefreshActionOperation(ValueOperationBase):
 
 
 class HeartbeatActionOperation(ValueOperationBase):
-    def __init__(self, every: DurationType):
+    def __init__(self, every: DurationType) -> None:
         self.every: Final = get_duration(every)
         self.last_time: float = -1_000_000_000
         self.last_value: float | None = None
@@ -53,7 +53,7 @@ class HeartbeatActionOperation(ValueOperationBase):
         self.last_time = monotonic()
         return self.last_value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<HeartbeatAction: {self.every}s at 0x{id(self):x}>'
 
     @override
