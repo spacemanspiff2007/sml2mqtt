@@ -14,13 +14,13 @@ if TYPE_CHECKING:
 class SmlValueInfo:
     __slots__ = ('value', 'frame', 'last_pub')
 
-    def __init__(self, sml: SmlListEntry, frame: SmlFrameValues, last_pub: float):
+    def __init__(self, sml: SmlListEntry, frame: SmlFrameValues, last_pub: float) -> None:
         self.value: Final = sml
         self.frame: Final = frame
 
         self.last_pub: Final = last_pub
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} obis={self.value.obis}>'
 
 

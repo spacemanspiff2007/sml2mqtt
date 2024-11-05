@@ -7,7 +7,7 @@ from sml2mqtt.const import DeviceProto
 from sml2mqtt.sml_device import SmlDevice
 
 
-def assert_signatures(a, b):
+def assert_signatures(a, b) -> None:
     sig_a = inspect.signature(a) if a is not None else a
     sig_b = inspect.signature(b) if b is not None else b
     assert sig_a == sig_b, f'\n  {sig_a}\n  {sig_b}\n'
@@ -16,7 +16,7 @@ def assert_signatures(a, b):
 @pytest.mark.parametrize(
     ('proto', 'cls'), [(DeviceProto, SmlDevice), ]
 )
-def test_protocols(proto: type[Protocol], cls: type):
+def test_protocols(proto: type[Protocol], cls: type) -> None:
     for name, proto_obj in inspect.getmembers(proto):
         if name.startswith('_'):
             continue

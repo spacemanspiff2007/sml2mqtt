@@ -19,7 +19,7 @@ TASK: Task | None = None
 IS_CONNECTED: Event | None = None
 
 
-async def start():
+async def start() -> None:
     global IS_CONNECTED, TASK
 
     assert TASK is None
@@ -126,6 +126,6 @@ async def _mqtt_task() -> None:
             IS_CONNECTED.clear()
 
 
-def publish(topic: str, value: int | float | str | bytes, qos: int, retain: bool):
+def publish(topic: str, value: int | float | str | bytes, qos: int, retain: bool) -> None:
     if QUEUE is not None:
         QUEUE.put_nowait((topic, value, qos, retain))

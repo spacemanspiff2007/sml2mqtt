@@ -17,7 +17,7 @@ def get_watchdog() -> tuple[Mock, Watchdog]:
     return m, w
 
 
-async def test_watchdog_expire():
+async def test_watchdog_expire() -> None:
 
     m, w = get_watchdog()
     w.start()
@@ -34,7 +34,7 @@ async def test_watchdog_expire():
     await asyncio.sleep(0.05)
 
 
-async def test_watchdog_no_expire():
+async def test_watchdog_no_expire() -> None:
 
     m, w = get_watchdog()
     w.start()
@@ -51,7 +51,7 @@ async def test_watchdog_no_expire():
     await asyncio.sleep(0.05)
 
 
-async def test_watchdog_setup_and_feed(sml_data_1):
+async def test_watchdog_setup_and_feed(sml_data_1) -> None:
 
     obj = SmlDevice('test')
     obj.frame_handler = obj.process_frame

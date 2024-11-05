@@ -22,7 +22,7 @@ class ShutdownObj:
     coro: Callable[[], Awaitable]
     msg: str
 
-    async def do(self):
+    async def do(self) -> None:
         try:
             log.debug(self.msg)
             await self.coro()
@@ -34,7 +34,7 @@ class ShutdownObj:
                 log.error(line)
 
 
-async def shutdown_coro():
+async def shutdown_coro() -> None:
     log.debug('Starting shutdown')
     for obj in SHUTDOWN_OBJS:
         await obj.do()
@@ -56,7 +56,7 @@ SHUTDOWN_LOCK: Final = Lock()
 SHUTDOWN_CALL: Task | None = None
 
 
-async def do_shutdown_async():
+async def do_shutdown_async() -> None:
     global SHUTDOWN_CALL
 
     try:
@@ -78,10 +78,10 @@ def do_shutdown():
         SHUTDOWN_CALL = create_task(do_shutdown_async())
 
 
-def _signal_handler_shutdown(sig, frame):
+def _signal_handler_shutdown(sig, frame) -> None:
     do_shutdown()
 
 
-def signal_handler_setup():
+def signal_handler_setup() -> None:
     signal.signal(signal.SIGINT, _signal_handler_shutdown)
     signal.signal(signal.SIGTERM, _signal_handler_shutdown)

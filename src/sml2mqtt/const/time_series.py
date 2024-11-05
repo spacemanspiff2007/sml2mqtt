@@ -18,7 +18,7 @@ def get_duration(obj: DurationType) -> int | float:
 class TimeSeries:
     __slots__ = ('period', 'times', 'values', 'is_full', 'wait_for_data')
 
-    def __init__(self, period: DurationType, wait_for_data: bool = False):
+    def __init__(self, period: DurationType, wait_for_data: bool = False) -> None:
         self.wait_for_data: Final = wait_for_data
         self.period: Final = get_duration(period)
         self.times: Final[deque[float]] = deque()
@@ -26,12 +26,12 @@ class TimeSeries:
 
         self.is_full: bool = False
 
-    def clear(self):
+    def clear(self) -> None:
         self.is_full = False
         self.times.clear()
         self.values.clear()
 
-    def add_value(self, value: int | float | None, timestamp: float):
+    def add_value(self, value: int | float | None, timestamp: float) -> None:
         start = timestamp - self.period
 
         if value is not None:

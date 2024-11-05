@@ -13,7 +13,7 @@ from sml2mqtt.sml_device import ALL_DEVICES, SmlDevice
 from sml2mqtt.sml_source import create_source
 
 
-async def a_main():
+async def a_main() -> None:
     # Add possibility to stop program with Ctrl + c
     signal_handler_setup()
 

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
@@ -14,8 +14,13 @@ repos:
 
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.5
+    rev: v0.7.2
     hooks:
+      - id: ruff
+        name: ruff unused imports
+        #  F401 [*] {name} imported but unused
+        args: [ "--select", "F401", "--extend-exclude", "__init__.py", "--fix"]
+
       - id: ruff
         #  I001 [*] Import block is un-sorted or un-formatted
         # UP035 [*] Import from {target} instead: {names}
@@ -23,12 +28,19 @@ repos:
         #  Q001 [*] Double quote multiline found but single quotes preferred
         args: [ "--select", "I001,UP035,Q000,Q001", "--fix"]
 
-      - id: ruff
 
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
       - id: rst-backticks
+
+
+  - repo: https://github.com/JelleZijlstra/autotyping
+    rev: 24.9.0
+    hooks:
+      - id: autotyping
+        types: [python]
+        args: [--safe]
 
 
   - repo: meta

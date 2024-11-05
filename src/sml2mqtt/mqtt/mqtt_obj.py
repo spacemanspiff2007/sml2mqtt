@@ -12,11 +12,11 @@ from .errors import MqttConfigValuesMissingError, MqttTopicEmpty, TopicFragmentE
 pub_func: Callable[[str, int | float | str, int, bool], Any] = publish
 
 
-def publish_analyze(topic: str, value: int | float | str, qos: int, retain: bool):
+def publish_analyze(topic: str, value: int | float | str, qos: int, retain: bool) -> None:
     get_logger('mqtt.pub').info(f'{topic}: {value} (QOS: {qos}, retain: {retain})')
 
 
-def patch_analyze():
+def patch_analyze() -> None:
     global pub_func
 
     pub_func = publish_analyze
@@ -29,7 +29,7 @@ class MqttCfg:
     qos: int | None = None
     retain: bool | None = None
 
-    def set_config(self, config: OptionalMqttPublishConfig):
+    def set_config(self, config: OptionalMqttPublishConfig) -> None:
         self.topic_full = config.full_topic
         self.topic_fragment = config.topic
         self.qos = config.qos
@@ -37,7 +37,7 @@ class MqttCfg:
 
 
 class MqttObj:
-    def __init__(self, topic_fragment: str | None = None, qos: int | None = None, retain: bool | None = None):
+    def __init__(self, topic_fragment: str | None = None, qos: int | None = None, retain: bool | None = None) -> None:
 
         # Configured parts
         self.cfg = MqttCfg(topic_fragment=topic_fragment, qos=qos, retain=retain)
@@ -50,7 +50,7 @@ class MqttObj:
         self.parent: MqttObj | None = None
         self.children: list[MqttObj] = []
 
-    def publish(self, value: str | int | float):
+    def publish(self, value: str | int | float) -> None:
         pub_func(self.topic, value, self.qos, self.retain)
 
     def update(self) -> 'MqttObj':
@@ -130,14 +130,14 @@ class MqttObj:
 BASE_TOPIC: Final = MqttObj()
 
 
-def setup_base_topic(topic: str, qos: int, retain: bool):
+def setup_base_topic(topic: str, qos: int, retain: bool) -> None:
     BASE_TOPIC.cfg.topic_fragment = topic
     BASE_TOPIC.cfg.qos = qos
     BASE_TOPIC.cfg.retain = retain
     BASE_TOPIC.update()
 
 
-def check_for_duplicate_topics(obj: MqttObj):
+def check_for_duplicate_topics(obj: MqttObj) -> None:
     log = get_logger('mqtt')
 
     topics: set[str] = set()

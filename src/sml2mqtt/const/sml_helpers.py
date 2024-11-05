@@ -57,14 +57,14 @@ class SmlFrameValues:
             c.values[value.obis] = value
         return c
 
-    def __init__(self, timestamp: float):
+    def __init__(self, timestamp: float) -> None:
         self.timestamp: Final = timestamp
         self.values: Final[dict[str, SmlListEntry]] = {}
 
     def __getattr__(self, item: str) -> SmlListEntry:
         return self.values[item]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.values)
 
     def get_value(self, obis: str) -> SmlListEntry | None:

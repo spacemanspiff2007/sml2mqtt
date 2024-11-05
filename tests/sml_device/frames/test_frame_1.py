@@ -1,4 +1,3 @@
-from binascii import a2b_hex
 
 import pytest
 
@@ -8,7 +7,7 @@ from sml2mqtt.sml_device import SmlDevice
 
 
 @pytest.mark.ignore_log_errors()
-async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_analyze, sml_frame_1_analyze):
+async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_analyze, sml_frame_1_analyze) -> None:
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
 
@@ -28,7 +27,7 @@ device_name/status: ERROR (QOS: 0, retain: False)'''
 
 
 @pytest.mark.ignore_log_warnings()
-async def test_frame_no_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_analyze, sml_frame_1_analyze):
+async def test_frame_no_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_analyze, sml_frame_1_analyze) -> None:
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
 
@@ -98,7 +97,7 @@ SHUTDOWN
 0a0149534b0005020de2/status: SHUTDOWN (QOS: 0, retain: False)'''
 
 
-async def test_frame_with_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_analyze, sml_frame_1_analyze):
+async def test_frame_with_config(no_mqtt, caplog, monkeypatch, sml_frame_1, arg_analyze, sml_frame_1_analyze) -> None:
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
 

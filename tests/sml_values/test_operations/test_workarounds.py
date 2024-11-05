@@ -24,17 +24,17 @@ def get_info() -> SmlValueInfo:
     return SmlValueInfo(power, SmlFrameValues.create(0, [power, energy]), 0)
 
 
-def test_repr():
+def test_repr() -> None:
     o = NegativeOnEnergyMeterWorkaroundOperation()
     check_operation_repr(o, '0100010800ff')
 
 
-def test_none():
+def test_none() -> None:
     o = NegativeOnEnergyMeterWorkaroundOperation()
     assert o.process_value(None, get_info()) is None
 
 
-def test_make_negative():
+def test_make_negative() -> None:
     o = NegativeOnEnergyMeterWorkaroundOperation()
 
     info = get_info()
@@ -43,7 +43,7 @@ def test_make_negative():
     assert o.process_value(value, info) == -4189.0
 
 
-def test_keep_positive():
+def test_keep_positive() -> None:
     o = NegativeOnEnergyMeterWorkaroundOperation()
 
     info = get_info()
@@ -55,7 +55,7 @@ def test_keep_positive():
     assert o.process_value(value, info) == 4189.0
 
 
-def test_description():
+def test_description() -> None:
     check_description(
         NegativeOnEnergyMeterWorkaroundOperation(),
         '- Negative On Status Of Energy Meter 0100010800ff'

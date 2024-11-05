@@ -8,7 +8,7 @@ from sml2mqtt.config.types import ObisHex  # noqa: TCH001
 from sml2mqtt.const import DurationType  # noqa: TCH001
 
 
-def test_obis():
+def test_obis() -> None:
     class TestObis(BaseModel):
         value: ObisHex
 
@@ -17,7 +17,7 @@ def test_obis():
     assert TestObis.model_validate({'value': '0100000009FF  '}).value == '0100000009ff'
 
 
-def test_duration():
+def test_duration() -> None:
     class TestObis(BaseModel):
         value: DurationType
 

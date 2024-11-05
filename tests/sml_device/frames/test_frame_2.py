@@ -1,4 +1,3 @@
-from binascii import a2b_hex
 
 import pytest
 
@@ -7,7 +6,7 @@ from sml2mqtt.sml_device import SmlDevice
 
 
 @pytest.mark.ignore_log_errors()
-async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_2, arg_analyze, sml_frame_2_analyze):
+async def test_frame_no_match_obis_id(no_mqtt, caplog, monkeypatch, sml_frame_2, arg_analyze, sml_frame_2_analyze) -> None:
     device = SmlDevice('device_name')
     device.frame_handler = device.analyze_frame
 

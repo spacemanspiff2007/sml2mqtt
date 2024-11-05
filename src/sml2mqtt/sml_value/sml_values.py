@@ -19,7 +19,7 @@ class SmlValues:
         self._all_ids: frozenset[str] = frozenset()
         self._values: tuple[SmlValue, ...] = ()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f'<{self.__class__.__name__:s} '
             f'processed={",".join(self._processed_ids):s}, '

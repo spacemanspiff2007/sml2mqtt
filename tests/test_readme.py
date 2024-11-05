@@ -5,7 +5,7 @@ from easyconfig.yaml import yaml_rt
 from sml2mqtt.config.config import Settings
 
 
-def test_readme(pytestconfig):
+def test_readme(pytestconfig) -> None:
 
     readme = pytestconfig.rootpath / 'readme.md'
     assert readme.is_file()

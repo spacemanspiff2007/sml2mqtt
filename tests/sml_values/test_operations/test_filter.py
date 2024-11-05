@@ -9,7 +9,7 @@ from sml2mqtt.sml_value.operations import (
 )
 
 
-def test_skip():
+def test_skip() -> None:
     f = SkipZeroMeterOperation()
     check_operation_repr(f)
 
@@ -24,7 +24,7 @@ def test_skip():
     )
 
 
-def test_delta():
+def test_delta() -> None:
     f = DeltaFilterOperation(min_value=5)
     check_operation_repr(f, 'min=5 min_percent=None')
     check_description(f, ['- Delta Filter:', '    Min  : 5'])
@@ -67,7 +67,7 @@ def test_delta():
     assert f.process_value(15, None) == 15
 
 
-def test_on_change():
+def test_on_change() -> None:
     f = OnChangeFilterOperation()
     check_operation_repr(f)
 
@@ -82,7 +82,7 @@ def test_on_change():
     )
 
 
-def test_range():
+def test_range() -> None:
 
     # ---------------------------------------------------------------------------------------------
     # Min
@@ -158,7 +158,7 @@ def test_range():
     )
 
 
-def test_throttle_filter(monotonic):
+def test_throttle_filter(monotonic) -> None:
     f = ThrottleFilterOperation(30)
     check_operation_repr(f, '30s')
     check_description(f, '- Throttle Filter: 30 seconds')

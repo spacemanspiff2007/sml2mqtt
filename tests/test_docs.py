@@ -96,16 +96,16 @@ def validate_yaml_blocks(file: Path, prefix_model: str = 'yamlmodel: ', func: Ca
         obj.validate(func)
 
 
-def test_yaml_samples(pytestconfig):
+def test_yaml_samples(pytestconfig) -> None:
 
     class DummyOperationParent:
-        def add_operation(self, obj):
+        def add_operation(self, obj) -> None:
             pass
 
     class HasOperationsModel(BaseModel):
         operations: list[BaseModel]
 
-    def check_obj(model: BaseModel):
+    def check_obj(model: BaseModel) -> None:
         if model.__class__ in MAPPING:
             setup_operations(DummyOperationParent(), HasOperationsModel(operations=[model]))
 
@@ -114,7 +114,7 @@ def test_yaml_samples(pytestconfig):
             validate_yaml_blocks(file, func=check_obj)
 
 
-def _get_documented_objs(path: Path, objs: set[str]):
+def _get_documented_objs(path: Path, objs: set[str]) -> None:
 
     current_module = ''
 
@@ -132,7 +132,7 @@ def _get_documented_objs(path: Path, objs: set[str]):
             objs.add(obj_name)
 
 
-def test_config_documentation_complete(pytestconfig):
+def test_config_documentation_complete(pytestconfig) -> None:
     cfg_model_dir: Path = pytestconfig.rootpath / 'src' / 'sml2mqtt' / 'config'
     assert cfg_model_dir.is_dir()
 

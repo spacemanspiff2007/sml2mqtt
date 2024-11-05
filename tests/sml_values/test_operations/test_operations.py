@@ -10,18 +10,18 @@ from sml2mqtt.sml_value.base import ValueOperationBase
 from sml2mqtt.sml_value.operations import OffsetOperation, OrOperation, SequenceOperation
 
 
-def test_repr():
+def test_repr() -> None:
     check_operation_repr(OrOperation())
     check_operation_repr(SequenceOperation())
 
 
 class MockOperationsGroup:
-    def __init__(self, operation: ValueOperationBase):
+    def __init__(self, operation: ValueOperationBase) -> None:
         self.sentinel = object()
         self.operation: Final = operation
         self.mocks: list[Mock] = []
 
-    def assert_called(self, *args: float | Literal['-']):
+    def assert_called(self, *args: float | Literal['-']) -> None:
         for mock, arg in zip(self.mocks, args, strict=True):    # type: Mock, float | Literal['-']
             if arg == '-':
                 mock.assert_not_called()
@@ -55,25 +55,25 @@ def get_mock_group(cls: type[OrOperation | SequenceOperation | SmlValue], *retur
     return m
 
 
-def test_or_no_exit():
+def test_or_no_exit() -> None:
     m = get_mock_group(OrOperation, None, None, None)
     assert m.process_value(1) is None
     m.assert_called(1, 1, 1)
 
 
-def test_or_last_exit():
+def test_or_last_exit() -> None:
     m = get_mock_group(OrOperation, None, None, 5)
     assert m.process_value(1) == 5
     m.assert_called(1, 1, 1)
 
 
-def test_or_first_exit():
+def test_or_first_exit() -> None:
     m = get_mock_group(OrOperation, 3, 99, 77)
     assert m.process_value(1) == 3
     m.assert_called(1, 1, 1)
 
 
-def test_or_single():
+def test_or_single() -> None:
     m = get_mock_group(OrOperation, None)
     assert m.process_value(1) is None
     m.assert_called(1)
@@ -83,7 +83,7 @@ def test_or_single():
     m.assert_called(1)
 
 
-def test_or_description():
+def test_or_description() -> None:
     o = OrOperation()
     o.add_operation(OffsetOperation(3))
 
@@ -109,28 +109,28 @@ def test_or_description():
 
 
 @pytest.mark.parametrize('cls', [SequenceOperation, SmlValue])
-def test_seq_no_exit(cls):
+def test_seq_no_exit(cls) -> None:
     m = get_mock_group(cls, 1, 2, 3)
     assert m.process_value(0) == 3
     m.assert_called(0, 1, 2)
 
 
 @pytest.mark.parametrize('cls', [SequenceOperation, SmlValue])
-def test_seq_first_exit(cls):
+def test_seq_first_exit(cls) -> None:
     m = get_mock_group(cls, None, 2, None)
     assert m.process_value(1) is None
     m.assert_called(1, None, 2)
 
 
 @pytest.mark.parametrize('cls', [SequenceOperation, SmlValue])
-def test_seq_last_exit(cls):
+def test_seq_last_exit(cls) -> None:
     m = get_mock_group(cls, 1, 2, None)
     assert m.process_value(0) is None
     m.assert_called(0, 1, 2)
 
 
 @pytest.mark.parametrize('cls', [SequenceOperation, SmlValue])
-def test_seq_single(cls):
+def test_seq_single(cls) -> None:
     m = get_mock_group(cls, None)
     assert m.process_value(1) is None
     m.assert_called(1)
@@ -140,7 +140,7 @@ def test_seq_single(cls):
     m.assert_called(1)
 
 
-def test_sequence_description():
+def test_sequence_description() -> None:
     o = SequenceOperation()
     o.add_operation(OffsetOperation(3))
 

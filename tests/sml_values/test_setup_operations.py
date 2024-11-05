@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 import sml2mqtt.config.operations as operations_module
 from sml2mqtt.config.operations import Offset, OperationsModels, Sequence
-from sml2mqtt.sml_value.operations import OffsetOperation, SequenceOperation, VirtualMeterOperation
+from sml2mqtt.sml_value.operations import SequenceOperation, VirtualMeterOperation
 from sml2mqtt.sml_value.setup_operations import MAPPING, get_kwargs_names, setup_operations
 
 
@@ -97,7 +97,7 @@ def test_all_models_in_mapping():
         raise ValueError(msg)
 
 
-def test_simple():
+def test_simple() -> None:
     cfg = Sequence(sequence=[
         Offset(offset=5)
     ])
@@ -112,7 +112,7 @@ def test_simple():
     ]
 
 
-def test_virtual_meter():
+def test_virtual_meter() -> None:
 
     cfg = Sequence(sequence=[
         {'type': 'meter', 'start now': True, 'reset times': ['02:00'], 'reset days': ['mon', 6]},
@@ -131,7 +131,7 @@ def test_virtual_meter():
     assert o._dt_finder.dows == (1, )
 
 
-def test_complex():
+def test_complex() -> None:
     cfg = Sequence(sequence=[
         {'offset': 5},
         {'or': [{'offset': 5}, {'factor': 3}]}

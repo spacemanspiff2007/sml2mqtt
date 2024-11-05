@@ -23,11 +23,11 @@ class SmlDevices:
         self._devices = (*self._devices, device)
         return device
 
-    async def start(self):
+    async def start(self) -> None:
         for device in self._devices:
             await device.start()
 
-    async def cancel_and_wait(self):
+    async def cancel_and_wait(self) -> None:
         for device in self._devices:
             await device.cancel_and_wait()
 

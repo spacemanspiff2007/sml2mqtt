@@ -7,7 +7,7 @@ from sml2mqtt.const import DeviceProto
 
 class DeviceMock(DeviceProto):
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.on_source_data = Mock()
         self.on_source_failed = Mock()
         self.on_error = Mock()

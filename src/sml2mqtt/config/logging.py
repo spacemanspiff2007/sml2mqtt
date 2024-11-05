@@ -1,7 +1,7 @@
 import logging
 
 from easyconfig import BaseModel
-from pydantic import Extra, Field, field_validator
+from pydantic import Field, field_validator
 
 
 class LoggingSettings(BaseModel):

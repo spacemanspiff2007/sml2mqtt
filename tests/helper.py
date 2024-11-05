@@ -30,7 +30,7 @@ class PatchedSmlStreamReader(SmlStreamReader):
     _CRC_ERROR = 'CRC_ERROR'
 
     @override
-    def __init__(self, build_ctx: CTX_HINT | None = None):
+    def __init__(self, build_ctx: CTX_HINT | None = None) -> None:
         super().__init__(build_ctx)
         self.returns = []
 
@@ -48,7 +48,7 @@ class PatchedSmlStreamReader(SmlStreamReader):
         else:
             raise TypeError()
 
-    def clear(self):
+    def clear(self) -> None:
         super().clear()
 
     def get_frame(self) -> EnhancedSmlFrame | None:

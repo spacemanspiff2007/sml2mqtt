@@ -11,7 +11,7 @@ from pydantic import Discriminator, Field, StrictBool, StrictFloat, StrictInt, T
 
 from sml2mqtt.const import DateTimeFinder, DurationType, TimeSeries
 
-from .types import Number, ObisHex, PercentStr  # noqa: TCH001
+from .types import Number, ObisHex  # noqa: TCH001
 
 
 class EmptyKwargs(TypedDict):

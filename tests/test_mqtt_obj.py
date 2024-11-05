@@ -3,7 +3,7 @@ import pytest
 from sml2mqtt.mqtt import MqttObj, check_for_duplicate_topics
 
 
-def test_topmost(monkeypatch):
+def test_topmost(monkeypatch) -> None:
     parent = MqttObj('base', 2, True).update()
 
     assert parent.topic == 'base'
@@ -16,14 +16,14 @@ def test_topmost(monkeypatch):
     assert parent.retain is True
 
 
-def test_prefix_empty(monkeypatch):
+def test_prefix_empty(monkeypatch) -> None:
     parent = MqttObj('', 2, True).update()
     child = parent.create_child('child')
 
     assert (child.topic, child.qos, child.retain) == ('child', 2, True)
 
 
-def test_child_change(monkeypatch):
+def test_child_change(monkeypatch) -> None:
     parent = MqttObj('base', 2, True).update()
     child = parent.create_child('child')
 
@@ -53,7 +53,7 @@ def test_child_change(monkeypatch):
 
 
 @pytest.mark.ignore_log_warnings()
-def test_check_for_duplicate_messages(caplog):
+def test_check_for_duplicate_messages(caplog) -> None:
     parent = MqttObj('base', 2, True).update()
     parent.create_child('child')
     parent.create_child('child')

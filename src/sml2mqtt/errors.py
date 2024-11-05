@@ -57,15 +57,15 @@ class ObisIdForConfigurationMappingNotFoundError(Sml2MqttExceptionWithLog):
 # ------------------------------------------------------------------------------------
 
 class HttpStatusError(Sml2MqttExceptionWithLog):
-    def __init__(self, status: int):
+    def __init__(self, status: int) -> None:
         super().__init__()
         self.status: Final = status
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__:s}: {self.status:d}'
 
     @override
-    def log_msg(self, log: Logger):
+    def log_msg(self, log: Logger) -> None:
         log.error(f'Received http status {self.status}')
 
     def __eq__(self, other):
@@ -78,12 +78,12 @@ class HttpStatusError(Sml2MqttExceptionWithLog):
 # Value Processing Errors
 # ------------------------------------------------------------------------------------
 class UnprocessedObisValuesReceivedError(Sml2MqttExceptionWithLog):
-    def __init__(self, *values: SmlListEntry):
+    def __init__(self, *values: SmlListEntry) -> None:
         super().__init__()
         self.values: Final = values
 
     @override
-    def log_msg(self, log: Logger):
+    def log_msg(self, log: Logger) -> None:
         log.error(f'Unexpected obis id{"" if len(self.values) == 1 else "s"} received!')
         for value in self.values:
             for line in value.format_msg().splitlines():
@@ -91,10 +91,10 @@ class UnprocessedObisValuesReceivedError(Sml2MqttExceptionWithLog):
 
 
 class RequiredObisValueNotInFrameError(Sml2MqttExceptionWithLog):
-    def __init__(self, *obis: str):
+    def __init__(self, *obis: str) -> None:
         super().__init__()
         self.obis: Final = obis
 
     @override
-    def log_msg(self, log: Logger):
+    def log_msg(self, log: Logger) -> None:
         log.error(f'Expected obis id{"" if len(self.obis) == 1 else "s"} missing in frame: {", ".join(self.obis)}!')
