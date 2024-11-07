@@ -443,3 +443,108 @@ The reported value will be the weighted mean value of the last 30s.
       min: 10
       min %: 5
     - refresh action: 01:00   # ... but refresh every hour
+
+
+Home Assistant MQTT Sensors
+--------------------------------------
+
+This will add MQTT Sensors to `Home Assistant <https://www.home-assistant.io/>`_. One can add this to a `package <https://www.home-assistant.io/docs/configuration/packages/>`_.
+
+.. code-block:: yaml
+
+   mqtt:
+     sensor:
+       - name: "sml01_energy_total"
+         unique_id: f855b69a-828b-4cad-bafd-7563a909153e
+         state_topic: "sml2mqtt/sml01/energy_total"
+         icon: mdi:transmission-tower
+         unit_of_measurement: kWh
+         state_class: total
+         device_class: energy
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
+       - name: "sml01_energy_total_returned"
+         unique_id: 855b9e06-9d39-41e9-afc0-ee0f567aacb2
+         state_topic: "sml2mqtt/sml01/energy_total_returned"
+         icon: mdi:transmission-tower
+         unit_of_measurement: kWh
+         state_class: total
+         device_class: energy
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
+         operations:
+           refresh action: 24:00
+       - name: "sml01_momentary_power"
+         unique_id: 5ddc1f63-bd73-4d9b-86a1-3e7dfeccee1e
+         state_topic: "sml2mqtt/sml01/momentary_power"
+         unit_of_measurement: W
+         state_class: measurement
+         device_class: power
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
+       - name: "sml01_real_power_l1"
+         unique_id: 3db5879a-a810-41cf-9489-359d9486948c
+         state_topic: "sml2mqtt/sml01/real_power_l1"
+         unit_of_measurement: W
+         state_class: measurement
+         device_class: power
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
+       - name: "sml01_real_power_l2"
+         unique_id: cd12d5ff-4662-483f-8744-7cf44e171ccc
+         state_topic: "sml2mqtt/sml01/real_power_l2"
+         unit_of_measurement: W
+         state_class: measurement
+         device_class: power
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
+       - name: "sml01_real_power_l3"
+         unique_id: d9f37985-65d8-46c8-84c6-c8588e589d62
+         state_topic: "sml2mqtt/sml01/real_power_l3"
+         unit_of_measurement: W
+         state_class: measurement
+         device_class: power
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
+       - name: "sml01_voltage_l1"
+         unique_id: 05ab47a3-3c91-4de1-afe6-af3efd10852a
+         state_topic: "sml2mqtt/sml01/voltage_l1"
+         unit_of_measurement: W
+         state_class: measurement
+         device_class: voltage
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
+       - name: "sml01_voltage_l2"
+         unique_id: 694fb3cd-b9b7-4d08-821a-abaa7766cc76
+         state_topic: "sml2mqtt/sml01/voltage_l2"
+         unit_of_measurement: W
+         state_class: measurement
+         device_class: voltage
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
+       - name: "sml01_voltage_l3"
+         unique_id: b6595e49-c7d9-491e-8947-855e61c987ae
+         state_topic: "sml2mqtt/sml01/voltage_l3"
+         unit_of_measurement: W
+         state_class: measurement
+         device_class: voltage
+         availability:
+           topic: "sml2mqtt/status"
+           payload_available: "ONLINE"
+           payload_not_available: "OFFLINE"
