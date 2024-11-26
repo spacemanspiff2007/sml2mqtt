@@ -53,7 +53,7 @@ devices:   # Device configuration by ID or url
       - negative on energy meter status: true   # Set to "true" to enable or to "false" to disable workaround. If the default obis code for the energy meter is wrong set to the appropriate meter obis code instead
       - factor: 3   # Factor with which the value gets multiplied
       - offset: 100   # Offset that gets added on the value
-      - round: 2   # Round to the specified digits
+      - round: 2   # Round to the specified digits, negative for tens
       - type: change filter   # Filter which passes only changes
       - refresh action: 600   # Refresh interval
 '''

@@ -16,6 +16,7 @@ will be reported can be processed in various ways with operations.
    cli
    getting_started
    operations
+   smart_home_systems
 
 
 Indices and tables

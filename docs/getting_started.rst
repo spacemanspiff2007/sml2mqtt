@@ -156,7 +156,7 @@ serial or http (e.g. for tibber) and edit the mqtt settings.
 4. Run with analyze
 ======================================
 
-Now run ``sml2mqtt`` with the path to the configuration file and the ``--analyze`` option.
+Now run ``sml2mqtt`` with the path to the configuration file and the ``-a`` or ``--analyze`` option.
 (see :ref:`command line interface <COMMAND_LINE_INTERFACE>`).
 This will process one sml frame from the meter and report the output.
 It's a convenient way to check what values will be reported.

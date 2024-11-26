@@ -96,6 +96,7 @@ class HeartbeatAction(BaseModel):
         description='Interval'
     )
 
+
 # -------------------------------------------------------------------------------------------------
 # Math
 # -------------------------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ class Offset(BaseModel):
 
 
 class Round(BaseModel):
-    digits: int = Field(ge=0, le=6, alias='round', description='Round to the specified digits')
+    digits: int = Field(ge=-4, le=6, alias='round', description='Round to the specified digits, negative for tens')
 
 
 # -------------------------------------------------------------------------------------------------
