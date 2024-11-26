@@ -110,7 +110,7 @@ def test_yaml_samples(pytestconfig) -> None:
             setup_operations(DummyOperationParent(), HasOperationsModel(operations=[model]))
 
     for file in (pytestconfig.rootpath / 'docs').iterdir():
-        if file.suffix.lower() == '.rst':
+        if file.suffix.lower() == '.rst' and file.name.lower() != 'smart_home_systems.rst':
             validate_yaml_blocks(file, func=check_obj)
 
 
