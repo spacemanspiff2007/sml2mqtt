@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from easyconfig import AppBaseModel, BaseModel, create_app_config
 from pydantic import Field
 
@@ -42,7 +44,7 @@ class Settings(AppBaseModel):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     mqtt: MqttConfig = Field(default_factory=MqttConfig)
     general: GeneralSettings = Field(default_factory=GeneralSettings)
-    inputs: list[HttpSourceSettings | SerialSourceSettings] = Field(default_factory=list, discriminator='type')
+    inputs: list[Annotated[HttpSourceSettings | SerialSourceSettings, Field(discriminator='type')]] = []
     devices: dict[LowerStr, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
 
 

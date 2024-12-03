@@ -7,6 +7,10 @@ from energy meters and report the values through mqtt.
 The meters can be read through serial ports or through http (e.g. Tibber) and the values that
 will be reported can be processed in various ways with operations.
 
+For reading through the serial port an USB to IR adapter is required.
+These are sometimes also called "Hichi" reader
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

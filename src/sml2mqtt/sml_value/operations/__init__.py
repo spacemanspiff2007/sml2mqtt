@@ -7,7 +7,7 @@ from .filter import (
     SkipZeroMeterOperation,
     ThrottleFilterOperation,
 )
-from .math import FactorOperation, OffsetOperation, RoundOperation
+from .math import FactorOperation, OffsetOperation, RoundOperation, RoundToMultipleOperation
 from .operations import OrOperation, SequenceOperation
 from .time_series import MaxOfIntervalOperation, MeanOfIntervalOperation, MinOfIntervalOperation
 from .workarounds import NegativeOnEnergyMeterWorkaroundOperation

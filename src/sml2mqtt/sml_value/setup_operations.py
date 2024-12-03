@@ -20,6 +20,7 @@ from sml2mqtt.config.operations import (
     RangeFilter,
     RefreshAction,
     Round,
+    RoundToMultiple,
     Sequence,
     ThrottleFilter,
     VirtualMeter,
@@ -41,6 +42,7 @@ from sml2mqtt.sml_value.operations import (
     RangeFilterOperation,
     RefreshActionOperation,
     RoundOperation,
+    RoundToMultipleOperation,
     SequenceOperation,
     ThrottleFilterOperation,
     VirtualMeterOperation,
@@ -67,6 +69,7 @@ MAPPING = {
     OnChangeFilter: OnChangeFilterOperation,
     HeartbeatAction: HeartbeatActionOperation,
     DeltaFilter: DeltaFilterOperation,
+    RangeFilter: RangeFilterOperation,
 
     RefreshAction: RefreshActionOperation,
     ThrottleFilter: ThrottleFilterOperation,
@@ -74,7 +77,7 @@ MAPPING = {
     Factor: FactorOperation,
     Offset: OffsetOperation,
     Round: RoundOperation,
-    RangeFilter: RangeFilterOperation,
+    RoundToMultiple: RoundToMultipleOperation,
 
     NegativeOnEnergyMeterWorkaround: create_workaround_negative_on_energy_meter,
 

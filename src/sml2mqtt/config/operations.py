@@ -112,6 +112,15 @@ class Round(BaseModel):
     digits: int = Field(ge=-4, le=6, alias='round', description='Round to the specified digits, negative for tens')
 
 
+class RoundToMultiple(BaseModel):
+    """Rounds to the multiple of a given value.
+    """
+
+    type: Literal['round to multiple']
+    value: int = Field(description='Round to the multiple of the given value')
+    round: Literal['up', 'down', 'nearest'] = Field(description='Round up, down or to the nearset multiple')
+
+
 # -------------------------------------------------------------------------------------------------
 # Workarounds
 # -------------------------------------------------------------------------------------------------
@@ -264,7 +273,7 @@ class MeanOfInterval(HasIntervalFields):
 OperationsModels = (
     OnChangeFilter, DeltaFilter, HeartbeatAction, RangeFilter,
     RefreshAction, ThrottleFilter,
-    Factor, Offset, Round,
+    Factor, Offset, Round, RoundToMultiple,
     NegativeOnEnergyMeterWorkaround,
     Or, Sequence,
     VirtualMeter, MaxValue, MinValue,
