@@ -190,6 +190,24 @@ Example
     round: 2
 
 
+Round To Multiple
+--------------------------------------
+
+.. autopydantic_model:: RoundToMultiple
+   :inherited-members: BaseModel
+
+Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..
+    YamlModel: RoundToMultiple
+
+.. code-block:: yaml
+
+    type: round to multiple
+    value: 20
+    round: down
+
+
 Workarounds
 ======================================
 
