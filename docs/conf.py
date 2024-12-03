@@ -89,7 +89,7 @@ if RTD_BUILD:
 if not RTD_BUILD:
     nitpick_ignore_regex = [
         (re.compile(r'^py:data'), re.compile(r'typing\..+')),
-        (re.compile(r'^py:class'), re.compile(r'pydantic_core\..+')),
+        (re.compile(r'^py:class'), re.compile(r'(?:pydantic_core|pydantic)\..+')),
         # WARNING: py:class reference target not found: sml2mqtt.config.operations.Annotated
         (re.compile(r'^py:class'), re.compile(r'.+\.Annotated')),
     ]
