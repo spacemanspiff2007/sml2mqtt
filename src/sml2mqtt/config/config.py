@@ -1,7 +1,10 @@
-from easyconfig import AppBaseModel, BaseModel, Field, create_app_config
+from typing import Annotated
+
+from easyconfig import AppBaseModel, BaseModel, create_app_config
+from pydantic import Field
 
 from .device import SmlDeviceConfig, SmlValueConfig
-from .inputs import SerialSourceSettings, SmlSourceSettingType
+from .inputs import HttpSourceSettings, SerialSourceSettings
 from .logging import LoggingSettings
 from .mqtt import MqttConfig, OptionalMqttPublishConfig
 from .types import LowerStr, ObisHex
@@ -41,7 +44,7 @@ class Settings(AppBaseModel):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     mqtt: MqttConfig = Field(default_factory=MqttConfig)
     general: GeneralSettings = Field(default_factory=GeneralSettings)
-    inputs: list[SmlSourceSettingType] = Field(default_factory=list)
+    inputs: list[Annotated[HttpSourceSettings | SerialSourceSettings, Field(discriminator='type')]] = []
     devices: dict[LowerStr, SmlDeviceConfig] = Field({}, description='Device configuration by ID or url',)
 
 
