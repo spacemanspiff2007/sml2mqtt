@@ -41,7 +41,8 @@ def setup_log() -> None:
 
     # File Handler
     file_path = sml2mqtt.CONFIG.logging.file
-    if file_path.lower() == 'stdout':
+    log_to_stdout = file_path.lower() == 'stdout'
+    if log_to_stdout:
         handler = logging.StreamHandler(sys.stdout)
     else:
         log_file = Path(file_path)
@@ -54,14 +55,14 @@ def setup_log() -> None:
         )
 
     handler.setFormatter(log_format)
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(level)
 
     # Bind handler to logger
     root_log = logging.getLogger()
     root_log.addHandler(handler)
 
     # If we analyze we print, too
-    if sml2mqtt.CMD_ARGS.analyze:
+    if sml2mqtt.CMD_ARGS.analyze and not log_to_stdout:
         ch = logging.StreamHandler(sys.stdout)
         ch.setLevel(level)
         ch.setFormatter(log_format)
