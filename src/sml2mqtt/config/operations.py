@@ -326,7 +326,7 @@ OperationsTypeAnnotated: TypeAlias = Annotated[
     )
 ]
 
-OperationsListType = Annotated[list[OperationsTypeAnnotated], Len(min_length=1)]
+OperationsListType = Annotated[list[OperationsTypeAnnotated], Len(min_length=0)]
 
 
 def cleanup_validation_errors(msg: str) -> str:
