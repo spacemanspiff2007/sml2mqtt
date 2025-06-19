@@ -126,20 +126,70 @@ It is now possible to start, stop, restart and check the status of sml2mqtt with
     sudo systemctl restart sml2mqtt.service
     sudo systemctl status sml2mqtt.service
 
-
 Docker
 ======================================
 
+The application is available as Docker image ``spacemanspiff2007/sml2mqtt`` via `Docker Hub <https://hub.docker.com/r/spacemanspiff2007/sml2mqtt>`_.
 
-Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/sml2mqtt>`_ is available:
+Installation
+--------------------------------------
 
-.. code-block:: bash
+#. Create a ``compose.yml`` containing a data directory and the location of your serial device. Example:
 
-    docker pull spacemanspiff2007/sml2mqtt:latest
+    .. code-block::
+
+        ---
+        services:
+          sml2mqtt:
+            image: spacemanspiff2007/sml2mqtt
+            container_name: sml2mqtt
+            init: true
+            restart: unless-stopped
+            mem_limit: 64m
+            volumes:
+              # Subdirectory ./data contains config.yml and log files
+              - "./data:/sml2mqtt"
+            devices:
+              # Replace with the location to your device
+              - /dev/serial/by-id/<ID-OF-SERIAL-DEVICE-TO-METER>
+            environment:
+              # Numerical UID of the owner of log files
+              USER_ID: 1000
+
+              # Numerical GID of the serial device, as returned by
+              # `stat --printf=%g /dev/serial/by-id/<ID-OF-SERIAL-DEVICE-TO-METER>`
+              GROUP_ID: 20
+
+    The subdirectory ``./data`` is mounted as Docker volume. An existing ``config.yml`` will be used, otherwise a new ``config.yml`` will be created.
+
+#. Start sml2mqtt
+    * As background service::
+
+        docker compose up -d sml2mqtt
+
+    * One-shot with analyze option::
+
+        docker compose run -e SML2MQTT_ANALYZE=1 --rm sml2mqtt
 
 
-The docker image has one volume ``/sml2mqtt`` which has to be mounted.
-There the ``config.yml`` will be used or a new ``config.yml`` will be created
+Upgrading
+--------------------------------------
+#. Stop sml2mqtt::
 
-The analyze option can also be set through an environment variable
-(see :ref:`command line interface <COMMAND_LINE_INTERFACE>`).
+    docker compose down
+
+#. Update the Docker image::
+
+    docker compose pull
+
+#. Start sml2mqtt::
+
+    docker compose up -d
+
+#. Observe the log for errors in case there were changes
+
+
+Autostart after reboot
+--------------------------------------
+
+To automatically start sml2mqtt after a reboot, add ``restart: unless-stopped`` to your ``compose.yml``.

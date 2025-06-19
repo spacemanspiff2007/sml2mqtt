@@ -2,10 +2,10 @@
 
 set -euo pipefail
 
-NEW_USER_ID=${USER_ID}
-NEW_GROUP_ID=${GROUP_ID:-$NEW_USER_ID}
+NEW_USER_ID="${USER_ID}"
+NEW_GROUP_ID="${GROUP_ID:-$NEW_USER_ID}"
 
-echo "Starting with sml2mqtt with user id: $NEW_USER_ID and group id: $NEW_GROUP_ID"
+echo "Starting sml2mqtt with user id: $NEW_USER_ID and group id: $NEW_GROUP_ID"
 if ! id -u sml2mqtt >/dev/null 2>&1; then
   if [ -z "$(getent group "${NEW_GROUP_ID}")" ]; then
     echo "Create group sml2mqtt with id ${NEW_GROUP_ID}"
