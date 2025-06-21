@@ -136,29 +136,8 @@ Installation
 
 #. Create a ``compose.yml`` containing a data directory and the location of your serial device. Example:
 
-    .. code-block::
-
-        ---
-        services:
-          sml2mqtt:
-            image: spacemanspiff2007/sml2mqtt
-            container_name: sml2mqtt
-            init: true
-            restart: unless-stopped
-            mem_limit: 64m
-            volumes:
-              # Subdirectory ./data contains config.yml and log files
-              - "./data:/sml2mqtt"
-            devices:
-              # Replace with the location to your device
-              - /dev/serial/by-id/<ID-OF-SERIAL-DEVICE-TO-METER>
-            environment:
-              # Numerical UID of the owner of log files
-              USER_ID: 1000
-
-              # Numerical GID of the serial device, as returned by
-              # `stat --printf=%g /dev/serial/by-id/<ID-OF-SERIAL-DEVICE-TO-METER>`
-              GROUP_ID: 20
+    .. literalinclude:: ../compose.example.yml
+        :language: yaml
 
     The subdirectory ``./data`` is mounted as Docker volume. An existing ``config.yml`` will be used, otherwise a new ``config.yml`` will be created.
 

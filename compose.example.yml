@@ -5,17 +5,19 @@ services:
     container_name: sml2mqtt
     init: true
     restart: unless-stopped
-    mem_limit: 64m
+    # drop root privileges and permit access to serial device
+    user: "1000:dialout"
     volumes:
       # Subdirectory ./data contains config.yml and log files
       - "./data:/sml2mqtt"
     devices:
-      # Replace with the location to your device
+      #
+      # Add your serial device here.
+      #
+      # The `/dev/serial/by-id/` path is recommended because it is stable.
+      #
+      # It is possible to simply use
+      #   `/dev/ttyUSB0`
+      # instead, although this might change over time
+      # when multiple devices are connected.
       - /dev/serial/by-id/<ID-OF-SERIAL-DEVICE-TO-METER>
-    environment:
-      # Numerical UID of the owner of log files
-      USER_ID: 1000
-
-      # Numerical GID of the serial device, as returned by
-      # `stat --printf=%g /dev/serial/by-id/<ID-OF-SERIAL-DEVICE-TO-METER>`
-      GROUP_ID: 20
