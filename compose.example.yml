@@ -1,0 +1,23 @@
+---
+services:
+  sml2mqtt:
+    image: spacemanspiff2007/sml2mqtt
+    container_name: sml2mqtt
+    init: true
+    restart: unless-stopped
+    # drop root privileges and permit access to serial device
+    user: "1000:dialout"
+    volumes:
+      # Subdirectory ./data contains config.yml and log files
+      - "./data:/sml2mqtt"
+    devices:
+      #
+      # Add your serial device here.
+      #
+      # The `/dev/serial/by-id/` path is recommended because it is stable.
+      #
+      # It is possible to simply use
+      #   `/dev/ttyUSB0`
+      # instead, although this might change over time
+      # when multiple devices are connected.
+      - /dev/serial/by-id/<ID-OF-SERIAL-DEVICE-TO-METER>
