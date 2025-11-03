@@ -21,6 +21,9 @@ To read from the serial port an IR to USB reader for energy meter is required.
 
 # Changelog
 
+#### 3.5 (2025-11-03)
+- Updated dependencies
+
 #### 3.4 (2024-12-03)
 - Allow rounding to the multiple of a value
 - Updated dependencies
