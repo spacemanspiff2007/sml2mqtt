@@ -2,7 +2,7 @@
 ARG BASE_IMAGE=python:3.13-alpine
 
 FROM $BASE_IMAGE AS buildimage
-RUN apk add --no-cache py3-pip
+RUN apk add --no-cache py3-pip build-base
 COPY . /tmp/sml2mqtt/source
 RUN pip install --prefix /tmp/sml2mqtt/target /tmp/sml2mqtt/source
 
