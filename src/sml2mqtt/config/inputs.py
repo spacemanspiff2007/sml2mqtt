@@ -1,11 +1,10 @@
-from typing import Literal
+from typing import Annotated, Literal, TypeAlias
 
 import serial
 from aiohttp import ClientTimeout
-from easyconfig import BaseModel
+from easyconfig import BaseModel, Field
 from pydantic import (
     AnyHttpUrl,
-    Field,
     StrictFloat,
     StrictInt,
     constr,
@@ -112,3 +111,6 @@ class HttpSourceSettings(SmlSourceSettingsBase):
             msg = 'No value for ClientTimeout'
             raise ValueError(msg)
         return ClientTimeout(total=value)
+
+
+SmlSourceSettingType: TypeAlias = Annotated[HttpSourceSettings | SerialSourceSettings, Field(discriminator='type')]
