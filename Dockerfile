@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG BASE_IMAGE=python:3.12-alpine
+ARG BASE_IMAGE=python:3.13-alpine
 
 FROM $BASE_IMAGE AS buildimage
 RUN apk add --no-cache py3-pip
