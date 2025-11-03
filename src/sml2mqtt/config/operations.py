@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, time, timedelta
 from enum import Enum
-from typing import Annotated, Any, Final, Literal, TypeAlias, TypedDict, Union, final
+from typing import Annotated, Final, Literal, TypeAlias, TypedDict, Union, final
 from typing import get_args as _get_args
 
 from annotated_types import Len
@@ -297,13 +297,13 @@ MODEL_TYPE_MAP: Final[dict[str, str]] = {
 }
 
 
-def check_allowed_keys(obj: Any):
+def check_allowed_keys(obj: dict | BaseModel) -> str | None:
     if isinstance(obj, dict):
-        type = obj.get('type')  # noqa: A001
-        keys = set(obj)
+        type: str = obj.get('type')  # noqa: A001
+        keys: set[str] = set(obj)
     else:
-        type = getattr(obj, 'type', None)  # noqa: A001
-        keys = set(obj.model_fields)
+        type: str = getattr(obj, 'type', None)  # noqa: A001
+        keys: set[str] = set(obj.__class__.model_fields)
 
     # we have a type field
     if type is not None:
