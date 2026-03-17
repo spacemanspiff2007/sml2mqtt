@@ -21,7 +21,7 @@ class EnhancedSmlFrame(SmlFrame):
 
         self.timestamp: Final = monotonic()
 
-    def get_frame_str(self):
+    def get_frame_str(self) -> Generator[str, None, None]:
         yield 'Received Frame'
         yield f' -> {b2a_hex(self.buffer)}'
 

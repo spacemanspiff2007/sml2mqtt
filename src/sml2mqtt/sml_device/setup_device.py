@@ -69,6 +69,7 @@ def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cf
 
     sml_value.add_operation(OnChangeFilterOperation())
     sml_value.add_operation(RefreshActionOperation(general_cfg.republish_after))
+    return None
 
 
 def setup_device(device: SmlDevice, frame: SmlFrameValues, cfg: SmlDeviceConfig | None, general_cfg: GeneralSettings) -> None:
