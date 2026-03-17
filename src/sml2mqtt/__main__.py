@@ -2,11 +2,13 @@ import asyncio
 import os
 import sys
 import traceback
+from typing import Final
 
 from sml2mqtt import mqtt
 from sml2mqtt.__args__ import CMD_ARGS, get_command_line_args
 from sml2mqtt.__log__ import log, setup_log
 from sml2mqtt.config import CONFIG, cleanup_validation_errors
+from sml2mqtt.config.logging import LoggingFallback
 from sml2mqtt.const.task import wait_for_tasks
 from sml2mqtt.runtime import do_shutdown_async, on_shutdown, signal_handler_setup
 from sml2mqtt.sml_device import ALL_DEVICES, SmlDevice
@@ -60,11 +62,22 @@ def main() -> int | str:
     try:
         CONFIG.load_config_file(get_command_line_args().config)
     except Exception as e:
-        print(cleanup_validation_errors(str(e)))
+        msg: Final = cleanup_validation_errors(str(e))
+        print(msg)
+
+        # try logging invalid config in logfile
+        try:
+            backup_cfg = LoggingFallback.model_validate(CONFIG._read_create_file())
+            setup_log(backup_cfg, [])
+            for line in msg.splitlines():
+                log.error(line)
+        except Exception:
+            pass
+
         return 2
 
     try:
-        setup_log()
+        setup_log(CONFIG.logging, CONFIG.inputs)
 
         # setup mqtt base topic
         mqtt.setup_base_topic(CONFIG.mqtt.topic, CONFIG.mqtt.defaults.qos, CONFIG.mqtt.defaults.retain)

@@ -136,7 +136,7 @@ def test_config_documentation_complete(pytestconfig) -> None:
     cfg_model_dir: Path = pytestconfig.rootpath / 'src' / 'sml2mqtt' / 'config'
     assert cfg_model_dir.is_dir()
 
-    documented_objs = set()
+    documented_objs = {'sml2mqtt.config.logging.LoggingFallback'}
     _get_documented_objs(pytestconfig.rootpath / 'docs' / 'configuration.rst', documented_objs)
     _get_documented_objs(pytestconfig.rootpath / 'docs' / 'operations.rst', documented_objs)
 

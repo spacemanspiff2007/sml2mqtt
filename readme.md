@@ -21,6 +21,10 @@ To read from the serial port an IR to USB reader for energy meter is required.
 
 # Changelog
 
+#### 3.6 (2026-03-17)
+- Try logging error on invalid config file
+- Updated dependencies
+
 #### 3.5 (2025-11-03)
 - Updated dependencies
 

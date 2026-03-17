@@ -1,10 +1,18 @@
+from __future__ import annotations
+
 import logging
 import sys
 from datetime import date, datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import sml2mqtt
+
+
+if TYPE_CHECKING:
+    from sml2mqtt.config.inputs import HttpSourceSettings, SerialSourceSettings
+    from sml2mqtt.config.logging import LoggingSettings
 
 
 log = logging.getLogger('sml')
@@ -29,18 +37,18 @@ class MidnightRotatingFileHandler(RotatingFileHandler):
         return super().shouldRollover(record)
 
 
-def setup_log() -> None:
-    level = sml2mqtt.CONFIG.logging.set_log_level()
+def setup_log(log_cfg: LoggingSettings, device_input_cfg: list[HttpSourceSettings | SerialSourceSettings]) -> None:
+    level = log_cfg.set_log_level()
 
     # This is the longest logger name str
     chars = 0
-    for device in sml2mqtt.CONFIG.inputs:
+    for device in device_input_cfg:
         # Name of the longest logger, should be the device status
         chars = max(len(get_logger(device.get_device_name()).getChild('status').name), chars)
     log_format = logging.Formatter('[{asctime:s}] [{name:' + str(chars) + 's}] {levelname:8s} | {message:s}', style='{')
 
     # File Handler
-    file_path = sml2mqtt.CONFIG.logging.file
+    file_path = log_cfg.file
     log_to_stdout = file_path.lower() == 'stdout'
     if log_to_stdout:
         handler = logging.StreamHandler(sys.stdout)

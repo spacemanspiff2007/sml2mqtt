@@ -1,7 +1,7 @@
 import logging
 
 from easyconfig import BaseModel
-from pydantic import Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
 
 
 class LoggingSettings(BaseModel):
@@ -19,3 +19,7 @@ class LoggingSettings(BaseModel):
         level = logging._nameToLevel[self.level]
         logging.getLogger().setLevel(level)
         return level
+
+
+class LoggingFallback(LoggingSettings):
+    model_config = ConfigDict(extra='ignore', validate_default=True)
