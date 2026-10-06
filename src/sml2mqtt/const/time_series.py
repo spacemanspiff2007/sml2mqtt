@@ -63,7 +63,6 @@ class TimeSeries:
         if start <= start_of_interval:
             start = start_of_interval
 
-        stop = timestamp
         value = self.values[0]
 
         ret = []
@@ -73,5 +72,5 @@ class TimeSeries:
             start = stop
             value = self.values[i]
 
-        ret.append((value, stop - start))
+        ret.append((value, timestamp - start))
         return ret

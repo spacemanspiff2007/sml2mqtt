@@ -70,6 +70,27 @@ def test_time_series_start() -> None:
         t.clear()
 
 
+def test_time_series_duration_gap_after_multiple_values() -> None:
+    # Regression test: once two or more real values have been recorded, the duration of the
+    # most recent value must keep growing while no new value arrives (e.g. because an
+    # upstream filter suppresses it), instead of staying stuck at 0.
+    t = TimeSeries(100, wait_for_data=False)
+
+    t.add_value(100, 0)
+    t.add_value(200, 10)
+    assert t.get_value_duration(10) == [(100, 10), (200, 0)]
+
+    t.add_value(None, 15)
+    assert t.get_value_duration(15) == [(100, 10), (200, 5)]
+
+    t.add_value(None, 50)
+    assert t.get_value_duration(50) == [(100, 10), (200, 40)]
+
+    # a fresh value resets the last segment's duration back to 0
+    t.add_value(300, 60)
+    assert t.get_value_duration(60) == [(100, 10), (200, 50), (300, 0)]
+
+
 def test_time_series_start_wait_for_data() -> None:
     t = TimeSeries(10, wait_for_data=True)
 

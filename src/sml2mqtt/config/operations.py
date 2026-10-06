@@ -182,6 +182,13 @@ class HasDateTimeFields(BaseModel):
         default=[], alias='reset days', description='Days of month or weekdays where the time(s) will be checked'
     )
 
+    @model_validator(mode='after')
+    def _check_reset_days_require_reset_times(self) -> HasDateTimeFields:
+        if self.reset_days and not self.reset_times:
+            msg = 'reset days requires reset times to be set as well'
+            raise ValueError(msg)
+        return self
+
     @final
     def get_kwargs_dt_fields(self) -> DateTimeBoundKwargs:
 
