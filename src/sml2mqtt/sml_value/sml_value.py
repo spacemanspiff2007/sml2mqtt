@@ -19,7 +19,7 @@ class SmlValue(OperationContainerBase):
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} obis={self.obis} at 0x{id(self):x}>'
 
-    def process_frame(self, frame: SmlFrameValues):
+    def process_frame(self, frame: SmlFrameValues) -> None:
         if (sml_value := frame.get_value(self.obis)) is None:
             return None
 

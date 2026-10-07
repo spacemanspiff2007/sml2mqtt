@@ -57,11 +57,11 @@ def create_workaround_negative_on_energy_meter(enabled_or_obis: bool | str):
     return None
 
 
-def create_or(operations: list[OperationsType]):
+def create_or(operations: list[OperationsType]) -> OrOperation:
     return OrOperation()
 
 
-def create_sequence(operations: list[OperationsType]):
+def create_sequence(operations: list[OperationsType]) -> SequenceOperation:
     return SequenceOperation()
 
 
