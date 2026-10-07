@@ -49,6 +49,25 @@ def sml_frame_2(stream_reader) -> EnhancedSmlFrame:
 
 
 @pytest.fixture
+def sml_frame_3(stream_reader) -> EnhancedSmlFrame:
+    """A frame from a device which does not report all obis every time"""
+
+    frame = EnhancedSmlFrame(a2b_hex(
+        b'7607001400419418620062007263010176010107001417dedc080bAAAAAAAAAAAAAAAAAAAA010163bbdd007607001400419419'
+        b'620062007263070177010bAAAAAAAAAAAAAAAAAAAA070100620affff7262016517de3cc17a77078181c78203ff010101010445'
+        b'4d480177070100000009ff010101010bAAAAAAAAAAAAAAAAAAAA0177070100010800ff640101a001621e52ff56000c42cb0f01'
+        b'77070100020800ff640101a001621e52ff56002427aff20177070100010801ff0101621e52ff56000c42cb0f01770701000208'
+        b'01ff0101621e52ff56002427aff20177070100010802ff0101621e52ff5600000000000177070100020802ff0101621e52ff56'
+        b'00000000000177070100100700ff0101621b52ff55000000390177078181c78205ff017262016517de3cc101018302FFFFFFFF'
+        b'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF010101633df900'
+        b'760700140041941c620062007263020171016303df00'
+    ))
+
+    stream_reader.add(frame)
+    return frame
+
+
+@pytest.fixture
 def sml_data_1_analyze(sml_data_1) -> str:
     r = SmlStreamReader()
     r.add(sml_data_1)
@@ -59,6 +78,12 @@ def sml_data_1_analyze(sml_data_1) -> str:
 @pytest.fixture
 def sml_frame_1_values(sml_frame_1) -> SmlFrameValues:
     values = sml_frame_1.get_obis()
+    return SmlFrameValues.create(0, values)
+
+
+@pytest.fixture
+def sml_frame_3_values(sml_frame_3) -> SmlFrameValues:
+    values = sml_frame_3.get_obis()
     return SmlFrameValues.create(0, values)
 
 

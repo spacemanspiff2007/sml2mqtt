@@ -51,6 +51,8 @@ class EnhancedSmlFrame(SmlFrame):
 
 
 class SmlFrameValues:
+    __slots__ = ('timestamp', 'values')
+
     @classmethod
     def create(cls, timestamp: float, values: Iterable[SmlListEntry]) -> Self:
         c = cls(timestamp)
