@@ -55,7 +55,7 @@ class DateTimeFinder:
         while True:
             date = next_dt.date()
             for time in self.times:
-                if (new := datetime.combine(date, time)) > now:
+                if (new := dt_datetime.combine(date, time)) > now:
                     return new
 
             while True:
