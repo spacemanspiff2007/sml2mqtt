@@ -10,6 +10,8 @@ from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class RefreshActionOperation(ValueOperationBase):
+    __slots__ = ('every', 'last_time', 'last_value')
+
     def __init__(self, every: DurationType) -> None:
         self.every: Final = get_duration(every)
         self.last_time: float = -1
@@ -37,6 +39,8 @@ class RefreshActionOperation(ValueOperationBase):
 
 
 class HeartbeatActionOperation(ValueOperationBase):
+    __slots__ = ('every', 'last_time', 'last_value')
+
     def __init__(self, every: DurationType) -> None:
         self.every: Final = get_duration(every)
         self.last_time: float = -1_000_000_000

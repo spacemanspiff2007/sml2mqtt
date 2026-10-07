@@ -9,6 +9,8 @@ from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class TimeSeriesOperationBaseBase(ValueOperationBase):
+    __slots__ = ('reset_after_value', 'time_series')
+
     def __init__(self, time_series: TimeSeries, reset_after_value: bool) -> None:
         self.time_series: Final = time_series
         self.reset_after_value: Final = reset_after_value
@@ -25,6 +27,8 @@ class TimeSeriesOperationBaseBase(ValueOperationBase):
 
 
 class TimeSeriesOperationBase(TimeSeriesOperationBaseBase):
+    __slots__ = ()
+
     def on_values(self, obj: Sequence[float]) -> float | None:
         raise NotImplementedError()
 
@@ -43,6 +47,8 @@ class TimeSeriesOperationBase(TimeSeriesOperationBaseBase):
 
 
 class TimeDurationSeriesOperationBase(TimeSeriesOperationBaseBase):
+    __slots__ = ()
+
     def on_values(self, obj: Sequence[tuple[float, float]]) -> float | None:
         raise NotImplementedError()
 
@@ -61,6 +67,7 @@ class TimeDurationSeriesOperationBase(TimeSeriesOperationBaseBase):
 
 
 class MaxOfIntervalOperation(TimeSeriesOperationBase):
+    __slots__ = ()
 
     @override
     def on_values(self, obj: Sequence[float]) -> float | None:
@@ -76,6 +83,7 @@ class MaxOfIntervalOperation(TimeSeriesOperationBase):
 
 
 class MinOfIntervalOperation(TimeSeriesOperationBase):
+    __slots__ = ()
 
     @override
     def on_values(self, obj: Sequence[float]) -> float | None:
@@ -91,6 +99,7 @@ class MinOfIntervalOperation(TimeSeriesOperationBase):
 
 
 class MeanOfIntervalOperation(TimeDurationSeriesOperationBase):
+    __slots__ = ()
 
     @override
     def on_values(self, obj: Sequence[tuple[float, float]]) -> float | None:

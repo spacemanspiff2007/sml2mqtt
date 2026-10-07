@@ -26,6 +26,8 @@ class SmlValueInfo:
 
 
 class ValueOperationBase:
+    __slots__ = ()
+
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
         raise NotImplementedError()
 
@@ -34,6 +36,8 @@ class ValueOperationBase:
 
 
 class OperationContainerBase:
+    __slots__ = ('operations', )
+
     def __init__(self) -> None:
         self.operations: tuple[ValueOperationBase, ...] = ()
 
@@ -47,6 +51,8 @@ class OperationContainerBase:
 
 
 class ValueOperationWithStartupBase(ValueOperationBase):
+    __slots__ = ('__dict__', '_process_value_original')
+
     _PROCESS_VALUE_BACKUP_ATTR: Final = '_process_value_original'
 
     def on_first_value(self, value: float, info: SmlValueInfo) -> float | None:

@@ -8,6 +8,8 @@ from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
 
 
 class FactorOperation(ValueOperationBase):
+    __slots__ = ('factor',)
+
     def __init__(self, factor: int | float) -> None:
         self.factor: Final = factor
 
@@ -26,6 +28,8 @@ class FactorOperation(ValueOperationBase):
 
 
 class OffsetOperation(ValueOperationBase):
+    __slots__ = ('offset',)
+
     def __init__(self, offset: int | float) -> None:
         self.offset: Final = offset
 
@@ -44,6 +48,8 @@ class OffsetOperation(ValueOperationBase):
 
 
 class RoundOperation(ValueOperationBase):
+    __slots__ = ('digits',)
+
     def __init__(self, digits: int) -> None:
         self.digits: Final = digits if digits else None
 
@@ -63,6 +69,8 @@ class RoundOperation(ValueOperationBase):
 
 
 class RoundToMultipleOperation(ValueOperationBase):
+    __slots__ = ('multiple', 'round_down', 'round_up')
+
     # noinspection PyShadowingBuiltins
     def __init__(self, value: int, round: Literal['up', 'down', 'nearest']) -> None:   # noqa: A002
         self.multiple: Final = value

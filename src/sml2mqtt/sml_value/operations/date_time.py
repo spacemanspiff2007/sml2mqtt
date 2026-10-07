@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
 
 class SupportsDateTimeAction(ValueOperationWithStartupBase):
+    __slots__ = ('_dt_finder', '_next_reset')
+
 
     def __init__(self, dt_finder: DateTimeFinder, start_now: bool = True) -> None:
         self._dt_finder: Final = dt_finder
@@ -52,6 +54,8 @@ class SupportsDateTimeAction(ValueOperationWithStartupBase):
 
 
 class VirtualMeterOperation(SupportsDateTimeAction):
+    __slots__ = ('last_value', 'offset')
+
     def __init__(self, dt_finder: DateTimeFinder, start_now: bool) -> None:
         super().__init__(dt_finder, start_now)
         self.last_value: float | None = None
@@ -90,6 +94,8 @@ class VirtualMeterOperation(SupportsDateTimeAction):
 
 
 class MaxValueOperation(SupportsDateTimeAction):
+    __slots__ = ('max_value',)
+
     def __init__(self, dt_finder: DateTimeFinder, start_now: bool) -> None:
         super().__init__(dt_finder, start_now)
         self.max_value: float | None = None
@@ -122,6 +128,8 @@ class MaxValueOperation(SupportsDateTimeAction):
 
 
 class MinValueOperation(SupportsDateTimeAction):
+    __slots__ = ('min_value',)
+
     def __init__(self, dt_finder: DateTimeFinder, start_now: bool) -> None:
         super().__init__(dt_finder, start_now)
         self.min_value: float | None = None
