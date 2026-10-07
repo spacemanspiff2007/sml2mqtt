@@ -21,6 +21,10 @@ To read from the serial port an IR to USB reader for energy meter is required.
 
 # Changelog
 
+#### 3.7 (2026-10-07)
+- If configured OBIS ids are missing sml2mqtt now issues a warning instead of shutting down
+- Updated dependencies
+
 #### 3.6 (2026-03-17)
 - Try logging error on invalid config file
 - Updated dependencies

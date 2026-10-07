@@ -48,7 +48,7 @@ class SerialSource(Protocol):
     def start(self) -> None:
         self._task.start()
 
-    async def cancel_and_wait(self):
+    async def cancel_and_wait(self) -> bool:
         return await self._task.cancel_and_wait()
 
     def connection_made(self, transport: SerialTransport) -> None:

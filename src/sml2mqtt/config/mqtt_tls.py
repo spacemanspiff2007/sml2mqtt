@@ -53,7 +53,7 @@ class MqttTlsOptions(BaseModel):
 
     @field_validator('ca_certs', 'cert_file', 'key_file')
     @classmethod
-    def _ensure_file_exists(cls, v: str | None):
+    def _ensure_file_exists(cls, v: str | None) -> str | None:
         if v is None:
             return None
 

@@ -12,6 +12,8 @@ from sml2mqtt.runtime import on_shutdown
 
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from sml2mqtt.config.inputs import HttpSourceSettings
     from sml2mqtt.const import DeviceProto
 
@@ -32,7 +34,7 @@ async def get_session() -> ClientSession:
     return SESSION
 
 
-async def close_session():
+async def close_session() -> None:
     global SESSION
 
     if (session := SESSION) is None:
@@ -48,7 +50,7 @@ async def close_session():
 class HttpSource:
 
     @classmethod
-    async def create(cls, device: DeviceProto, settings: HttpSourceSettings):
+    async def create(cls, device: DeviceProto, settings: HttpSourceSettings) -> Self:
         auth = None
         if settings.user or settings.password:
             auth = BasicAuth(settings.user, settings.password)

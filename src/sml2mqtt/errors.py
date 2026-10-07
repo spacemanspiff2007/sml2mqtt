@@ -16,7 +16,7 @@ class Sml2MqttException(Exception):
 
 
 class Sml2MqttExceptionWithLog(Sml2MqttException):
-    def log_msg(self, log: Logger):
+    def log_msg(self, log: Logger) -> None:
         raise NotImplementedError()
 
 
@@ -48,7 +48,7 @@ class Sml2MqttConfigMappingError(Sml2MqttException):
 
 class ObisIdForConfigurationMappingNotFoundError(Sml2MqttExceptionWithLog):
     @override
-    def log_msg(self, log: Logger):
+    def log_msg(self, log: Logger) -> None:
         return None
 
 
@@ -68,7 +68,7 @@ class HttpStatusError(Sml2MqttExceptionWithLog):
     def log_msg(self, log: Logger) -> None:
         log.error(f'Received http status {self.status}')
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, HttpStatusError):
             return self.status == other.status
         return NotImplemented

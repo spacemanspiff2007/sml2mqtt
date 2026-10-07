@@ -8,6 +8,8 @@ from sml2mqtt.sml_value.base import OperationContainerBase, SmlValueInfo
 
 
 class SmlValue(OperationContainerBase):
+    __slots__ = ('last_publish', 'mqtt', 'obis')
+
     def __init__(self, obis: str, mqtt: MqttObj) -> None:
         super().__init__()
 
@@ -19,7 +21,7 @@ class SmlValue(OperationContainerBase):
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} obis={self.obis} at 0x{id(self):x}>'
 
-    def process_frame(self, frame: SmlFrameValues):
+    def process_frame(self, frame: SmlFrameValues) -> None:
         if (sml_value := frame.get_value(self.obis)) is None:
             return None
 

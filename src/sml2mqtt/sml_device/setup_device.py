@@ -56,7 +56,7 @@ def _create_default_transformations(log: logging.Logger, sml_value: SmlValue, fr
             sml_value.insert_operation(SkipZeroMeterOperation())
 
 
-def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cfg: GeneralSettings):
+def _create_default_filters(log: logging.Logger, sml_value: SmlValue, general_cfg: GeneralSettings) -> None:
     if op := has_operation_type(
         sml_value,
         FactorOperation, OffsetOperation, RoundOperation, RangeFilterOperation, SkipZeroMeterOperation,

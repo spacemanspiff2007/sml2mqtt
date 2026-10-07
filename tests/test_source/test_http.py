@@ -1,6 +1,10 @@
+import inspect
 import sys
 from asyncio import TimeoutError
+from typing import Any
+from unittest.mock import Mock
 
+import aiohttp
 import pytest
 from aiohttp import ClientTimeout
 from aioresponses import aioresponses
@@ -8,6 +12,20 @@ from tests.helper import wait_for_call
 
 from sml2mqtt.errors import HttpStatusError
 from sml2mqtt.sml_source.http import HttpSource, close_session
+
+
+@pytest.fixture(autouse=True)
+def fix_aioresponses_error(monkeypatch) -> None:
+    _response_init = aiohttp.ClientResponse.__init__
+
+    assert 'stream_writer' in inspect.signature(_response_init).parameters
+
+    def _patched_response_init(self: aiohttp.ClientResponse, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault('stream_writer', Mock(output_size=0))
+        # noinspection bad-argument-type
+        _response_init(self, *args, **kwargs)
+
+    monkeypatch.setattr(aiohttp.ClientResponse, '__init__', _patched_response_init)
 
 
 @pytest.fixture

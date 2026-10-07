@@ -12,6 +12,8 @@ from tests.sml_data import (
     sml_frame_2,
     sml_frame_2_analyze,
     sml_frame_2_values,
+    sml_frame_3,
+    sml_frame_3_values,
 )
 
 import sml2mqtt.const.task as task_module
@@ -33,6 +35,9 @@ if TYPE_CHECKING:
     sml_frame_2         = sml_frame_2
     sml_frame_2_values  = sml_frame_2_values
     sml_frame_2_analyze = sml_frame_2_analyze
+
+    sml_frame_3         = sml_frame_3
+    sml_frame_3_values  = sml_frame_3_values
 
 
 class PatchedMonotonic:

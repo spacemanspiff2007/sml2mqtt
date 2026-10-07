@@ -52,7 +52,7 @@ class SmlDevice:
         self.mqtt_status: Final = self.mqtt_device.create_child('status')
 
         self.device_id: str | None = None
-        self.sml_values: Final = SmlValues()
+        self.sml_values: Final = SmlValues(self.log)
 
         self.frame_handler: Callable[[EnhancedSmlFrame], Any] = self.process_first_frame
 
@@ -149,7 +149,7 @@ class SmlDevice:
 
     def process_frame(self, frame: EnhancedSmlFrame) -> None:
 
-        frame_values = frame.get_frame_values(self.log)
+        frame_values: Final = frame.get_frame_values(self.log)
 
         self.sml_values.process_frame(frame_values)
 

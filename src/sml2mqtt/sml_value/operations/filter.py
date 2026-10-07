@@ -10,6 +10,8 @@ from sml2mqtt.sml_value.operations._helper import format_period
 
 
 class OnChangeFilterOperation(ValueOperationBase):
+    __slots__ = ('last_value',)
+
     def __init__(self) -> None:
         self.last_value: int | float | str | None = None
 
@@ -33,6 +35,8 @@ class OnChangeFilterOperation(ValueOperationBase):
 
 
 class RangeFilterOperation(ValueOperationBase):
+    __slots__ = ('limit_values', 'max_value', 'min_value')
+
     # noinspection PyShadowingBuiltins
     def __init__(self, min_value: float | None, max_value: float | None, limit_values: bool = True) -> None:
         self.min_value: Final = min_value
@@ -67,6 +71,8 @@ class RangeFilterOperation(ValueOperationBase):
 
 
 class DeltaFilterOperation(ValueOperationBase):
+    __slots__ = ('last_value', 'min_percent', 'min_value')
+
     def __init__(self, min_value: int | float | None = None, min_percent: int | float | None = None) -> None:
         self.min_value: Final = min_value
         self.min_percent: Final = min_percent
@@ -108,6 +114,7 @@ class DeltaFilterOperation(ValueOperationBase):
 
 
 class SkipZeroMeterOperation(ValueOperationBase):
+    __slots__ = ()
 
     @override
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
@@ -124,6 +131,8 @@ class SkipZeroMeterOperation(ValueOperationBase):
 
 
 class ThrottleFilterOperation(ValueOperationBase):
+    __slots__ = ('last_time', 'period')
+
     def __init__(self, period: DurationType) -> None:
         self.period: Final = get_duration(period)
         self.last_time: float = -1_000_000_000

@@ -3,6 +3,7 @@ import string
 
 from easyconfig import BaseModel
 from pydantic import Field, StrictBool, field_validator, model_validator
+from typing_extensions import Self
 
 from sml2mqtt.config.mqtt_tls import MqttTlsOptions
 from sml2mqtt.config.types import MqttQosInt, MqttTopicStr, StrippedStr
@@ -26,7 +27,7 @@ class OptionalMqttPublishConfig(BaseModel):
         None, description='Retain for publishing this value (if set - otherwise use parent)')
 
     @field_validator('topic', 'full_topic')
-    def validate_topic(cls, value):
+    def validate_topic(cls, value: str | None) -> str | None:
         if value is None:
             return None
 
@@ -39,7 +40,7 @@ class OptionalMqttPublishConfig(BaseModel):
         return value
 
     @model_validator(mode='after')
-    def check_full_or_partial(self):
+    def check_full_or_partial(self) -> Self:
         if self.topic is not None and self.full_topic is not None:
             msg = 'Topic and full_topic can not be used at the same time!'
             raise ValueError(msg)

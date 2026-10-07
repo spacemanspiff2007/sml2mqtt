@@ -7,12 +7,13 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
     from smllib.sml import SmlListEntry
+    from typing_extensions import Self
 
     from sml2mqtt.const import SmlFrameValues
 
 
 class SmlValueInfo:
-    __slots__ = ('value', 'frame', 'last_pub')
+    __slots__ = ('frame', 'last_pub', 'value')
 
     def __init__(self, sml: SmlListEntry, frame: SmlFrameValues, last_pub: float) -> None:
         self.value: Final = sml
@@ -25,6 +26,8 @@ class SmlValueInfo:
 
 
 class ValueOperationBase:
+    __slots__ = ()
+
     def process_value(self, value: float | None, info: SmlValueInfo) -> float | None:
         raise NotImplementedError()
 
@@ -33,22 +36,26 @@ class ValueOperationBase:
 
 
 class OperationContainerBase:
+    __slots__ = ('operations', )
+
     def __init__(self) -> None:
         self.operations: tuple[ValueOperationBase, ...] = ()
 
-    def add_operation(self, operation: ValueOperationBase):
+    def add_operation(self, operation: ValueOperationBase) -> Self:
         self.operations = (*self.operations, operation)
         return self
 
-    def insert_operation(self, operation: ValueOperationBase):
+    def insert_operation(self, operation: ValueOperationBase) -> Self:
         self.operations = (operation, *self.operations)
         return self
 
 
 class ValueOperationWithStartupBase(ValueOperationBase):
+    __slots__ = ('__dict__', '_process_value_original')
+
     _PROCESS_VALUE_BACKUP_ATTR: Final = '_process_value_original'
 
-    def on_first_value(self, value: float, info: SmlValueInfo):
+    def on_first_value(self, value: float, info: SmlValueInfo) -> float | None:
         raise NotImplementedError()
 
     def enable_on_first_value(self) -> None:

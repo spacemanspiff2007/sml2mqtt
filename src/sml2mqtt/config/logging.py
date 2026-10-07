@@ -9,7 +9,7 @@ class LoggingSettings(BaseModel):
     file: str = Field('sml2mqtt.log', description='Log file path (absolute or relative to config file) or "stdout"')
 
     @field_validator('level')
-    def validate_logging(cls, value):
+    def validate_logging(cls, value: str) -> str:
         if value not in logging._nameToLevel:
             msg = f'Level must be one of {", ".join(logging._nameToLevel)}'
             raise ValueError(msg)

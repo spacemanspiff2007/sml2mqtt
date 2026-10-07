@@ -8,6 +8,8 @@ from sml2mqtt.sml_value.base import SmlValueInfo, ValueOperationBase
 
 
 class NegativeOnEnergyMeterWorkaroundOperation(ValueOperationBase):
+    __slots__ = ('meter_obis',)
+
     def __init__(self, meter_obis: str | None = None) -> None:
         self.meter_obis: Final[str] = '0100010800ff' if meter_obis is None else meter_obis
 
