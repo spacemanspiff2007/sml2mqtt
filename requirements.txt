@@ -5,6 +5,3 @@ pytest          == 9.1.1
 pre-commit      == 4.6.2
 pytest-asyncio  == 1.4.0
 aioresponses    == 0.7.9
-
-# Linter
-ruff == 0.16.10
