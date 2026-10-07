@@ -8,6 +8,8 @@ from sml2mqtt.errors import RequiredObisValueNotInFrameError, UnprocessedObisVal
 if TYPE_CHECKING:
     from collections.abc import Generator
 
+    from typing_extensions import Self
+
     from sml2mqtt.const import SmlFrameValues
     from sml2mqtt.sml_value.sml_value import SmlValue
 
@@ -26,18 +28,18 @@ class SmlValues:
             f'skipped={",".join(self._skipped_ids):s}>'
         )
 
-    def set_skipped(self, *obis_ids: str):
+    def set_skipped(self, *obis_ids: str) -> Self:
         self._skipped_ids = frozenset(obis_ids)
         self._all_ids = self._processed_ids | self._skipped_ids
         return self
 
-    def add_value(self, value: SmlValue):
+    def add_value(self, value: SmlValue) -> Self:
         self._processed_ids = self._processed_ids.union((value.obis, ))
         self._all_ids = self._processed_ids | self._skipped_ids
         self._values = (*self._values, value)
         return self
 
-    def process_frame(self, frame: SmlFrameValues):
+    def process_frame(self, frame: SmlFrameValues) -> None:
         for value in self._values:
             value.process_frame(frame)
 

@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from logging import Logger
 
     from smllib.sml import SmlListEntry
+    from typing_extensions import Self
 
 
 class EnhancedSmlFrame(SmlFrame):
@@ -51,7 +52,7 @@ class EnhancedSmlFrame(SmlFrame):
 
 class SmlFrameValues:
     @classmethod
-    def create(cls, timestamp: float, values: Iterable[SmlListEntry]):
+    def create(cls, timestamp: float, values: Iterable[SmlListEntry]) -> Self:
         c = cls(timestamp)
         for value in values:
             c.values[value.obis] = value

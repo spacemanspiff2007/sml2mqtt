@@ -31,7 +31,7 @@ async def start() -> None:
     TASK.start()
 
 
-async def wait_for_connect(timeout: float):
+async def wait_for_connect(timeout: float) -> None:
     if IS_CONNECTED is None:
         raise ValueError()
 

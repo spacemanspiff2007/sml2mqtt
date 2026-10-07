@@ -7,7 +7,7 @@ from sml2mqtt.const import EnhancedSmlFrame, SmlFrameValues
 
 
 @pytest.fixture
-def sml_data_1():
+def sml_data_1() -> bytes:
     return a2b_hex(
         b'1B1B1B1B01010101760501188E6162006200726500000101760101070000000000000B000000000000000000000101636877007'
         b'60501188E626200620072650000070177010B000000000000000000000172620165002EC3F47A77078181C78203FF0101010104'
@@ -34,7 +34,7 @@ def sml_frame_1(stream_reader):
 
 
 @pytest.fixture
-def sml_frame_2(stream_reader):
+def sml_frame_2(stream_reader) -> EnhancedSmlFrame:
     frame = EnhancedSmlFrame(a2b_hex(
         b'7605065850a66200620072630101760107ffffffffffff05021d70370b0a014c475a0003403b4972620165021d7707016326de'
         b'007605065850a762006200726307017707ffffffffffff0b0a014c475a0003403b49070100620affff72620165021d77077577'
@@ -49,7 +49,7 @@ def sml_frame_2(stream_reader):
 
 
 @pytest.fixture
-def sml_data_1_analyze(sml_data_1):
+def sml_data_1_analyze(sml_data_1) -> str:
     r = SmlStreamReader()
     r.add(sml_data_1)
     frame = r.get_frame()   # type: EnhancedSmlFrame | None
@@ -57,24 +57,24 @@ def sml_data_1_analyze(sml_data_1):
 
 
 @pytest.fixture
-def sml_frame_1_values(sml_frame_1):
+def sml_frame_1_values(sml_frame_1) -> SmlFrameValues:
     values = sml_frame_1.get_obis()
     return SmlFrameValues.create(0, values)
 
 
 @pytest.fixture
-def sml_frame_1_analyze(sml_frame_1):
+def sml_frame_1_analyze(sml_frame_1) -> str:
     return '\n'.join(sml_frame_1.get_analyze_str())
 
 
 @pytest.fixture
-def sml_frame_2_values(sml_frame_2):
+def sml_frame_2_values(sml_frame_2) -> SmlFrameValues:
     values = sml_frame_2.get_obis()
     return SmlFrameValues.create(0, values)
 
 
 @pytest.fixture
-def sml_frame_2_analyze(sml_frame_2):
+def sml_frame_2_analyze(sml_frame_2) -> str:
     return '\n'.join(sml_frame_2.get_analyze_str())
 
 

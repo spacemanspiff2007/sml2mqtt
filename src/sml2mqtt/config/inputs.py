@@ -11,7 +11,7 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from typing_extensions import override
+from typing_extensions import Self, override
 
 from sml2mqtt.config.types import log
 
@@ -34,14 +34,14 @@ class SerialSourceSettings(SmlSourceSettingsBase):
     bytesize: int = Field(serial.EIGHTBITS, in_file=False, alias='byte size')
 
     @field_validator('baudrate')
-    def _val_baudrate(cls, v):
+    def _val_baudrate(cls, v: int) -> int:
         if v not in serial.Serial.BAUDRATES:
             msg = f'must be one of {list(serial.Serial.BAUDRATES)}'
             raise ValueError(msg)
         return v
 
     @field_validator('parity')
-    def _val_parity(cls, v):
+    def _val_parity(cls, v: str) -> str:
         # Short name
         if v in serial.PARITY_NAMES:
             return v
@@ -54,14 +54,14 @@ class SerialSourceSettings(SmlSourceSettingsBase):
         return parity_values[v]
 
     @field_validator('stopbits')
-    def _val_stopbits(cls, v):
+    def _val_stopbits(cls, v: float) -> float:
         if v not in serial.Serial.STOPBITS:
             msg = f'must be one of {list(serial.Serial.STOPBITS)}'
             raise ValueError(msg)
         return v
 
     @field_validator('bytesize')
-    def _val_bytesize(cls, v):
+    def _val_bytesize(cls, v: int) -> int:
         if v not in serial.Serial.BYTESIZES:
             msg = f'must be one of {list(serial.Serial.BYTESIZES)}'
             raise ValueError(msg)
@@ -93,7 +93,7 @@ class HttpSourceSettings(SmlSourceSettingsBase):
         return self.url.host
 
     @model_validator(mode='after')
-    def check_timeout_gt_interval(self):
+    def check_timeout_gt_interval(self) -> Self:
         if self.interval * 2 > self.timeout:
             msg = 'Timeout must be greater equal than 2 * interval'
             raise ValueError(msg)

@@ -58,7 +58,7 @@ class VirtualMeterOperation(SupportsDateTimeAction):
         self.offset: float | None = None
 
     @override
-    def on_first_value(self, value, info: SmlValueInfo):
+    def on_first_value(self, value: float, info: SmlValueInfo) -> float | None:
         self.last_value = value
         self.offset = value
         return self.process_value(value, info)
@@ -95,7 +95,7 @@ class MaxValueOperation(SupportsDateTimeAction):
         self.max_value: float | None = None
 
     @override
-    def on_first_value(self, value, info: SmlValueInfo):
+    def on_first_value(self, value: float, info: SmlValueInfo) -> float | None:
         self.max_value = value
         return self.process_value(value, info)
 
@@ -127,7 +127,7 @@ class MinValueOperation(SupportsDateTimeAction):
         self.min_value: float | None = None
 
     @override
-    def on_first_value(self, value, info: SmlValueInfo):
+    def on_first_value(self, value: float, info: SmlValueInfo) -> float | None:
         self.min_value = value
         return self.process_value(value, info)
 

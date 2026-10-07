@@ -7,6 +7,8 @@ from ..const import DeviceTask
 
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .sml_device import SmlDevice
 
 
@@ -24,10 +26,10 @@ class Watchdog:
     def cancel(self) -> None:
         self._task.cancel()
 
-    async def cancel_and_wait(self):
+    async def cancel_and_wait(self) -> bool:
         return await self._task.cancel_and_wait()
 
-    def set_timeout(self, timeout: float):
+    def set_timeout(self, timeout: float) -> Self:
         if timeout < 0.1:
             raise ValueError()
         self._timeout = timeout

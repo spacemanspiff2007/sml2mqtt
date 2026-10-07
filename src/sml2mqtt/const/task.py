@@ -19,7 +19,7 @@ TASKS: Final[set[asyncio_Task]] = set()
 log = logging.getLogger('sml.tasks')
 
 
-def create_task(coro: Coroutine, *, name: str | None = None):
+def create_task(coro: Coroutine, *, name: str | None = None) -> asyncio_Task:
     task = asyncio_create_task(coro, name=name)
 
     TASKS.add(task)

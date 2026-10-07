@@ -55,7 +55,7 @@ jobs:
           pip install slotscheck -r requirements.txt
       - name: Run slotscheck
         working-directory: src
-        run: python -m slotscheck HABApp --verbose
+        run: python -m slotscheck sml2mqtt --verbose
 
 
   docs:

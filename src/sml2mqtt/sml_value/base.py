@@ -7,12 +7,13 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
     from smllib.sml import SmlListEntry
+    from typing_extensions import Self
 
     from sml2mqtt.const import SmlFrameValues
 
 
 class SmlValueInfo:
-    __slots__ = ('value', 'frame', 'last_pub')
+    __slots__ = ('frame', 'last_pub', 'value')
 
     def __init__(self, sml: SmlListEntry, frame: SmlFrameValues, last_pub: float) -> None:
         self.value: Final = sml
@@ -36,11 +37,11 @@ class OperationContainerBase:
     def __init__(self) -> None:
         self.operations: tuple[ValueOperationBase, ...] = ()
 
-    def add_operation(self, operation: ValueOperationBase):
+    def add_operation(self, operation: ValueOperationBase) -> Self:
         self.operations = (*self.operations, operation)
         return self
 
-    def insert_operation(self, operation: ValueOperationBase):
+    def insert_operation(self, operation: ValueOperationBase) -> Self:
         self.operations = (operation, *self.operations)
         return self
 
@@ -48,7 +49,7 @@ class OperationContainerBase:
 class ValueOperationWithStartupBase(ValueOperationBase):
     _PROCESS_VALUE_BACKUP_ATTR: Final = '_process_value_original'
 
-    def on_first_value(self, value: float, info: SmlValueInfo):
+    def on_first_value(self, value: float, info: SmlValueInfo) -> float | None:
         raise NotImplementedError()
 
     def enable_on_first_value(self) -> None:

@@ -3,9 +3,10 @@ from __future__ import annotations
 import logging.handlers
 import signal
 import traceback
+from asyncio import Task as AsyncioTask
 from dataclasses import dataclass
 from threading import Lock
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from sml2mqtt.const import Task, create_task
 
@@ -41,7 +42,7 @@ async def shutdown_coro() -> None:
     log.debug('Shutdown complete')
 
 
-def on_shutdown(coro: Callable[[], Awaitable], msg: str):
+def on_shutdown(coro: Callable[[], Awaitable], msg: str) -> None:
     global SHUTDOWN_OBJS
     for obj in SHUTDOWN_OBJS:
         if obj.coro == coro or obj.msg == msg:
@@ -53,7 +54,7 @@ SHUTDOWN_OBJS: tuple[ShutdownObj, ...] = ()
 SHUTDOWN_TASK: Final = Task(shutdown_coro, name='Shutdown Task')
 
 SHUTDOWN_LOCK: Final = Lock()
-SHUTDOWN_CALL: Task | None = None
+SHUTDOWN_CALL: AsyncioTask | None = None
 
 
 async def do_shutdown_async() -> None:
@@ -69,16 +70,18 @@ async def do_shutdown_async() -> None:
             SHUTDOWN_CALL = None
 
 
-def do_shutdown():
+def do_shutdown() -> None:
     global SHUTDOWN_CALL
 
     with SHUTDOWN_LOCK:
         if SHUTDOWN_CALL is not None:
             return None
+
         SHUTDOWN_CALL = create_task(do_shutdown_async())
+        return None
 
 
-def _signal_handler_shutdown(sig, frame) -> None:
+def _signal_handler_shutdown(sig: int, frame: Any) -> None:
     do_shutdown()
 
 
